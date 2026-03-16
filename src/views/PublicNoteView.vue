@@ -129,29 +129,30 @@ watch(
           :prefer-fallback="false"
         />
 
+        <theme-swap />
+      </div>
+      <div class="subheader">
         <span
           class="badge badge-author badge-soft badge-accent"
           v-if="author && content"
         >
+          <template v-if="language">
+            <span>{{ language }}</span>
+            <span>&nbsp;•&nbsp;</span>
+          </template>
           <router-link
             :to="{ name: 'PublicNoteListByDidView', params: { did: did } }"
             class="link link-hover"
           >
             {{ author.handle }}
           </router-link>
-          <template v-if="language">
-            <span>&nbsp;•&nbsp;</span>
-            <span>{{ language }}</span>
-          </template>
           <template v-if="publishedAt">
             <span>&nbsp;•&nbsp;</span>
             <span>{{ publishedAt }}</span>
           </template>
         </span>
         <div class="badge skeleton h-4 w-50" v-else></div>
-        <theme-swap />
       </div>
-      <div class="meta"></div>
       <div class="repo-title-breadcrumb">
         <a
           class="title-stacked-note-link"
@@ -185,6 +186,10 @@ watch(
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .subheader {
+    margin: 1rem auto 0;
   }
 
   h1 {
