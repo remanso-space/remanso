@@ -60,5 +60,5 @@ export const noteRouter = contract.router({
 })
 
 export const client = initQueryClient(noteRouter, {
-  baseUrl: "https://api.litenote.li212.fr",
+  baseUrl: "https://api.remanso.space",
 })
