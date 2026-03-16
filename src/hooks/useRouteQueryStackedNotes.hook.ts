@@ -25,7 +25,7 @@ export const useRouteQueryStackedNotes = () => {
     notes: string[] = stackedNotes.value,
   ) => {
     nextTick(() => {
-      const index = noteId ? notes.findIndex((nid) => nid.includes(noteId)) : 0
+      const index = noteId ? notes.findIndex((nid) => nid === noteId) : 0
 
       if (isMobile.value) {
         if (noteId) {
