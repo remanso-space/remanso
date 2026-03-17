@@ -6,6 +6,7 @@ import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useFollows } from "@/hooks/useFollows.hook"
 import { useFollowingNoteList } from "@/hooks/useFollowingNoteList.hook"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
+import { toShortDid } from "@/modules/atproto/shortDid"
 import { computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
@@ -62,7 +63,7 @@ const following = useFollowingNoteList(follows, followingEnabled)
       <template #meta="{ note }">
         <router-link
           v-if="all.getAuthor(note.did)"
-          :to="{ name: 'PublicNoteListByDidView', params: { did: note.did } }"
+          :to="{ name: 'PublicNoteListByDidView', params: { shortDid: toShortDid(note.did) } }"
           class="link link-hover"
         >
           {{ all.getAuthor(note.did) }}
@@ -84,7 +85,7 @@ const following = useFollowingNoteList(follows, followingEnabled)
       <template #meta="{ note }">
         <router-link
           v-if="following.getAuthor(note.did)"
-          :to="{ name: 'PublicNoteListByDidView', params: { did: note.did } }"
+          :to="{ name: 'PublicNoteListByDidView', params: { shortDid: toShortDid(note.did) } }"
           class="link link-hover"
         >
           {{ following.getAuthor(note.did) }}
