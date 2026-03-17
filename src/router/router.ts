@@ -25,13 +25,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/PublicNoteListView.vue"),
   },
   {
-    path: "/pub/:did",
+    path: "/pub/:shortDid",
     name: "PublicNoteListByDidView",
     props: true,
     component: () => import("@/views/PublicNoteListByDidView.vue"),
   },
   {
-    path: "/pub/:did/:rkey/:slug?",
+    path: "/pub/:shortDid/:rkey/:slug?",
     name: "PublicNoteView",
     props: true,
     component: () => import("@/views/PublicNoteView.vue"),

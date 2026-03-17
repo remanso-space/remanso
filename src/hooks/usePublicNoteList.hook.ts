@@ -18,7 +18,7 @@ export function usePublicNoteList(options?: UsePublicNoteListOptions) {
     isLoading.value = true
 
     const path = options?.did?.value ? `/${options.did.value}/notes` : "/notes"
-    const noteAPI = new URL(path, "https://api.litenote.li212.fr")
+    const noteAPI = new URL(path, "https://api.remanso.space")
 
     if (cursor.value) {
       noteAPI.searchParams.set("cursor", cursor.value)

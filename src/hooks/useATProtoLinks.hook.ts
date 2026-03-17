@@ -3,6 +3,7 @@ import { ComputedRef, onUnmounted, Ref, toValue } from "vue"
 import { isExternalLink } from "@/utils/link"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { parseAtUri } from "@/modules/atproto/parseAtUri"
+import { toShortDid } from "@/modules/atproto/shortDid"
 import { router } from "@/router/router"
 
 export const useATProtoLinks = (
@@ -35,25 +36,25 @@ export const useATProtoLinks = (
         href.replace(window.location.origin, ""),
       )
 
-      if (!params.did || !params.rkey) {
+      if (!params.shortDid || !params.rkey) {
         return
       }
 
       const noteId = params.slug
-        ? `${params.did}-${params.rkey}-${params.slug}`
-        : `${params.did}-${params.rkey}`
+        ? `${params.shortDid}-${params.rkey}-${params.slug}`
+        : `${params.shortDid}-${params.rkey}`
 
       addStackedNote(
         toValue(currentAtUri) ?? "",
         noteId,
-        `${params.did}-${params.rkey}`,
+        `${params.shortDid}-${params.rkey}`,
       )
       return
     }
 
     if (href.startsWith("at://")) {
       const { did, rkey } = parseAtUri(href)
-      const noteId = `${did}-${rkey}`
+      const noteId = `${toShortDid(did)}-${rkey}`
 
       addStackedNote(toValue(currentAtUri) ?? "", noteId)
     }

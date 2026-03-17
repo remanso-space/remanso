@@ -3,11 +3,16 @@ import { PublicNoteListItem } from "@/modules/note/models/Note"
 import { computedAsync } from "@vueuse/core"
 import { computed, ref, Ref, watch } from "vue"
 
-export function useFollowingNoteList(dids: Ref<Set<string>>, enabled: Ref<boolean>) {
+export function useFollowingNoteList(
+  dids: Ref<Set<string>>,
+  enabled: Ref<boolean>,
+) {
   const isLoading = ref(false)
   const notes = ref<PublicNoteListItem[]>([])
   const cursor = ref<string | null | undefined>(null)
-  const canLoadMore = computed(() => dids.value.size > 0 && cursor.value !== undefined)
+  const canLoadMore = computed(
+    () => dids.value.size > 0 && cursor.value !== undefined,
+  )
 
   const onLoadMore = async () => {
     if (isLoading.value) return
@@ -24,13 +29,14 @@ export function useFollowingNoteList(dids: Ref<Set<string>>, enabled: Ref<boolea
       body.cursor = cursor.value
     }
 
-    const response = await fetch("https://api.litenote.li212.fr/notes/feed", {
+    const response = await fetch("https://api.remanso.space/notes/feed", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
 
-    const data: { notes: PublicNoteListItem[]; cursor?: string } = await response.json()
+    const data: { notes: PublicNoteListItem[]; cursor?: string } =
+      await response.json()
 
     notes.value.push(...data.notes)
     cursor.value = data.cursor

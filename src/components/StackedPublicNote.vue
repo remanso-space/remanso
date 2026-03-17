@@ -9,6 +9,7 @@ import { computedAsync } from "@vueuse/core"
 import { getUrl } from "@/modules/atproto/getUrl"
 import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
 import { getAuthor } from "@/modules/atproto/getAuthor"
+import { fromShortDid } from "@/modules/atproto/shortDid"
 import { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
 
 const props = defineProps<{
@@ -17,7 +18,7 @@ const props = defineProps<{
 }>()
 
 const didrkey = computed(() => props.didrkey)
-const did = computed(() => props.didrkey.split("-")[0])
+const did = computed(() => fromShortDid(props.didrkey.split("-")[0]))
 const rkey = computed(() => props.didrkey.split("-")[1])
 const classNameId = computed(() => didrkey.value.replaceAll(":", "-"))
 

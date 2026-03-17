@@ -8,6 +8,7 @@ import { getAuthor } from "@/modules/atproto/getAuthor"
 import type { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
 import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
 import { getUrl } from "@/modules/atproto/getUrl"
+import { fromShortDid } from "@/modules/atproto/shortDid"
 import { downloadFont } from "@/utils/downloadFont"
 import { slugify } from "@/utils/slugify"
 import { computedAsync } from "@vueuse/core"
@@ -19,9 +20,9 @@ import ThemeSwap from "@/components/ThemeSwap.vue"
 import { useTitle } from "@vueuse/core"
 import { displayLanguage } from "@/utils/displayLanguage"
 
-const props = defineProps<{ did: string; rkey: string; slug?: string }>()
+const props = defineProps<{ shortDid: string; rkey: string; slug?: string }>()
 const router = useRouter()
-const did = computed(() => props.did)
+const did = computed(() => fromShortDid(props.shortDid))
 const rkey = computed(() => props.rkey)
 
 const author = computedAsync(async () => getAuthor(did.value))
@@ -125,7 +126,7 @@ watch(
     <div class="note article">
       <div class="header">
         <back-button
-          :fallback="{ name: 'PublicNoteListByDidView', params: { did } }"
+          :fallback="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
           :prefer-fallback="false"
         />
 
@@ -141,7 +142,7 @@ watch(
             <span>&nbsp;•&nbsp;</span>
           </template>
           <router-link
-            :to="{ name: 'PublicNoteListByDidView', params: { did: did } }"
+            :to="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
             class="link link-hover"
           >
             {{ author.handle }}
