@@ -4,7 +4,7 @@ import { markdownItPlugin } from "./markdown-it-regexp"
 export const markdownItTablerIcons = markdownItPlugin(
   /:([\w-]+):/,
   (match) => {
-    const name = match[0][1]
+    const name = match[1]
     return `<i class="ti ti-${name}"></i>`
   },
 )
