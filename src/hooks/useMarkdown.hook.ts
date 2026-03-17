@@ -9,6 +9,7 @@ import { Ref, toValue } from "vue"
 
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
+import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
 import mermaid from "mermaid"
 import type Token from "markdown-it/lib/token.mjs"
 import Renderer, { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
@@ -62,6 +63,7 @@ const md = new MarkdownIt({
     width: "100%",
   })
   .use(MarkdownItGitHubAlerts)
+  .use(markdownItTablerIcons)
 
 let shikijiInitialized = false
 
