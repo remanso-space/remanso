@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PublicNoteListItem } from "@/modules/note/models/Note"
+import { toShortDid } from "@/modules/atproto/shortDid"
 import { slugify } from "@/utils/slugify"
 import { vInfiniteScroll } from "@vueuse/components"
 
@@ -25,7 +26,7 @@ defineSlots<{
           :to="{
             name: 'PublicNoteView',
             params: {
-              did: note.did,
+              shortDid: toShortDid(note.did),
               rkey: note.rkey,
               slug: slugify(note.title),
             },

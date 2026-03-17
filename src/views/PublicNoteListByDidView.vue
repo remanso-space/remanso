@@ -3,11 +3,12 @@ import HomeButton from "@/components/HomeButton.vue"
 import PublicNoteList from "@/components/PublicNoteList.vue"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
+import { fromShortDid } from "@/modules/atproto/shortDid"
 import { computedAsync } from "@vueuse/core"
 import { computed } from "vue"
 
-const props = defineProps<{ did: string }>()
-const did = computed(() => props.did)
+const props = defineProps<{ shortDid: string }>()
+const did = computed(() => fromShortDid(props.shortDid))
 
 const { notes, isLoading, canLoadMore, onLoadMore } = usePublicNoteList({ did })
 
