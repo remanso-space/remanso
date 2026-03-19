@@ -33,8 +33,7 @@ const following = useFollowingNoteList(follows, followingEnabled)
 <template>
   <main class="public-note-list-view">
     <div class="header">
-      <home-button class="back-button" />
-      <img src="/favicon.png" alt="Remanso" class="remanso-logo" />
+      <home-button class="home-button" />
     </div>
 
     <div v-if="isLoggedIn" role="tablist" class="tabs tabs-border">
@@ -64,7 +63,10 @@ const following = useFollowingNoteList(follows, followingEnabled)
       <template #meta="{ note }">
         <router-link
           v-if="all.getAuthor(note.did)"
-          :to="{ name: 'PublicNoteListByDidView', params: { shortDid: toShortDid(note.did) } }"
+          :to="{
+            name: 'PublicNoteListByDidView',
+            params: { shortDid: toShortDid(note.did) },
+          }"
           class="link link-hover"
         >
           {{ all.getAuthor(note.did) }}
@@ -86,7 +88,10 @@ const following = useFollowingNoteList(follows, followingEnabled)
       <template #meta="{ note }">
         <router-link
           v-if="following.getAuthor(note.did)"
-          :to="{ name: 'PublicNoteListByDidView', params: { shortDid: toShortDid(note.did) } }"
+          :to="{
+            name: 'PublicNoteListByDidView',
+            params: { shortDid: toShortDid(note.did) },
+          }"
           class="link link-hover"
         >
           {{ following.getAuthor(note.did) }}
@@ -130,20 +135,6 @@ const following = useFollowingNoteList(follows, followingEnabled)
     flex: 1;
     text-align: center;
     margin-bottom: 0;
-  }
-
-  .back-button {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    position: absolute;
-  }
-
-  .remanso-logo {
-    width: 32px;
-    height: 32px;
-    box-shadow: none;
-    view-transition-name: remanso-logo;
   }
 
   @media screen and (min-width: 769px) {

@@ -7,12 +7,18 @@ const goHome = () => router.push({ name: "Home" })
 
 <template>
   <a class="btn btn-ghost btn-circle btn-lg" @click="goHome">
-    <img src="/favicon.png" alt="Remanso icon" />
+    <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
   </a>
 </template>
 
 <style>
 img {
   box-shadow: none;
+}
+
+.remanso-logo {
+  width: 32px;
+  height: 32px;
+  view-transition-name: remanso-logo;
 }
 </style>

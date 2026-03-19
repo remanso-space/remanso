@@ -131,6 +131,8 @@ watch(
           :prefer-fallback="false"
         />
 
+        <img src="/favicon.png" alt="Remanso" class="remanso-logo" />
+
         <theme-swap />
       </div>
       <div class="subheader">
@@ -189,6 +191,13 @@ watch(
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .remanso-logo {
+    width: 32px;
+    height: 32px;
+    box-shadow: none;
+    view-transition-name: remanso-logo;
   }
 
   .subheader {

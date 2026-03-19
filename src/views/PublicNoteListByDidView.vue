@@ -19,8 +19,7 @@ const author = computedAsync(async () => getAuthor(did.value))
 <template>
   <main class="public-note-list-view">
     <div class="header">
-      <home-button class="back-button" />
-      <img src="/favicon.png" alt="Remanso" class="remanso-logo" />
+      <home-button />
       <h1 v-if="author">{{ author.handle }}</h1>
       <div v-else class="skeleton h-8 w-40"></div>
     </div>
@@ -60,17 +59,6 @@ const author = computedAsync(async () => getAuthor(did.value))
     flex: 1;
     text-align: center;
     margin-bottom: 0;
-  }
-
-  .back-button {
-    position: absolute;
-  }
-
-  .remanso-logo {
-    width: 32px;
-    height: 32px;
-    box-shadow: none;
-    view-transition-name: remanso-logo;
   }
 
   @media screen and (min-width: 769px) {

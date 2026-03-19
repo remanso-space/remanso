@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import NewVersion from '@/components/NewVersion.vue'
-import { useATProtoLogin } from '@/hooks/useATProtoLogin.hook'
-import { useGitHubLogin } from '@/hooks/useGitHubLogin.hook'
+import NewVersion from "@/components/NewVersion.vue"
+import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
+import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 
 const { isReady } = useGitHubLogin()
 const { isATProtoReady } = useATProtoLogin()
@@ -29,6 +29,11 @@ const { isATProtoReady } = useATProtoLogin()
 
 ::view-transition-group(remanso-logo) {
   animation-duration: 0.4s;
-  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(remanso-logo),
+::view-transition-new(remanso-logo) {
+  object-fit: contain;
 }
 </style>
