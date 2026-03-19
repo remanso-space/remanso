@@ -1,3 +1,4 @@
+import { nextTick } from "vue"
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router"
 
 import Home from "@/views/HomeApp.vue"
@@ -92,4 +93,14 @@ const routes: Array<RouteRecordRaw> = [
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach(() => {
+  if (!("startViewTransition" in document)) return
+  return new Promise<void>((resolve) => {
+    ;(document as Document & { startViewTransition: (cb: () => Promise<void>) => void }).startViewTransition(async () => {
+      resolve()
+      await nextTick()
+    })
+  })
 })

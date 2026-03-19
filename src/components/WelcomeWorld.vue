@@ -14,7 +14,7 @@ const { userInput, repoInput, submit } = useForm()
 <template>
   <div class="welcome-world">
     <h1 class="title is-1">
-      <img src="/favicon.png" alt="Remanso icon" />
+      <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
       Remanso
     </h1>
 
@@ -91,6 +91,10 @@ h1 {
     height: 64px;
     box-shadow: none;
   }
+}
+
+.remanso-logo {
+  view-transition-name: remanso-logo;
 }
 
 .welcome-world {

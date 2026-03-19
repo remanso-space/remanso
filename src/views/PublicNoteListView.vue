@@ -34,6 +34,7 @@ const following = useFollowingNoteList(follows, followingEnabled)
   <main class="public-note-list-view">
     <div class="header">
       <home-button class="back-button" />
+      <img src="/favicon.png" alt="Remanso" class="remanso-logo" />
     </div>
 
     <div v-if="isLoggedIn" role="tablist" class="tabs tabs-border">
@@ -135,6 +136,14 @@ const following = useFollowingNoteList(follows, followingEnabled)
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    position: absolute;
+  }
+
+  .remanso-logo {
+    width: 32px;
+    height: 32px;
+    box-shadow: none;
+    view-transition-name: remanso-logo;
   }
 
   @media screen and (min-width: 769px) {

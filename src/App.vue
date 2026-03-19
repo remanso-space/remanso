@@ -21,4 +21,14 @@ const { isATProtoReady } = useATProtoLogin()
   display: flex;
   flex: 1;
 }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+}
+
+::view-transition-group(remanso-logo) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 </style>
