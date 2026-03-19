@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import HomeButton from "@/components/HomeButton.vue"
 import PublicNoteList from "@/components/PublicNoteList.vue"
+import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
 import { fromShortDid } from "@/modules/atproto/shortDid"
@@ -19,9 +20,10 @@ const author = computedAsync(async () => getAuthor(did.value))
   <main class="public-note-list-view">
     <div class="header">
       <home-button class="back-button" />
-      <h1>{{ author?.handle ?? did }}</h1>
+      <h1 v-if="author">{{ author.handle }}</h1>
+      <div v-else class="skeleton h-8 w-40"></div>
     </div>
-    <div v-if="isLoading"></div>
+    <skeleton-loader v-if="isLoading" />
     <div v-else>
       <PublicNoteList
         :notes="notes"

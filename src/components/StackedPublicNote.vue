@@ -11,6 +11,7 @@ import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
 import { getAuthor } from "@/modules/atproto/getAuthor"
 import { fromShortDid } from "@/modules/atproto/shortDid"
 import { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
+import SkeletonLoader from "@/components/SkeletonLoader.vue"
 
 const props = defineProps<{
   didrkey: string
@@ -99,7 +100,8 @@ watch(
       <div v-if="noteNotFound" class="alert alert-error">
         This note no longer exists.
       </div>
-      <div class="note-content" v-else v-html="content"></div>
+      <div class="note-content" v-else-if="content" v-html="content"></div>
+      <skeleton-loader v-else-if="!noteNotFound" />
     </section>
   </div>
 </template>

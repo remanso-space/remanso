@@ -3,7 +3,7 @@ import { ref } from "vue"
 
 import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 
-const { handle, isLoggedIn, signIn, signOut } = useATProtoLogin()
+const { handle, isLoggedIn, isATProtoReady, signIn, signOut } = useATProtoLogin()
 
 withDefaults(
   defineProps<{
@@ -24,13 +24,14 @@ const onSignIn = () => {
 </script>
 
 <template>
-  <div v-if="isLoggedIn" class="sign-in-atproto is-signed-in">
+  <div v-if="!isATProtoReady" class="skeleton h-8 w-40"></div>
+  <div v-else-if="isLoggedIn" class="sign-in-atproto is-signed-in">
     <span>{{ handle }}</span>
     <button class="btn btn-sm" @click="signOut" v-if="withSignOut">
       Sign out
     </button>
   </div>
-  <div v-else class="sign-in-atproto join">
+  <div v-else-if="!isLoggedIn" class="sign-in-atproto join">
     <input
       v-model="inputHandle"
       class="input input-sm join-item"

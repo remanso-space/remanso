@@ -17,6 +17,7 @@ import { useRouter } from "vue-router"
 import { errorMessage } from "@/utils/notif"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import ThemeSwap from "@/components/ThemeSwap.vue"
+import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { useTitle } from "@vueuse/core"
 import { displayLanguage } from "@/utils/displayLanguage"
 
@@ -163,7 +164,8 @@ watch(
         >
       </div>
 
-      <article class="note-display" v-html="content"></article>
+      <article class="note-display" v-if="content" v-html="content"></article>
+      <skeleton-loader v-else-if="!noteNotFound" />
     </div>
     <stacked-public-note
       v-for="(stackedNote, index) in stackedNotes"

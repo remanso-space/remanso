@@ -10,8 +10,13 @@ const handle = ref<string | null>(null)
 let init = true
 
 const initializeAuth = async () => {
-  const session = await restoreSession()
+  // Load cached session from IndexedDB first (fast, local) so the UI can render immediately
+  const stored = await loadSession()
+  did.value = stored?.did ?? ''
+  handle.value = stored?.handle ?? ''
 
+  // Then restore OAuth session in the background (may involve network)
+  const session = await restoreSession()
   if (session) {
     const author = await getAuthor(session.did)
     const resolvedHandle = author?.handle ?? ''
@@ -21,10 +26,6 @@ const initializeAuth = async () => {
     await saveSession(session.did, resolvedHandle)
 
     window.history.replaceState(null, '', window.location.pathname + window.location.search)
-  } else {
-    const stored = await loadSession()
-    did.value = stored?.did ?? ''
-    handle.value = stored?.handle ?? ''
   }
 }
 
