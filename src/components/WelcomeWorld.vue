@@ -17,13 +17,15 @@ const { userInput, repoInput, submit } = useForm()
       <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
       Remanso
     </h1>
+    <p>
+      <sign-in-atproto :with-sign-out="false" />
+    </p>
 
     <repo-list />
 
     <last-visited />
 
     <div class="get-started">
-      <sign-in-atproto :with-sign-out="false" />
       <sign-in-github />
       <router-link v-if="isLogged" :to="{ name: 'RepoList' }" class="btn btn-sm"
         >Manage your repos</router-link
