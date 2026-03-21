@@ -183,6 +183,7 @@ watch(
 .public-note-view {
   display: flex;
   flex: 1;
+  width: 100%;
 
   .header {
     margin-top: 1rem;
@@ -249,6 +250,7 @@ watch(
     flex-direction: column;
     overflow-y: auto;
     height: 100vh;
+    width: 100%;
     position: sticky;
 
     .title {
