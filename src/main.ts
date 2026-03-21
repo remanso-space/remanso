@@ -10,6 +10,7 @@ import { messages } from "@/locales/message"
 import { router } from "@/router/router"
 
 import App from "./App.vue"
+import "@/analytics/openpanel"
 
 const i18n = createI18n({
   locale: "en",
