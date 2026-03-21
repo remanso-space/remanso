@@ -51,7 +51,7 @@ src/
 │   ├── card/        # Spaced repetition
 │   ├── history/     # Edit history tracking
 │   ├── atproto/     # ATProto/Bluesky integration (DID resolution, blob URLs)
-│   └── post/        # ts-rest API client for public note publishing (api.litenote.li212.fr)
+│   └── post/        # ts-rest API client for public note publishing (api.remanso.space)
 ├── hooks/           # Composition hooks (useMarkdown, useBacklinks, useGitHubContent, etc.)
 ├── data/            # PouchDB wrapper and data models
 ├── utils/           # Utilities including custom markdown-it plugins
