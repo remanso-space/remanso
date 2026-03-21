@@ -1,20 +1,20 @@
-import { Octokit } from '@octokit/rest'
-import { addMinutes, addSeconds, isBefore } from 'date-fns'
+import { Octokit } from "@octokit/rest"
+import { addMinutes, addSeconds, isBefore } from "date-fns"
 
-import { data } from '@/data/data'
-import { DataType } from '@/data/DataType.enum'
-import { GithubAccessToken } from '@/data/models/GithubAccessToken'
-import { GithubToken } from '@/modules/user/interfaces/GithubToken'
-import { GithubTokenError } from '@/modules/user/interfaces/GithubTokenError'
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import { GithubAccessToken } from "@/data/models/GithubAccessToken"
+import { GithubToken } from "@/modules/user/interfaces/GithubToken"
+import { GithubTokenError } from "@/modules/user/interfaces/GithubTokenError"
 
-const AUTHENTICATION_SERVER = 'https://litenote.li212.fr'
-const personalTokenId = 'token'
+const AUTHENTICATION_SERVER = "https://api.remanso.space/auth/github"
+const personalTokenId = "token"
 
 export const signIn = async (
-  code: string
+  code: string,
 ): Promise<GithubToken | GithubTokenError> => {
   const authenticationServerURL = new URL(AUTHENTICATION_SERVER)
-  authenticationServerURL.searchParams.set('code', code)
+  authenticationServerURL.searchParams.set("code", code)
 
   const response = await fetch(authenticationServerURL.toString())
   const body = (await response.json()) as GithubToken | GithubTokenError
@@ -52,15 +52,15 @@ export const refreshToken = async () => {
 
   if (needRefresh) {
     const authenticationServerURL = new URL(AUTHENTICATION_SERVER)
-    authenticationServerURL.searchParams.set('type', 'refresh')
-    authenticationServerURL.searchParams.set('code', accessToken.refreshToken)
+    authenticationServerURL.searchParams.set("type", "refresh")
+    authenticationServerURL.searchParams.set("code", accessToken.refreshToken)
 
     const response = await fetch(authenticationServerURL.toString())
     const githubToken = (await response.json()) as
       | GithubToken
       | GithubTokenError
 
-    if ('error' in githubToken) {
+    if ("error" in githubToken) {
       return null
     }
 
@@ -84,12 +84,12 @@ export const saveAccessToken = async (githubToken: GithubToken) => {
 
   const expirationDate = addSeconds(
     new Date(),
-    githubToken.expires_in
+    githubToken.expires_in,
   ).toISOString()
 
   const refreshTokenExpirationDate = addSeconds(
     new Date(),
-    githubToken.refresh_token_expires_in
+    githubToken.refresh_token_expires_in,
   ).toISOString()
 
   const accessToken: GithubAccessToken = {
@@ -102,14 +102,14 @@ export const saveAccessToken = async (githubToken: GithubToken) => {
     refreshToken: githubToken.refresh_token,
     refreshTokenExpiresIn: githubToken.refresh_token_expires_in,
     refreshTokenExpirationDate,
-    username: ''
+    username: "",
   }
 
   const octokit = new Octokit({
-    auth: accessToken?.token
+    auth: accessToken?.token,
   })
 
-  const user = await octokit.request('GET /user')
+  const user = await octokit.request("GET /user")
   accessToken.username = user.data.login
 
   await data.add(accessToken)
