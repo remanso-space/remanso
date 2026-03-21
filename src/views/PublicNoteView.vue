@@ -108,8 +108,10 @@ const language = computed(() =>
     : null,
 )
 
+const mainNoteId = computed(() => `${props.shortDid}-${props.rkey}`)
+
 const { stackedNotes, scrollToFocusedNote } = useRouteQueryStackedNotes()
-const { listenToClick } = useATProtoLinks("note-display")
+const { listenToClick } = useATProtoLinks("note-display", { mainNoteId })
 useResizeContainer("note-container", stackedNotes)
 
 watch(

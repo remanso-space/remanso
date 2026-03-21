@@ -8,9 +8,14 @@ import { router } from "@/router/router"
 
 export const useATProtoLinks = (
   className: ComputedRef<string> | string,
-  currentAtUri?: Ref<string> | string,
+  options: {
+    currentAtUri?: Ref<string> | string | ComputedRef<string>
+    mainNoteId: Ref<string> | string | ComputedRef<string>
+  },
 ) => {
-  const { addStackedNote } = useRouteQueryStackedNotes()
+  const { addStackedNote, scrollToFocusedNote } = useRouteQueryStackedNotes()
+  const { currentAtUri, mainNoteId } = options
+
   const linkNote = (event: Event) => {
     const target = event.target as HTMLElement
     const href = target.getAttribute("href")
@@ -44,6 +49,11 @@ export const useATProtoLinks = (
         ? `${params.shortDid}-${params.rkey}-${params.slug}`
         : `${params.shortDid}-${params.rkey}`
 
+      if (noteId === toValue(mainNoteId)) {
+        scrollToFocusedNote(null)
+        return
+      }
+
       addStackedNote(
         toValue(currentAtUri) ?? "",
         noteId,
@@ -55,6 +65,11 @@ export const useATProtoLinks = (
     if (href.startsWith("at://")) {
       const { did, rkey } = parseAtUri(href)
       const noteId = `${toShortDid(did)}-${rkey}`
+
+      if (noteId === toValue(mainNoteId)) {
+        scrollToFocusedNote(null)
+        return
+      }
 
       addStackedNote(toValue(currentAtUri) ?? "", noteId)
     }

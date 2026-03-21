@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from "vue"
+import { useRoute } from "vue-router"
 import { errorMessage } from "@/utils/notif"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
@@ -33,8 +34,16 @@ const url = computedAsync(async () =>
 const className = computed(() => `stacked-note-${props.index}`)
 const titleClassName = computed(() => `title-${className.value}`)
 
+const route = useRoute()
+const mainNoteId = computed(
+  () => `${route.params.shortDid}-${route.params.rkey}`,
+)
+
 const { scrollToFocusedNote } = useRouteQueryStackedNotes()
-const { listenToClick } = useATProtoLinks(className.value, didrkey)
+const { listenToClick } = useATProtoLinks(className.value, {
+  currentAtUri: didrkey,
+  mainNoteId,
+})
 const { displayNoteOverlay } = useNoteOverlay(className.value, index)
 
 const noteNotFound = ref(false)
