@@ -9,17 +9,17 @@ Rolldown's minifier drops the `while(`/`for(;` keyword when a `while (x in globa
 
 ## Target repositories
 
-- https://github.com/rolldown/rolldown/issues
-- https://github.com/oxc-project/oxc/issues (underlying minifier)
+- <https://github.com/rolldown/rolldown/issues>
+- <https://github.com/oxc-project/oxc/issues> (underlying minifier)
 
 ## Environment
 
-| Package | Version |
-|---|---|
-| `vite` | 8.0.1 |
-| `rolldown` | 1.0.0-rc.10 |
-| `@oxc-project/types` | 0.120.0 |
-| Triggered by | `@ark/schema` 0.56.0 / `arktype` 2.1.29 |
+| Package              | Version                                 |
+| -------------------- | --------------------------------------- |
+| `vite`               | 8.0.1                                   |
+| `rolldown`           | 1.0.0-rc.10                             |
+| `@oxc-project/types` | 0.120.0                                 |
+| Triggered by         | `@ark/schema` 0.56.0 / `arktype` 2.1.29 |
 
 ## Source
 
@@ -52,10 +52,16 @@ var dn=`$ark`,fn=2;for(;dn in globalThis;)dn=`$ark${fn++}`;var pn=dn;
 Safari throws: `SyntaxError: Unexpected keyword 'in'. Expected a ';' following a return statement.`
 Chrome and Firefox appear to tolerate the malformed output.
 
+## Reproduction attempts
+
+Direct Rolldown calls (even with the full `arktype` + `@better-fetch/fetch` bundle) do **not** reproduce the bug. It only manifests through Vite's full production build pipeline. This strongly suggests the issue is in the interaction between **Vite's module preprocessing** (dependency pre-bundling, plugin transforms, scope-flattening of ESM modules) and Rolldown's minifier `sequences` optimization pass.
+
+Hypothesis: Vite's pipeline produces a flattened scope where multiple `var` declarations from different original modules are consecutive. When the `sequences` optimizer then tries to fold those `var` declarations into the `for` loop init, it incorrectly drops the `for(var` prefix when the loop condition contains the `in` operator.
+
 ## Notes
 
-- The bug does **not** reproduce with a minimal isolated input — it is triggered by Rolldown merging multiple module-level `var` declarations across bundled modules before applying the loop optimization.
 - Related closed issue: [rolldown/rolldown#8146](https://github.com/rolldown/rolldown/issues/8146) — "Minifier incorrectly merges statements into for-in expression via comma operator"
+- To reproduce: run `pnpm build` in this project **without** `build.minify: "esbuild"` — the broken chunk is `getAuthor-*.js`
 
 ## Workaround
 
