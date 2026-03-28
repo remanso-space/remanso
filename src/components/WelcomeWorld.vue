@@ -146,6 +146,7 @@ h1 {
   margin: auto;
   display: flex;
   flex: 1;
+  align-self: stretch;
   flex-direction: column;
   justify-content: flex-start;
   gap: 1rem;
