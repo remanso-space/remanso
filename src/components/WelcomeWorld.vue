@@ -15,6 +15,7 @@ const { userInput, repoInput, submit } = useForm()
 
 <template>
   <div class="welcome-world">
+    <div class="welcome-content">
     <h1 class="title is-1">
       <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
       Remanso
@@ -43,6 +44,7 @@ const { userInput, repoInput, submit } = useForm()
         go
       </button>
     </form>
+    </div>
 
     <footer>
       <theme-swap />
@@ -148,12 +150,18 @@ h1 {
   flex: 1;
   align-self: stretch;
   flex-direction: column;
-  justify-content: flex-start;
   gap: 1rem;
 
   .title {
     text-align: center;
   }
+}
+
+.welcome-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .github-form {
@@ -170,7 +178,6 @@ footer {
   display: flex;
   gap: 1rem;
   align-items: center;
-  margin-top: auto;
 }
 
 .profile-avatar {
