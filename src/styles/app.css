@@ -55,7 +55,7 @@ html {
 }
 
 body {
-  height: 100vh;
+  height: 100dvh;
   scroll-behavior: smooth;
   overflow-y: auto;
 }
@@ -78,7 +78,7 @@ body {
 }
 
 #app {
-  height: 100vh;
+  height: 100dvh;
   display: flex;
 }
 
