@@ -49,22 +49,11 @@
   }
 }
 
-html {
-  overflow-y: auto;
-  overflow-x: auto;
-}
-
+html,
 body {
   height: 100dvh;
+  overflow: hidden;
   scroll-behavior: smooth;
-  overflow-y: auto;
-}
-
-@media screen and (min-width: 769px) {
-  html,
-  body {
-    overflow-y: hidden;
-  }
 }
 
 .columns {
