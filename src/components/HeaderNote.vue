@@ -32,12 +32,12 @@ defineProps<{ user: string; repo: string }>()
       </svg>
     </router-link> -->
 
-    <button onclick="font_modal.showModal()">
+    <a class="btn btn-ghost btn-circle" onclick="font_modal.showModal()">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icons-tabler-outline icon-tabler-typography"
-        width="36"
-        height="36"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
@@ -51,12 +51,15 @@ defineProps<{ user: string; repo: string }>()
         <path d="M10.2 6.3l5.8 13.7" />
         <path d="M5 20l6 -16l2 0l7 16" />
       </svg>
-    </button>
-    <router-link :to="{ name: 'FluxNoteView', params: { user, repo } }">
+    </a>
+    <router-link
+      class="btn btn-ghost btn-circle"
+      :to="{ name: 'FluxNoteView', params: { user, repo } }"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="36"
-        height="36"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         stroke="currentColor"
         fill="none"
@@ -69,12 +72,15 @@ defineProps<{ user: string; repo: string }>()
         <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
       </svg>
     </router-link>
-    <router-link :to="{ name: 'DraftNotes', params: { user, repo } }">
+    <router-link
+      class="btn btn-ghost btn-circle"
+      :to="{ name: 'DraftNotes', params: { user, repo } }"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icon-tabler-notes"
-        width="36"
-        height="36"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
@@ -88,11 +94,14 @@ defineProps<{ user: string; repo: string }>()
         <line x1="9" y1="15" x2="13" y2="15" />
       </svg>
     </router-link>
-    <router-link :to="{ name: 'TodoNotes', params: { user, repo } }">
+    <router-link
+      class="btn btn-ghost btn-circle"
+      :to="{ name: 'TodoNotes', params: { user, repo } }"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="36"
-        height="36"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -110,12 +119,15 @@ defineProps<{ user: string; repo: string }>()
         <path d="M11 18l9 0" />
       </svg>
     </router-link>
-    <router-link :to="{ name: 'FleetingNotes', params: { user, repo } }">
+    <router-link
+      class="btn btn-ghost btn-circle"
+      :to="{ name: 'FleetingNotes', params: { user, repo } }"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icon-tabler-mailbox"
-        width="36"
-        height="36"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
@@ -131,7 +143,7 @@ defineProps<{ user: string; repo: string }>()
       </svg>
     </router-link>
     <dialog id="font_modal" class="modal">
-      <div class="modal-box">
+      <div class="modal-box w-11/12 max-w-5xl">
         <h3 class="text-lg font-bold">Style settings</h3>
         <font-change />
       </div>
@@ -148,10 +160,5 @@ defineProps<{ user: string; repo: string }>()
   align-items: center;
   justify-content: space-between;
   margin-top: 10px;
-
-  button {
-    color: var(--color-accent);
-    cursor: pointer;
-  }
 }
 </style>
