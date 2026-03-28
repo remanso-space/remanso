@@ -18,10 +18,22 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
   <div class="font-change" v-if="sortedFontFamilies.length > 0">
     <theme-swap />
 
+    <label class="font-label">t</label>
     <select
       class="select"
-      :value="store.userSettings?.chosenFontFamily"
-      @change="store.setFontFamily(($event.target as HTMLSelectElement).value)"
+      :value="store.userSettings?.chosenTitleFont"
+      @change="store.setTitleFont(($event.target as HTMLSelectElement).value)"
+    >
+      <option v-for="font in sortedFontFamilies" :key="font" :value="font">
+        {{ font }}
+      </option>
+    </select>
+
+    <label class="font-label">p</label>
+    <select
+      class="select"
+      :value="store.userSettings?.chosenBodyFont"
+      @change="store.setBodyFont(($event.target as HTMLSelectElement).value)"
     >
       <option v-for="font in sortedFontFamilies" :key="font" :value="font">
         {{ font }}
@@ -52,5 +64,11 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
     flex: 1;
     display: flex;
   }
+}
+
+.font-label {
+  font-weight: bold;
+  font-size: 0.75rem;
+  opacity: 0.6;
 }
 </style>

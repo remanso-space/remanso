@@ -104,7 +104,16 @@ export const getUserSettingsContent = async (
     return null
   }
 
-  return JSON.parse(atob(content)) as UserSettings
+  const raw = JSON.parse(atob(content)) as UserSettings & {
+    t?: string
+    p?: string
+  }
+  const { t, p, ...rest } = raw
+  return {
+    ...rest,
+    chosenTitleFont: t,
+    chosenBodyFont: p
+  }
 }
 
 export const queryFileContent = async (

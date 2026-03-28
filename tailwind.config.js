@@ -11,7 +11,8 @@ const defaultTitleStyles = Array.from(
     ...acc,
     [heading]: {
       "margin-top": "0",
-      "margin-bottom": "0.5em"
+      "margin-bottom": "0.5em",
+      "font-family": "var(--title-font-family)"
     }
   }),
   {}

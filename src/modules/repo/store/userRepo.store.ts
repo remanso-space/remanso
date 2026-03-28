@@ -81,6 +81,14 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             : userSettings?.fontFamily
           const chosenFontSize =
             this.userSettings?.chosenFontSize ?? userSettings?.fontSize
+          const chosenTitleFont =
+            this.userSettings?.chosenTitleFont ??
+            userSettings?.chosenTitleFont ??
+            chosenFontFamily
+          const chosenBodyFont =
+            this.userSettings?.chosenBodyFont ??
+            userSettings?.chosenBodyFont ??
+            chosenFontFamily
           this.userSettings = userSettings
 
           if (!this.userSettings) {
@@ -91,6 +99,8 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             chosenFontFamily ?? this.userSettings.fontFamily
           this.userSettings.chosenFontSize =
             chosenFontSize ?? this.userSettings.fontSize
+          this.userSettings.chosenTitleFont = chosenTitleFont
+          this.userSettings.chosenBodyFont = chosenBodyFont
 
           data.update<DataType.UserSettings, UserSettings>({
             ...this.userSettings,
@@ -155,6 +165,30 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         return
       }
       this.userSettings.chosenFontSize = fontSize
+
+      const userSettingsId = `UserSetting-${this.user}-${this.repo}`
+      data.update<DataType.UserSettings, UserSettings>({
+        ...this.userSettings,
+        _id: userSettingsId
+      })
+    },
+    setTitleFont(font: string) {
+      if (!this.userSettings) {
+        return
+      }
+      this.userSettings.chosenTitleFont = font
+
+      const userSettingsId = `UserSetting-${this.user}-${this.repo}`
+      data.update<DataType.UserSettings, UserSettings>({
+        ...this.userSettings,
+        _id: userSettingsId
+      })
+    },
+    setBodyFont(font: string) {
+      if (!this.userSettings) {
+        return
+      }
+      this.userSettings.chosenBodyFont = font
 
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({

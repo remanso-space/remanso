@@ -14,14 +14,32 @@ import {
 
 const did = ref<string | null>(null)
 const handle = ref<string | null>(null)
+const avatarUrl = ref<string | null>(null)
 
 let init = true
+
+const fetchAvatar = async (actorDid: string) => {
+  try {
+    const res = await fetch(
+      `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(actorDid)}`
+    )
+    if (res.ok) {
+      const data = await res.json()
+      avatarUrl.value = data.avatar ?? null
+    }
+  } catch {
+    avatarUrl.value = null
+  }
+}
 
 const initializeAuth = async () => {
   // Load cached session from IndexedDB first (fast, local) so the UI can render immediately
   const stored = await loadSession()
   did.value = stored?.did ?? ""
   handle.value = stored?.handle ?? ""
+  if (stored?.did) {
+    fetchAvatar(stored.did)
+  }
 
   // Then restore OAuth session in the background (may involve network)
   const session = await restoreSession()
@@ -32,6 +50,7 @@ const initializeAuth = async () => {
     did.value = session.did
     handle.value = resolvedHandle
     await saveSession(session.did, resolvedHandle)
+    fetchAvatar(session.did)
 
     window.history.replaceState(
       null,
@@ -61,11 +80,13 @@ export const useATProtoLogin = () => {
     await clearSession()
     did.value = ""
     handle.value = ""
+    avatarUrl.value = null
   }
 
   return {
     did,
     handle,
+    avatarUrl,
     isLoggedIn,
     isATProtoReady,
     signIn,
