@@ -15,7 +15,7 @@ interface GetAllParams {
 }
 
 class Data {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // oxlint-disable-next-line typescript/ban-types
   private readonly locale: PouchDB.Database<{}> | null = null
 
   constructor() {

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* oxlint-disable typescript/no-explicit-any */
 // We can only detect video/audio files from the extension in the URL.
 // We ignore MP1 and MP2 (not in active use) and default to video for ambiguous
 

@@ -15,7 +15,7 @@ export const markdownItPlugin = (
 
   const regexp = RegExp("^" + regex.source, flags)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line typescript/no-explicit-any
   const parse = (state: any, silent: boolean): boolean => {
     const match = regexp.exec(state.src.slice(state.pos))
 
