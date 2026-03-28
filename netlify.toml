@@ -9,9 +9,9 @@ status = 200
 
 [[headers]]
 for = "/client-metadata.json"
-  [headers.values]
-  Access-Control-Allow-Origin = "*"
-  Content-Type = "application/json"
+[headers.values]
+Access-Control-Allow-Origin = "*"
+Content-Type = "application/json"
 
 [[redirects]]
 from = "/client-metadata.json"
