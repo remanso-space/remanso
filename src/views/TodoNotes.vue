@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, nextTick, ref, watch } from "vue"
-import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
+
 import { useCheckboxCommit } from "@/hooks/useCheckboxCommit.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { queryFileContent } from "@/modules/repo/services/repo"
+import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 
 type Prop = {
@@ -19,7 +20,7 @@ const repo = computed(() => props.repo)
 const store = useUserRepoStore()
 
 const todoNote = computed(() =>
-  store.files.find((file) => file.path?.endsWith("_todo/todo.md")),
+  store.files.find((file) => file.path?.endsWith("_todo/todo.md"))
 )
 
 const sha = computed(() => todoNote.value?.sha ?? "")
@@ -36,7 +37,7 @@ const { pendingContent, syncContent, listenToCheckboxes, hasPendingChanges } =
     initialContent: "",
     initialSha: sha,
     containerSelector: ".todo-notes .note-display",
-    debounceMs: 1000,
+    debounceMs: 1000
   })
 
 // Render pending content to HTML for display
@@ -60,7 +61,7 @@ watch(
       syncContent(rawContent, newSha)
     }
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 // Setup checkbox listeners when content renders
@@ -70,7 +71,7 @@ watch(
     await nextTick()
     listenToCheckboxes()
   },
-  { immediate: true },
+  { immediate: true }
 )
 </script>
 

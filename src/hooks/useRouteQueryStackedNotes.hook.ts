@@ -14,7 +14,7 @@ export const useRouteQueryStackedNotes = () => {
       }
 
       return Array.isArray(value) ? value : [value]
-    },
+    }
   })
   const { height } = useWindowSize()
 
@@ -22,7 +22,7 @@ export const useRouteQueryStackedNotes = () => {
 
   const scrollToFocusedNote = (
     noteId: string | null = null,
-    notes: string[] = stackedNotes.value,
+    notes: string[] = stackedNotes.value
   ) => {
     nextTick(() => {
       const index = noteId ? notes.findIndex((nid) => nid === noteId) : 0
@@ -31,7 +31,7 @@ export const useRouteQueryStackedNotes = () => {
         if (noteId) {
           const cleanNoteId = noteId.replaceAll(":", "-")
           const element = document.querySelector(
-            `.note-${cleanNoteId}`,
+            `.note-${cleanNoteId}`
           ) as HTMLElement
 
           const top = (index + 1) * (element?.clientHeight ?? height.value)
@@ -53,7 +53,7 @@ export const useRouteQueryStackedNotes = () => {
   const addStackedNote = (
     currentSha: string,
     sha: string,
-    selector?: string,
+    selector?: string
   ) => {
     if (stackedNotes.value.includes(sha)) {
       scrollToFocusedNote(selector ?? sha)
@@ -70,7 +70,7 @@ export const useRouteQueryStackedNotes = () => {
       const newStackedNotes = [
         ...splittedStackedNotes.replaceAll(";;", ";").split(";"),
         currentSha,
-        sha,
+        sha
       ].filter((sha) => !!sha)
 
       stackedNotes.value = newStackedNotes
@@ -82,6 +82,6 @@ export const useRouteQueryStackedNotes = () => {
   return {
     stackedNotes: readonly(stackedNotes),
     addStackedNote,
-    scrollToFocusedNote,
+    scrollToFocusedNote
   }
 }

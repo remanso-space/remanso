@@ -5,5 +5,5 @@ export const op = new OpenPanel({
   clientId: "038a6aac-19bb-4a7f-9aae-2d0201fead5b",
   trackScreenViews: true,
   trackOutgoingLinks: true,
-  trackAttributes: true,
+  trackAttributes: true
 })

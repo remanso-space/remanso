@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { format } from "date-fns"
 import { computed, ref, watch } from "vue"
+
 import FluxNote from "@/components/FluxNote.vue"
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
@@ -70,7 +71,7 @@ const handleYouTube = async () => {
 
 const { createFile } = useGitHubContent({
   repo: repo.value,
-  user: user.value,
+  user: user.value
 })
 
 const hasTodayNote = computed(() => content.value.includes(today))
@@ -83,7 +84,7 @@ watch(mode, async (newMode) => {
 
     const newSha = await createFile({
       content,
-      path: newContentPath,
+      path: newContentPath
     })
 
     if (!newSha) {
@@ -94,7 +95,7 @@ watch(mode, async (newMode) => {
     const { saveCacheNote } = prepareNoteCache(newSha, newContentPath)
     await saveCacheNote(encodeUTF8ToBase64(content), {
       editedSha: newSha,
-      path: newContentPath,
+      path: newContentPath
     })
 
     addStackedNote("", newSha)

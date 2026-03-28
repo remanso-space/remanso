@@ -1,4 +1,4 @@
-import MarkdownIt, { PluginSimple } from 'markdown-it'
+import MarkdownIt, { PluginSimple } from "markdown-it"
 
 let counter = 0
 
@@ -6,14 +6,14 @@ export const markdownItPlugin = (
   regex: RegExp,
   replacer: (matches: RegExpExecArray[]) => string
 ): PluginSimple => {
-  const id = 'regexp-' + counter
+  const id = "regexp-" + counter
   counter++
   const flags =
-    (regex.global ? 'g' : '') +
-    (regex.multiline ? 'm' : '') +
-    (regex.ignoreCase ? 'i' : '')
+    (regex.global ? "g" : "") +
+    (regex.multiline ? "m" : "") +
+    (regex.ignoreCase ? "i" : "")
 
-  const regexp = RegExp('^' + regex.source, flags)
+  const regexp = RegExp("^" + regex.source, flags)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parse = (state: any, silent: boolean): boolean => {
@@ -31,7 +31,7 @@ export const markdownItPlugin = (
       return true
     }
 
-    const token = state.push(id, '', 0)
+    const token = state.push(id, "", 0)
     token.meta = { match }
 
     return true

@@ -3,29 +3,29 @@
 // Script pour changer facilement le thème clair de l'application Remanso
 // Usage: pnpm run theme:light [theme-name]
 
-import { readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { readFileSync, writeFileSync } from "fs"
+import { join } from "path"
 
-import { commitTheme } from './change-theme'
+import { commitTheme } from "./change-theme"
 
 // Chemins vers les fichiers
-const themeConfigPath = join(__dirname, '..', 'src', 'theme.config.ts')
-const indexPath = join(__dirname, '..', 'index.html')
-const appCssPath = join(__dirname, '..', 'src', 'styles', 'app.css')
+const themeConfigPath = join(__dirname, "..", "src", "theme.config.ts")
+const indexPath = join(__dirname, "..", "index.html")
+const appCssPath = join(__dirname, "..", "src", "styles", "app.css")
 
 // Vérifier les arguments
 if (process.argv.length < 3) {
-  console.log('Usage: pnpm run theme:light [theme-name]')
-  console.log('Exemple: pnpm run theme:light cupcake')
+  console.log("Usage: pnpm run theme:light [theme-name]")
+  console.log("Exemple: pnpm run theme:light cupcake")
   process.exit(1)
 }
 
 // Mode fixé à light pour ce script
-const mode = 'light'
+const mode = "light"
 const newTheme = process.argv[2] // nom du nouveau thème
 
 // Lire le contenu actuel du fichier de configuration
-let themeConfigContent = readFileSync(themeConfigPath, 'utf8')
+let themeConfigContent = readFileSync(themeConfigPath, "utf8")
 
 // Remplacer la valeur du thème clair
 themeConfigContent = themeConfigContent.replace(
@@ -37,7 +37,7 @@ themeConfigContent = themeConfigContent.replace(
 writeFileSync(themeConfigPath, themeConfigContent)
 
 // Mettre à jour également le fichier index.html
-let indexContent = readFileSync(indexPath, 'utf8')
+let indexContent = readFileSync(indexPath, "utf8")
 indexContent = indexContent.replace(
   /data-theme="[^"]*"/,
   `data-theme="${newTheme}"`
@@ -45,7 +45,7 @@ indexContent = indexContent.replace(
 writeFileSync(indexPath, indexContent)
 
 // Mettre à jour également le fichier app.css pour le thème --default
-let appCssContent = readFileSync(appCssPath, 'utf8')
+let appCssContent = readFileSync(appCssPath, "utf8")
 appCssContent = appCssContent.replace(
   /(\s+)([a-zA-Z0-9-]+)(\s+--default,)/,
   `$1${newTheme}$3`

@@ -1,14 +1,14 @@
-import { data } from '@/data/data'
-import { DataType } from '@/data/DataType.enum'
-import { Note } from '@/modules/note/models/Note'
-import { useUserRepoStore } from '@/modules/repo/store/userRepo.store'
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import { Note } from "@/modules/note/models/Note"
+import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 
 type NoteCacheResult =
   | {
       note: Note
-      from: 'sha'
+      from: "sha"
     }
-  | { note: Note; from: 'path' }
+  | { note: Note; from: "path" }
   | { note: null; from: null }
 
 export const prepareNoteCache = (sha: string, path?: string) => {
@@ -20,7 +20,7 @@ export const prepareNoteCache = (sha: string, path?: string) => {
     const note = await data.get<DataType.Note, Note>(noteId)
 
     if (note) {
-      return { note, from: 'sha' }
+      return { note, from: "sha" }
     }
 
     if (notePath) {
@@ -33,7 +33,7 @@ export const prepareNoteCache = (sha: string, path?: string) => {
       }
       return {
         note,
-        from: 'path'
+        from: "path"
       }
     }
 

@@ -1,18 +1,18 @@
 import markdownItKatex from "@vscode/markdown-it-katex"
 import MarkdownIt, { Options } from "markdown-it"
+import Renderer, { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
+import type Token from "markdown-it/lib/token.mjs"
 import blockEmbedPlugin from "markdown-it-block-embed"
 import markdownItCheckbox from "markdown-it-checkbox"
 import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
 import markdownItIframe from "markdown-it-iframe"
 import Shikiji from "markdown-it-shikiji"
+import mermaid from "mermaid"
 import { Ref, toValue } from "vue"
 
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
-import mermaid from "mermaid"
-import type Token from "markdown-it/lib/token.mjs"
-import Renderer, { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
 
 const markdownItMermaidExtractor = (md: MarkdownIt) => {
   const defaultFence =
@@ -22,7 +22,7 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
       index: number,
       options: Options,
       _: unknown,
-      self: Renderer,
+      self: Renderer
     ) {
       return self.renderToken(tokens, index, options)
     }
@@ -32,7 +32,7 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
     index: number,
     options: Options,
     env: unknown,
-    self: Renderer,
+    self: Renderer
   ) {
     const token = tokens[index]
 
@@ -47,20 +47,20 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
 
 const md = new MarkdownIt({
   typographer: true,
-  quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"],
+  quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"]
 })
   .use(markdownItMermaidExtractor)
   .use(html5Media)
   .use(blockEmbedPlugin, {
     youtube: {
       width: "100%",
-      height: 300,
-    },
+      height: 300
+    }
   })
   .use(markdownItCheckbox)
   .use(markdownItKatex)
   .use(markdownItIframe, {
-    width: "100%",
+    width: "100%"
   })
   .use(MarkdownItGitHubAlerts)
   .use(markdownItTablerIcons)
@@ -77,7 +77,7 @@ export const useShikiji = async () => {
     await Shikiji({
       themes: {
         light: "vitesse-light",
-        dark: "vitesse-black",
+        dark: "vitesse-black"
       },
       langs: [
         "bash",
@@ -87,9 +87,9 @@ export const useShikiji = async () => {
         "mermaid",
         "html",
         "css",
-        "json",
-      ],
-    }),
+        "json"
+      ]
+    })
   )
 }
 
@@ -101,19 +101,19 @@ export const runMermaid = (querySelector: string) => {
     mermaid.initialize({
       theme: "dark",
       startOnLoad: false,
-      flowchart: { curve: "natural" },
+      flowchart: { curve: "natural" }
     })
   }
 
   mermaid.run({
-    querySelector,
+    querySelector
   })
 }
 
 const rules: RenderRuleRecord = {
   table_open: () =>
     '<div class="overflow-x-auto"><table class="table table-zebra">',
-  table_close: () => "</table></div>",
+  table_close: () => "</table></div>"
 }
 
 md.renderer.rules = { ...md.renderer.rules, ...rules }
@@ -128,7 +128,7 @@ export const markdownBuilder = (defaultPrefix?: Ref<string> | string) => {
   const renderFromUTF8 = (content: string, prefix?: string) => {
     return content
       ? md.render(stripFrontmatter(content), {
-          docId: defaultPrefix ? toValue(defaultPrefix) : (prefix ?? ""),
+          docId: defaultPrefix ? toValue(defaultPrefix) : (prefix ?? "")
         })
       : ""
   }
@@ -139,6 +139,6 @@ export const markdownBuilder = (defaultPrefix?: Ref<string> | string) => {
     render: (content: string, prefix?: string) =>
       renderFromUTF8(decodeBase64ToUTF8(content), prefix),
     renderFromUTF8,
-    getRawContent,
+    getRawContent
   }
 }

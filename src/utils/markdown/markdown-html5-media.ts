@@ -2,11 +2,11 @@
 // We can only detect video/audio files from the extension in the URL.
 // We ignore MP1 and MP2 (not in active use) and default to video for ambiguous
 
-import MarkdownIt from 'markdown-it'
+import MarkdownIt from "markdown-it"
 
 // extensions (MPG, MP4)
-const validAudioExtensions = ['aac', 'm4a', 'mp3', 'oga', 'ogg', 'wav']
-const validVideoExtensions = ['mp4', 'm4v', 'ogv', 'webm', 'mpg', 'mpeg']
+const validAudioExtensions = ["aac", "m4a", "mp3", "oga", "ogg", "wav"]
+const validVideoExtensions = ["mp4", "m4v", "ogv", "webm", "mpg", "mpeg"]
 
 /**
  * @property {Object} messages
@@ -19,13 +19,13 @@ const validVideoExtensions = ['mp4', 'm4v', 'ogv', 'webm', 'mpg', 'mpeg']
  */
 let messages: { [key: string]: any } = {
   en: {
-    'html5 video not supported':
-      'Your browser does not support playing HTML5 video.',
-    'html5 audio not supported':
-      'Your browser does not support playing HTML5 audio.',
-    'html5 media fallback link':
+    "html5 video not supported":
+      "Your browser does not support playing HTML5 video.",
+    "html5 audio not supported":
+      "Your browser does not support playing HTML5 audio.",
+    "html5 media fallback link":
       'You can <a href="%s" download>download the file</a> instead.',
-    'html5 media description': 'Here is a description of the content: %s'
+    "html5 media description": "Here is a description of the content: %s"
   }
 }
 
@@ -37,18 +37,18 @@ let translate = (
   // Revert back to English default if no message object, or no translation
   // for this language
   if (!messages[language] || !messages[language][messageKey]) {
-    language = 'en'
+    language = "en"
   }
 
   if (!messages[language]) {
-    return ''
+    return ""
   }
 
-  let message = messages[language][messageKey] || ''
+  let message = messages[language][messageKey] || ""
 
   if (messageParams)
     for (const param of messageParams) {
-      message = message.replace('%s', param)
+      message = message.replace("%s", param)
     }
 
   return message
@@ -96,7 +96,7 @@ function tokenizeImagesAndMedia(
   }
 ): boolean {
   let attrs, code, label, pos, ref, res, title, tokens: never[], start
-  let href = ''
+  let href = ""
   const oldPos = state.pos
   const max = state.posMax
 
@@ -140,7 +140,7 @@ function tokenizeImagesAndMedia(
       if (state.md.validateLink(href)) {
         pos = res.pos
       } else {
-        href = ''
+        href = ""
       }
     }
 
@@ -166,7 +166,7 @@ function tokenizeImagesAndMedia(
         if (!md.utils.isSpace(code) && code !== 0x0a) break
       }
     } else {
-      title = ''
+      title = ""
     }
 
     if (pos >= max || state.src.charCodeAt(pos) !== 0x29) {
@@ -179,7 +179,7 @@ function tokenizeImagesAndMedia(
     //
     // Link reference
     //
-    if (typeof state.env.references === 'undefined') return false
+    if (typeof state.env.references === "undefined") return false
 
     if (pos < max && state.src.charCodeAt(pos) === 0x5b) {
       // Bracket: [
@@ -219,15 +219,15 @@ function tokenizeImagesAndMedia(
   state.md.inline.parse(content, state.md, state.env, (tokens = []))
 
   const mediaType = guessMediaType(href)
-  const tag = mediaType == 'image' ? 'img' : mediaType
+  const tag = mediaType == "image" ? "img" : mediaType
 
   const token = state.push(mediaType, tag, 0)
-  token.attrs = attrs = [['src', href]]
-  if (mediaType == 'image') attrs.push(['alt', ''])
+  token.attrs = attrs = [["src", href]]
+  if (mediaType == "image") attrs.push(["alt", ""])
   token.children = tokens
   token.content = content
 
-  if (title) attrs.push(['title', title])
+  if (title) attrs.push(["title", title])
 
   state.pos = pos
   state.posMax = max
@@ -247,13 +247,13 @@ function tokenizeImagesAndMedia(
  */
 function guessMediaType(url: string): string {
   const extensionMatch = url.match(/\.([^/.]+)$/)
-  if (extensionMatch === null) return 'image'
+  if (extensionMatch === null) return "image"
   const extension = extensionMatch[1]
   if (validAudioExtensions.indexOf(extension.toLowerCase()) != -1)
-    return 'audio'
+    return "audio"
   else if (validVideoExtensions.indexOf(extension.toLowerCase()) != -1)
-    return 'video'
-  else return 'image'
+    return "video"
+  else return "image"
 }
 
 /**
@@ -283,37 +283,37 @@ function renderMedia(
   const token = tokens[idx]
   const type = token.type
 
-  if (!token.attrs || (type !== 'video' && type !== 'audio')) {
-    return ''
+  if (!token.attrs || (type !== "video" && type !== "audio")) {
+    return ""
   }
 
   let attrs = options.html5Media[`${type}Attrs`].trim()
   if (attrs) {
-    attrs = ' ' + attrs
+    attrs = " " + attrs
   }
 
   // We'll always have a URL for non-image media: they are detected by URL
-  const url = token.attrs[token.attrIndex('src')][1]
+  const url = token.attrs[token.attrIndex("src")][1]
 
   // Title is set like this: ![descriptive text](video.mp4 "title")
   const title =
-    token.attrIndex('title') != -1
+    token.attrIndex("title") != -1
       ? ` title="${md.utils.escapeHtml(
-          token.attrs[token.attrIndex('title')][1]
+          token.attrs[token.attrIndex("title")][1]
         )}"`
-      : ''
+      : ""
 
   const fallbackText =
     translate(env.language, `html5 ${type} not supported`) +
-    '\n' +
-    translate(env.language, 'html5 media fallback link', [url])
+    "\n" +
+    translate(env.language, "html5 media fallback link", [url])
 
   const description = token.content
-    ? '\n' +
-      translate(env.language, 'html5 media description', [
+    ? "\n" +
+      translate(env.language, "html5 media description", [
         md.utils.escapeHtml(token.content)
       ])
-    : ''
+    : ""
 
   return (
     `<${type} src="${url}"${title}${attrs}>\n` +
@@ -369,7 +369,7 @@ export const html5Media = (
       ? options.audioAttrs
       : 'controls class="html5-audio-player"'
 
-  md.inline.ruler.at('image', (tokens: any, silent: any) =>
+  md.inline.ruler.at("image", (tokens: any, silent: any) =>
     tokenizeImagesAndMedia(tokens, silent, md)
   )
 

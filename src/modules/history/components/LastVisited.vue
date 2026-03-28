@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useLastVisitedRepos } from '@/modules/history/hooks/useLastVisitedRepos.hook'
+import { useLastVisitedRepos } from "@/modules/history/hooks/useLastVisitedRepos.hook"
 
 const { lastVisitedRepos } = useLastVisitedRepos()
 </script>

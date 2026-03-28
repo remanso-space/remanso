@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useRouter, type RouteLocationRaw } from "vue-router"
+import { type RouteLocationRaw, useRouter } from "vue-router"
 
 const props = withDefaults(
   defineProps<{ fallback?: RouteLocationRaw; preferFallback?: boolean }>(),
-  { preferFallback: true },
+  { preferFallback: true }
 )
 
 const router = useRouter()

@@ -1,10 +1,10 @@
-import { computed, watch } from 'vue'
+import { computed, watch } from "vue"
 
-import { useFile } from '@/hooks/useFile.hook'
-import { resolvePath } from '@/modules/repo/services/resolvePath'
-import { useUserRepoStore } from '@/modules/repo/store/userRepo.store'
+import { useFile } from "@/hooks/useFile.hook"
+import { resolvePath } from "@/modules/repo/services/resolvePath"
+import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 
-const SRC_PREFIX = 'data:image/jpeg;charset=utf-8;base64,'
+const SRC_PREFIX = "data:image/jpeg;charset=utf-8;base64,"
 
 export const useImages = (sha: string) => {
   const store = useUserRepoStore()
@@ -23,14 +23,14 @@ export const useImages = (sha: string) => {
       const images = document.querySelectorAll(`.note-${sha} img`)
 
       images.forEach(async (image) => {
-        const src = image.getAttribute('src')
+        const src = image.getAttribute("src")
         if (!src || src.startsWith(SRC_PREFIX)) {
           return
         }
 
         const imageFilePath = resolvePath(
           filePath,
-          image.getAttribute('src') ?? ''
+          image.getAttribute("src") ?? ""
         )
 
         const imageFile = store.files.find(
@@ -43,7 +43,7 @@ export const useImages = (sha: string) => {
         const { getCachedFileContent } = useFile(imageFile.sha, false)
 
         const fileContent = await getCachedFileContent()
-        image.setAttribute('src', `${SRC_PREFIX} ${fileContent}`)
+        image.setAttribute("src", `${SRC_PREFIX} ${fileContent}`)
       })
     },
     { immediate: true }

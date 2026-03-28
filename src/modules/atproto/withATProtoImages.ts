@@ -1,6 +1,6 @@
 export const withATProtoImages = (
   markdown: string,
-  { pds, did }: { pds: string; did: string },
+  { pds, did }: { pds: string; did: string }
 ): string => {
   const imageLinkPattern = /!\[([^\]]*)\]\((bafkrei[a-z0-9]+)\)/g
 

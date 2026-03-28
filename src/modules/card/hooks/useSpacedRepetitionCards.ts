@@ -31,14 +31,14 @@ export const useSpacedRepetitionCards = () => {
       (file) =>
         file.path !== undefined &&
         file.path.startsWith("_cards") &&
-        file.path.endsWith(".md"),
-    ),
+        file.path.endsWith(".md")
+    )
   )
 
   const {
     state: cards,
     isReady,
-    execute,
+    execute
   } = useAsyncState(
     async () => {
       const cards: Repetition[] = []
@@ -55,7 +55,7 @@ export const useSpacedRepetitionCards = () => {
           $type: DataType.RepetitionCard,
           level: 1,
           repeatDate: new Date(),
-          needsReview: false,
+          needsReview: false
         })
 
         if (
@@ -77,20 +77,20 @@ export const useSpacedRepetitionCards = () => {
           card: {
             front: toHTML(front),
             back: toHTML(back),
-            references: toHTML(references),
-          },
+            references: toHTML(references)
+          }
         })
       }
 
       return cards
     },
     [],
-    { immediate: false },
+    { immediate: false }
   )
 
   const successRepetition = async (cardId: string) => {
     const repetition = await data.get<DataType.RepetitionCard, RepetitionCard>(
-      cardId,
+      cardId
     )
     if (!repetition) {
       return
@@ -100,13 +100,13 @@ export const useSpacedRepetitionCards = () => {
       ...repetition,
       needsReview: false,
       level: Math.min(repetition.level + 1, MAX_LEVEL),
-      repeatDate: addDays(new Date(), 2 ** repetition.level),
+      repeatDate: addDays(new Date(), 2 ** repetition.level)
     })
   }
 
   const failRepetition = async (cardId: string) => {
     const repetition = await data.get<DataType.RepetitionCard, RepetitionCard>(
-      cardId,
+      cardId
     )
     if (!repetition) {
       return
@@ -118,13 +118,13 @@ export const useSpacedRepetitionCards = () => {
       ...repetition,
       level,
       needsReview: false,
-      repeatDate: addDays(new Date(), level),
+      repeatDate: addDays(new Date(), level)
     })
   }
 
   const needsReview = async (cardId: string) => {
     const repetition = await data.get<DataType.RepetitionCard, RepetitionCard>(
-      cardId,
+      cardId
     )
     if (!repetition) {
       return
@@ -132,7 +132,7 @@ export const useSpacedRepetitionCards = () => {
 
     await data.update<DataType.RepetitionCard, RepetitionCard>({
       ...repetition,
-      needsReview: true,
+      needsReview: true
     })
   }
 
@@ -142,7 +142,7 @@ export const useSpacedRepetitionCards = () => {
       nextTick(() => {
         listenToClick()
       }),
-    { immediate: true },
+    { immediate: true }
   )
 
   watch(cardFiles, () => execute())
@@ -152,6 +152,6 @@ export const useSpacedRepetitionCards = () => {
     successRepetition,
     failRepetition,
     needsReview,
-    isLoading: !isReady,
+    isLoading: !isReady
   }
 }

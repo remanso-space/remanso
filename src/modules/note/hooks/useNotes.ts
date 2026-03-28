@@ -6,10 +6,10 @@ export const useNotes = () => {
   const store = useUserRepoStore()
 
   const notes = computed(() =>
-    store.files.filter((file) => file.path?.endsWith(".md")),
+    store.files.filter((file) => file.path?.endsWith(".md"))
   )
 
   return {
-    notes,
+    notes
   }
 }

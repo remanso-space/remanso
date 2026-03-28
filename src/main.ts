@@ -1,5 +1,6 @@
 import "notyf/notyf.min.css"
 import "./styles/app.css"
+import "@/analytics/openpanel"
 
 import { VueQueryPlugin } from "@tanstack/vue-query"
 import { createPinia } from "pinia"
@@ -10,11 +11,10 @@ import { messages } from "@/locales/message"
 import { router } from "@/router/router"
 
 import App from "./App.vue"
-import "@/analytics/openpanel"
 
 const i18n = createI18n({
   locale: "en",
-  messages,
+  messages
 })
 
 createApp(App)

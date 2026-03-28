@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AuthorizeUser from '@/components/AuthorizeUser.vue'
-import WelcomeWorld from '@/components/WelcomeWorld.vue'
+import AuthorizeUser from "@/components/AuthorizeUser.vue"
+import WelcomeWorld from "@/components/WelcomeWorld.vue"
 </script>
 
 <template>

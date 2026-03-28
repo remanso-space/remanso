@@ -1,7 +1,8 @@
+import { computedAsync } from "@vueuse/core"
+import { computed, Ref, ref } from "vue"
+
 import { Author, getAuthors } from "@/modules/atproto/getAuthor"
 import { PublicNoteListItem } from "@/modules/note/models/Note"
-import { computedAsync } from "@vueuse/core"
-import { computed, ref, Ref } from "vue"
 
 interface UsePublicNoteListOptions {
   did?: Ref<string | undefined>
@@ -50,6 +51,6 @@ export function usePublicNoteList(options?: UsePublicNoteListOptions) {
     canLoadMore,
     onLoadMore,
     authors,
-    getAuthor,
+    getAuthor
   }
 }

@@ -11,7 +11,7 @@ const AUTHENTICATION_SERVER = "https://api.remanso.space/auth/github"
 const personalTokenId = "token"
 
 export const signIn = async (
-  code: string,
+  code: string
 ): Promise<GithubToken | GithubTokenError> => {
   const authenticationServerURL = new URL(AUTHENTICATION_SERVER)
   authenticationServerURL.searchParams.set("code", code)
@@ -84,12 +84,12 @@ export const saveAccessToken = async (githubToken: GithubToken) => {
 
   const expirationDate = addSeconds(
     new Date(),
-    githubToken.expires_in,
+    githubToken.expires_in
   ).toISOString()
 
   const refreshTokenExpirationDate = addSeconds(
     new Date(),
-    githubToken.refresh_token_expires_in,
+    githubToken.refresh_token_expires_in
   ).toISOString()
 
   const accessToken: GithubAccessToken = {
@@ -102,11 +102,11 @@ export const saveAccessToken = async (githubToken: GithubToken) => {
     refreshToken: githubToken.refresh_token,
     refreshTokenExpiresIn: githubToken.refresh_token_expires_in,
     refreshTokenExpirationDate,
-    username: "",
+    username: ""
   }
 
   const octokit = new Octokit({
-    auth: accessToken?.token,
+    auth: accessToken?.token
   })
 
   const user = await octokit.request("GET /user")

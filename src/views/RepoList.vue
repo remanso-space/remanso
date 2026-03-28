@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import GoBack from '@/components/GoBack.vue'
-import { useGitHubLogin } from '@/hooks/useGitHubLogin.hook'
-import { useRepos } from '@/hooks/useRepos.hook'
-import { useRepoList } from '@/modules/repo/hooks/useRepoList.hook'
+import GoBack from "@/components/GoBack.vue"
+import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
+import { useRepos } from "@/hooks/useRepos.hook"
+import { useRepoList } from "@/modules/repo/hooks/useRepoList.hook"
 
 const { username } = useGitHubLogin()
 const { isReady } = useRepos()

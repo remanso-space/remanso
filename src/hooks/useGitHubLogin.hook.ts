@@ -1,8 +1,8 @@
-import { computed, ref } from 'vue'
+import { computed, ref } from "vue"
 
-import { GithubToken } from '@/modules/user/interfaces/GithubToken'
-import { getAccessToken, saveAccessToken } from '@/modules/user/service/signIn'
-import { confirmMessage } from '@/utils/notif'
+import { GithubToken } from "@/modules/user/interfaces/GithubToken"
+import { getAccessToken, saveAccessToken } from "@/modules/user/service/signIn"
+import { confirmMessage } from "@/utils/notif"
 
 const username = ref<string | null>(null)
 const accessToken = ref<string | null>(null)
@@ -11,8 +11,8 @@ let init = true
 
 const saveAccessTokenToLocal = async () => {
   const response = await getAccessToken()
-  username.value = response?.username || ''
-  accessToken.value = response?.token || ''
+  username.value = response?.username || ""
+  accessToken.value = response?.token || ""
 }
 
 const saveCredentials = async (token: GithubToken): Promise<void> => {

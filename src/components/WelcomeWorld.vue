@@ -77,7 +77,7 @@ const { userInput, repoInput, submit } = useForm()
       <router-link
         :to="{
           name: 'FluxNoteView',
-          params: { user: 'remanso-space', repo: 'getting-started' },
+          params: { user: 'remanso-space', repo: 'getting-started' }
         }"
         class="btn btn-sm"
         >Get started</router-link

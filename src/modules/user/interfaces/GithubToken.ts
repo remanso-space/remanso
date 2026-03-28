@@ -4,5 +4,5 @@ export interface GithubToken {
   refresh_token: string
   refresh_token_expires_in: number
   scope: string
-  token_type: 'bearer'
+  token_type: "bearer"
 }

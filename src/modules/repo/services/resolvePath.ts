@@ -1,15 +1,15 @@
 const sanitizePath = (path: string) => {
-  if (path.startsWith('./')) {
-    return decodeURIComponent(path.replace('./', ''))
+  if (path.startsWith("./")) {
+    return decodeURIComponent(path.replace("./", ""))
   }
   return decodeURIComponent(path)
 }
 
 const removeNoteFilename = (pathNote: string) => {
-  const path = pathNote.split('/')
+  const path = pathNote.split("/")
   path.pop()
 
-  return sanitizePath(path.join('/'))
+  return sanitizePath(path.join("/"))
 }
 
 export const resolvePath = (
@@ -19,11 +19,11 @@ export const resolvePath = (
   let currentAbsolutePath = removeNoteFilename(currentAbsolutePathNote)
   pathToResolve = sanitizePath(pathToResolve)
 
-  while (pathToResolve.startsWith('../')) {
-    const adjustedAbsolutePath = currentAbsolutePath.split('/')
+  while (pathToResolve.startsWith("../")) {
+    const adjustedAbsolutePath = currentAbsolutePath.split("/")
     adjustedAbsolutePath.pop()
-    currentAbsolutePath = adjustedAbsolutePath.join('/')
-    pathToResolve = pathToResolve.replace('../', '')
+    currentAbsolutePath = adjustedAbsolutePath.join("/")
+    pathToResolve = pathToResolve.replace("../", "")
   }
 
   return currentAbsolutePath

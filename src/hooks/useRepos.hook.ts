@@ -1,8 +1,8 @@
-import { useAsyncState } from '@vueuse/core'
+import { useAsyncState } from "@vueuse/core"
 
-import { useGitHubLogin } from '@/hooks/useGitHubLogin.hook'
-import { RepoBase } from '@/modules/repo/interfaces/RepoBase'
-import { getOctokit } from '@/modules/repo/services/octo'
+import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
+import { RepoBase } from "@/modules/repo/interfaces/RepoBase"
+import { getOctokit } from "@/modules/repo/services/octo"
 
 export const useRepos = () => {
   const { username, accessToken } = useGitHubLogin()
@@ -13,7 +13,7 @@ export const useRepos = () => {
 
     const octokit = await getOctokit()
 
-    const repoList = await octokit.request('GET /search/repositories', {
+    const repoList = await octokit.request("GET /search/repositories", {
       q: `user:${username.value}`,
       per_page: 100
     })

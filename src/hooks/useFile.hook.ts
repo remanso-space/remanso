@@ -17,18 +17,18 @@ export const useFile = (sha: Ref<string> | string, retrieveContent = true) => {
   const {
     render,
     renderFromUTF8,
-    getRawContent: getRawContentFromFile,
+    getRawContent: getRawContentFromFile
   } = markdownBuilder(shaValue)
 
   const { getCachedNote, saveCacheNote } = prepareNoteCache(
     shaValue,
-    toValue(path),
+    toValue(path)
   )
 
   const fromCache = ref(false)
   const rawContent = ref("")
   const content = computed(() =>
-    rawContent.value ? renderFromUTF8(rawContent.value) : "",
+    rawContent.value ? renderFromUTF8(rawContent.value) : ""
   )
 
   const getEditedSha = async () => {
@@ -55,7 +55,7 @@ export const useFile = (sha: Ref<string> | string, retrieveContent = true) => {
             }
             saveCacheNote(fileContent)
             rawContent.value = getRawContentFromFile(fileContent)
-          },
+          }
         )
       }
 
@@ -111,6 +111,6 @@ export const useFile = (sha: Ref<string> | string, retrieveContent = true) => {
     getCachedFileContent,
     getEditedSha,
     fromCache,
-    saveCacheNote,
+    saveCacheNote
   }
 }
