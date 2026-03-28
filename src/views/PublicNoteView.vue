@@ -4,7 +4,7 @@ import { useTitle } from "@vueuse/core"
 import { computed, nextTick, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
-import BackButton from "@/components/BackButton.vue"
+import HomeButton from "@/components/HomeButton.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
@@ -129,13 +129,7 @@ watch(
   <main class="public-note-view repo-note note-container">
     <div class="note article">
       <div class="header">
-        <back-button
-          :fallback="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
-          :prefer-fallback="false"
-        />
-
-        <img src="/favicon.png" alt="Remanso" class="remanso-logo" />
-
+        <home-button />
         <theme-swap />
       </div>
       <div class="subheader">
@@ -195,13 +189,6 @@ watch(
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-  }
-
-  .remanso-logo {
-    width: 32px;
-    height: 32px;
-    box-shadow: none;
-    view-transition-name: remanso-logo;
   }
 
   .subheader {
