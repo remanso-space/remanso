@@ -147,7 +147,8 @@ h1 {
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 1rem;
 
   .title {
     text-align: center;
@@ -168,6 +169,7 @@ footer {
   display: flex;
   gap: 1rem;
   align-items: center;
+  margin-top: auto;
 }
 
 .profile-avatar {
