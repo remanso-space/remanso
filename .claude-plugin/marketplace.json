@@ -1,0 +1,14 @@
+{
+  "name": "remanso-local",
+  "description": "Local plugins for the Remanso project",
+  "owner": {
+    "name": "julien"
+  },
+  "plugins": [
+    {
+      "name": "remanso-skills",
+      "description": "Local skills for the Remanso project (migrate-oxlint, etc.)",
+      "source": "./.agents"
+    }
+  ]
+}
