@@ -39,12 +39,14 @@ const { userInput, repoInput, submit } = useForm()
         type="text"
         placeholder="repo"
       />
-      <button type="submit" class="btn btn-primary" @click="submit">go</button>
+      <button type="submit" class="btn btn-sm btn-primary" @click="submit">
+        go
+      </button>
     </form>
 
     <footer>
       <theme-swap />
-      Made with
+      made with
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icon-tabler-heart"
