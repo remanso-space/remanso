@@ -80,6 +80,7 @@ body {
 #app {
   height: 100dvh;
   display: flex;
+  overflow: hidden;
 }
 
 a {
