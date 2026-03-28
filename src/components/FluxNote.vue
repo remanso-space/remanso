@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {
   computed,
-  defineAsyncComponent,
   nextTick,
   onMounted,
   onUnmounted,
@@ -9,6 +8,7 @@ import {
   watch
 } from "vue"
 
+import HeaderNote from "@/components/HeaderNote.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedNote from "@/components/StackedNote.vue"
 import { useLinks } from "@/hooks/useLinks.hook"
@@ -20,10 +20,6 @@ import { useVisitRepo } from "@/modules/history/hooks/useVisitRepo.hook"
 import CacheAllNotes from "@/modules/note/components/CacheAllNote.vue"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { useUserSettings } from "@/modules/user/hooks/useUserSettings.hook"
-
-const HeaderNote = defineAsyncComponent(
-  () => import("@/components/HeaderNote.vue")
-)
 
 const props = withDefaults(
   defineProps<{

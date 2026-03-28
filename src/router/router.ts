@@ -104,7 +104,12 @@ router.beforeEach(() => {
       }
     ).startViewTransition(async () => {
       resolve()
-      await nextTick()
+      await new Promise<void>((r) => {
+        const unwatch = router.afterEach(() => {
+          unwatch()
+          nextTick().then(r)
+        })
+      })
     })
   })
 })

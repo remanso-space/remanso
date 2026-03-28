@@ -1,32 +1,13 @@
 <script lang="ts" setup>
 import FontChange from "@/components/FontChange.vue"
+import HomeButton from "@/components/HomeButton.vue"
 
 defineProps<{ user: string; repo: string }>()
 </script>
 
 <template>
   <header class="header-note">
-    <router-link
-      :to="{ name: 'Home' }"
-      class="button is-small is-white back-button"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="icon icon-tabler icon-tabler-arrow-narrow-left"
-        width="28"
-        height="28"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <line x1="5" y1="12" x2="19" y2="12" />
-        <line x1="5" y1="12" x2="9" y2="16" />
-        <line x1="5" y1="12" x2="9" y2="8" />
-      </svg>
-    </router-link>
+    <home-button />
     <!-- <router-link
       :to="{ name: 'SpacedRepetitionCard', params: { user, repo } }"
     >
@@ -168,14 +149,9 @@ defineProps<{ user: string; repo: string }>()
   justify-content: space-between;
   margin-top: 10px;
 
-  img {
-    &:hover {
-      cursor: pointer;
-    }
-  }
-
   button {
     color: var(--color-accent);
+    cursor: pointer;
   }
 }
 </style>
