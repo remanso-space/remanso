@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa"
 export default defineConfig(({ command }) => {
   const config: UserConfigExport = {
     build: {
-      minify: "esbuild",
+      minify: "esbuild"
     },
     plugins: [
       vue(),
@@ -23,7 +23,7 @@ export default defineConfig(({ command }) => {
           "masked-icon.png",
           "maskable-icon-512x512.png",
           "monochrome-icon.png",
-          "assets/*.svg",
+          "assets/*.svg"
         ],
         manifest: {
           name: "Remanso",
@@ -35,53 +35,53 @@ export default defineConfig(({ command }) => {
             {
               src: "pwa-64x64.png",
               sizes: "64x64",
-              type: "image/png",
+              type: "image/png"
             },
             {
               src: "pwa-192x192.png",
               sizes: "192x192",
-              type: "image/png",
+              type: "image/png"
             },
             {
               src: "pwa-512x512.png",
               sizes: "512x512",
-              type: "image/png",
+              type: "image/png"
             },
             {
               src: "favicon.png",
               sizes: "1024x1024",
-              type: "image/png",
+              type: "image/png"
             },
             {
               src: "maskable-icon-512x512.png",
               sizes: "512x512",
               type: "image/png",
-              purpose: "maskable",
+              purpose: "maskable"
             },
             {
               src: "monochrome-icon.png",
               sizes: "1024x1024",
               type: "image/png",
-              purpose: "monochrome",
-            },
-          ],
-        },
-      }),
+              purpose: "monochrome"
+            }
+          ]
+        }
+      })
     ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "node-fetch": "isomorphic-fetch",
-      },
-    },
+        "node-fetch": "isomorphic-fetch"
+      }
+    }
   }
 
   if (command === "serve") {
     config.define = {
-      global: {},
+      global: {}
     }
     config.server = {
-      host: "127.0.0.1",
+      host: "127.0.0.1"
     }
   }
 

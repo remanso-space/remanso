@@ -26,11 +26,10 @@ Rolldown's minifier drops the `while(`/`for(;` keyword when a `while (x in globa
 File: `node_modules/@ark/schema/out/shared/registry.js`
 
 ```js
-let _registryName = "$ark";
-let suffix = 2;
-while (_registryName in globalThis)
-    _registryName = `$ark${suffix++}`;
-export const registryName = _registryName;
+let _registryName = "$ark"
+let suffix = 2
+while (_registryName in globalThis) _registryName = `$ark${suffix++}`
+export const registryName = _registryName
 ```
 
 ## Actual minified output
@@ -44,7 +43,10 @@ The `while(` keyword is missing. The orphaned `)` is a syntax error.
 ## Expected output
 
 ```js
-var dn=`$ark`,fn=2;for(;dn in globalThis;)dn=`$ark${fn++}`;var pn=dn;
+var dn = `$ark`,
+  fn = 2
+for (; dn in globalThis; ) dn = `$ark${fn++}`
+var pn = dn
 ```
 
 ## Impact

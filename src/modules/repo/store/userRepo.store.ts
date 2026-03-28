@@ -9,7 +9,7 @@ import {
   getCachedMainReadme,
   getFiles,
   getMainReadme,
-  getUserSettingsContent,
+  getUserSettingsContent
 } from "@/modules/repo/services/repo"
 import { refreshToken } from "@/modules/user/service/signIn"
 
@@ -29,7 +29,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     files: [],
     readme: undefined,
     userSettings: undefined,
-    needToLogin: false,
+    needToLogin: false
   }),
   actions: {
     async setUserRepo(user: string, repo: string) {
@@ -38,7 +38,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
 
       const savedRepoId = data.generateId(DataType.SavedRepo, `${user}-${repo}`)
       const cachedSavedRepo = await data.get<DataType.SavedRepo, SavedRepo>(
-        savedRepoId,
+        savedRepoId
       )
 
       if (cachedSavedRepo) {
@@ -68,14 +68,14 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             $type: DataType.SavedRepo,
             repo,
             user,
-            files,
+            files
           })
           this.files = files
           return getUserSettingsContent(user, repo, files)
         })
         .then((userSettings) => {
           const chosenFontFamily = userSettings?.fontFamilies?.find(
-            (font) => font === this.userSettings?.chosenFontFamily,
+            (font) => font === this.userSettings?.chosenFontFamily
           )
             ? this.userSettings?.chosenFontFamily
             : userSettings?.fontFamily
@@ -94,7 +94,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
 
           data.update<DataType.UserSettings, UserSettings>({
             ...this.userSettings,
-            _id: userSettingsId,
+            _id: userSettingsId
           })
         })
 
@@ -116,7 +116,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
 
       const savedRepoId = data.generateId(
         DataType.SavedRepo,
-        `${this.user}-${this.repo}`,
+        `${this.user}-${this.repo}`
       )
       const newFiles = [...this.files.filter((f) => f.sha !== file.sha), file]
       data.update<DataType.SavedRepo, SavedRepo>({
@@ -124,7 +124,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         $type: DataType.SavedRepo,
         repo: this.repo,
         user: this.user,
-        files: newFiles,
+        files: newFiles
       })
       this.files = newFiles
     },
@@ -147,7 +147,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({
         ...this.userSettings,
-        _id: userSettingsId,
+        _id: userSettingsId
       })
     },
     setFontSize(fontSize: string) {
@@ -159,8 +159,8 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({
         ...this.userSettings,
-        _id: userSettingsId,
+        _id: userSettingsId
       })
-    },
-  },
+    }
+  }
 })

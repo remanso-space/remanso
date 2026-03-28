@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { PublicNoteListItem } from "@/modules/note/models/Note"
-import { toShortDid } from "@/modules/atproto/shortDid"
-import { slugify } from "@/utils/slugify"
 import { vInfiniteScroll } from "@vueuse/components"
+
+import { toShortDid } from "@/modules/atproto/shortDid"
+import { PublicNoteListItem } from "@/modules/note/models/Note"
+import { slugify } from "@/utils/slugify"
 
 defineProps<{
   notes: PublicNoteListItem[]
@@ -28,8 +29,8 @@ defineSlots<{
             params: {
               shortDid: toShortDid(note.did),
               rkey: note.rkey,
-              slug: slugify(note.title),
-            },
+              slug: slugify(note.title)
+            }
           }"
           class="btn btn-link"
           >{{ note.title }}</router-link

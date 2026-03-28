@@ -26,8 +26,8 @@ const getStyle = (seed: string) => {
         name: 'FluxNoteView',
         params: {
           user: username,
-          repo: favoriteRepo.name,
-        },
+          repo: favoriteRepo.name
+        }
       }"
       class="btn"
       :style="getStyle(`${favoriteRepo.name}-${username}`)"

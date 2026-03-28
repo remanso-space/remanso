@@ -2,9 +2,7 @@
   "client_id": "https://remanso.space/client-metadata.json",
   "client_name": "Remanso",
   "client_uri": "https://remanso.space",
-  "redirect_uris": [
-    "https://remanso.space/"
-  ],
+  "redirect_uris": ["https://remanso.space/"],
   "scope": "atproto transition:generic",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],

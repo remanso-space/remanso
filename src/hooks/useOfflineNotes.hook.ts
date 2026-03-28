@@ -1,12 +1,12 @@
-import { useAsyncState } from '@vueuse/core'
-import { computed, ref } from 'vue'
+import { useAsyncState } from "@vueuse/core"
+import { computed, ref } from "vue"
 
-import { data } from '@/data/data'
-import { DataType } from '@/data/DataType.enum'
-import { prepareNoteCache } from '@/modules/note/cache/prepareNoteCache'
-import { Note } from '@/modules/note/models/Note'
-import { queryFileContent } from '@/modules/repo/services/repo'
-import { useUserRepoStore } from '@/modules/repo/store/userRepo.store'
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import { prepareNoteCache } from "@/modules/note/cache/prepareNoteCache"
+import { Note } from "@/modules/note/models/Note"
+import { queryFileContent } from "@/modules/repo/services/repo"
+import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 
 export const useOfflineNotes = () => {
   const store = useUserRepoStore()

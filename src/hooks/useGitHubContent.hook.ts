@@ -4,7 +4,7 @@ import { confirmMessage, errorMessage } from "@/utils/notif"
 
 export const useGitHubContent = ({
   user,
-  repo,
+  repo
 }: {
   user: string
   repo: string
@@ -12,7 +12,7 @@ export const useGitHubContent = ({
   const putFile = async ({
     content,
     path,
-    sha,
+    sha
   }: {
     content: string
     path: string
@@ -29,8 +29,8 @@ export const useGitHubContent = ({
           path,
           message: `Updating ${path} from Remanso`,
           content: encodeUTF8ToBase64(content),
-          sha,
-        },
+          sha
+        }
       )
 
       confirmMessage("✅ Note saved")
@@ -48,6 +48,6 @@ export const useGitHubContent = ({
     updateFile: async (props: { content: string; path: string; sha: string }) =>
       putFile(props),
     createFile: async (props: { content: string; path: string }) =>
-      putFile(props),
+      putFile(props)
   }
 }

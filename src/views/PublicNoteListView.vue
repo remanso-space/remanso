@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { computed } from "vue"
+import { useRoute, useRouter } from "vue-router"
+
 import HomeButton from "@/components/HomeButton.vue"
 import PublicNoteList from "@/components/PublicNoteList.vue"
 import SignInAtproto from "@/components/SignInAtproto.vue"
 import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
-import { useFollows } from "@/hooks/useFollows.hook"
 import { useFollowingNoteList } from "@/hooks/useFollowingNoteList.hook"
+import { useFollows } from "@/hooks/useFollows.hook"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
 import { toShortDid } from "@/modules/atproto/shortDid"
-import { computed } from "vue"
-import { useRoute, useRouter } from "vue-router"
 
 const route = useRoute()
 const router = useRouter()
@@ -20,8 +21,8 @@ const tab = computed<"all" | "following">({
   get: () => (route.query.tab === "following" ? "following" : "all"),
   set: (value) =>
     router.replace({
-      query: { ...route.query, tab: value === "all" ? undefined : value },
-    }),
+      query: { ...route.query, tab: value === "all" ? undefined : value }
+    })
 })
 
 const followingEnabled = computed(() => tab.value === "following")
@@ -65,7 +66,7 @@ const following = useFollowingNoteList(follows, followingEnabled)
           v-if="all.getAuthor(note.did)"
           :to="{
             name: 'PublicNoteListByDidView',
-            params: { shortDid: toShortDid(note.did) },
+            params: { shortDid: toShortDid(note.did) }
           }"
           class="link link-hover"
         >
@@ -90,7 +91,7 @@ const following = useFollowingNoteList(follows, followingEnabled)
           v-if="following.getAuthor(note.did)"
           :to="{
             name: 'PublicNoteListByDidView',
-            params: { shortDid: toShortDid(note.did) },
+            params: { shortDid: toShortDid(note.did) }
           }"
           class="link link-hover"
         >

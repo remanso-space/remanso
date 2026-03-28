@@ -6,7 +6,7 @@ import { isExternalLink } from "@/utils/link"
 
 export const useLinks = (
   className: ComputedRef<string> | string,
-  sha?: Ref<string> | string,
+  sha?: Ref<string> | string
 ) => {
   const store = useUserRepoStore()
 
@@ -34,7 +34,7 @@ export const useLinks = (
       path: href,
       currentNoteSHA: toValue(sha),
       user: store.user,
-      repo: store.repo,
+      repo: store.repo
     })
   }
 
@@ -74,6 +74,6 @@ export const useLinks = (
   })
 
   return {
-    listenToClick,
+    listenToClick
   }
 }

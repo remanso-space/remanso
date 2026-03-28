@@ -17,9 +17,6 @@ const { userInput, repoInput, submit } = useForm()
       <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
       Remanso
     </h1>
-    <p>
-      <sign-in-atproto :with-sign-out="false" />
-    </p>
 
     <repo-list />
 
@@ -74,10 +71,11 @@ const { userInput, repoInput, submit } = useForm()
       <a href="https://apoena.dev" target="_blank" rel="noopener noreferrer"
         >apoena</a
       >
+      <sign-in-atproto :with-sign-out="false" />
       <router-link
         :to="{
           name: 'FluxNoteView',
-          params: { user: 'remanso-space', repo: 'getting-started' },
+          params: { user: 'remanso-space', repo: 'getting-started' }
         }"
         class="btn btn-sm"
         >Get started</router-link

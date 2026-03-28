@@ -5,6 +5,7 @@
 
 import { readFileSync, writeFileSync } from "fs"
 import { join } from "path"
+
 import { commitTheme } from "./change-theme"
 
 // Chemins vers les fichiers
@@ -28,7 +29,7 @@ let themeConfigContent = readFileSync(themeConfigPath, "utf8")
 // Remplacer la valeur du thème sombre
 themeConfigContent = themeConfigContent.replace(
   /dark:\s*['"][^'"]*['"],/,
-  `dark: '${newTheme}',`,
+  `dark: '${newTheme}',`
 )
 
 // Écrire le contenu mis à jour dans le fichier
@@ -38,7 +39,7 @@ writeFileSync(themeConfigPath, themeConfigContent)
 let appCssContent = readFileSync(appCssPath, "utf8")
 appCssContent = appCssContent.replace(
   /(\s+)([a-zA-Z0-9-]+)(\s+--prefersdark;)/,
-  `$1${newTheme}$3`,
+  `$1${newTheme}$3`
 )
 writeFileSync(appCssPath, appCssContent)
 

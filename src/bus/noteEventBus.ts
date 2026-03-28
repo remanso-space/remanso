@@ -1,4 +1,4 @@
-import { createEventBus } from 'retrobus'
+import { createEventBus } from "retrobus"
 
 interface EventBusParams {
   user: string

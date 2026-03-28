@@ -4,23 +4,23 @@ const notif = new Notyf({
   types: [
     {
       className: "alert alert-success",
-      type: "confirm",
+      type: "confirm"
     },
     {
       className: "alert alert-error",
-      type: "error",
-    },
-  ],
+      type: "error"
+    }
+  ]
 })
 
 export const confirmMessage = (message: string) =>
   notif.open({
     type: "confirm",
-    message,
+    message
   })
 
 export const errorMessage = (message: string) =>
   notif.open({
     type: "error",
-    message,
+    message
   })

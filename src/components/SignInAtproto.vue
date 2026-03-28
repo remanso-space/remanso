@@ -3,15 +3,16 @@ import { ref } from "vue"
 
 import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 
-const { handle, isLoggedIn, isATProtoReady, signIn, signOut } = useATProtoLogin()
+const { handle, isLoggedIn, isATProtoReady, signIn, signOut } =
+  useATProtoLogin()
 
 withDefaults(
   defineProps<{
     withSignOut?: boolean
   }>(),
   {
-    withSignOut: true,
-  },
+    withSignOut: true
+  }
 )
 
 const inputHandle = ref("")

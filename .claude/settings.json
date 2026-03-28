@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "remanso-local": {
+      "source": {
+        "source": "directory",
+        "path": "."
+      }
+    }
+  },
+  "enabledPlugins": {
+    "remanso-skills@remanso-local": true
+  }
+}

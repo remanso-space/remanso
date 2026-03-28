@@ -1,5 +1,6 @@
-import { ref, Ref, toValue, onUnmounted } from "vue"
 import { useDebounceFn } from "@vueuse/core"
+import { onUnmounted, Ref, ref, toValue } from "vue"
+
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 
 const CHECKBOX_PATTERN = /\[([ xX])\]/g
@@ -7,7 +8,7 @@ const CHECKBOX_PATTERN = /\[([ xX])\]/g
 const setCheckboxInMarkdown = (
   markdown: string,
   index: number,
-  checked: boolean,
+  checked: boolean
 ): string => {
   let currentIndex = 0
 
@@ -21,7 +22,7 @@ const setCheckboxInMarkdown = (
 
 const findCheckboxIndex = (
   container: Element,
-  checkbox: HTMLInputElement,
+  checkbox: HTMLInputElement
 ): number => {
   const allCheckboxes = container.querySelectorAll('input[type="checkbox"]')
   return Array.from(allCheckboxes).indexOf(checkbox)
@@ -34,7 +35,7 @@ export const useCheckboxCommit = ({
   initialContent,
   initialSha,
   containerSelector,
-  debounceMs = 1000,
+  debounceMs = 1000
 }: {
   user: string
   repo: string
@@ -76,7 +77,7 @@ export const useCheckboxCommit = ({
     const newSha = await updateFile({
       content: pendingContent.value,
       path: pathValue,
-      sha: currentSha.value,
+      sha: currentSha.value
     })
 
     if (newSha) {
@@ -109,7 +110,7 @@ export const useCheckboxCommit = ({
     pendingContent.value = setCheckboxInMarkdown(
       pendingContent.value,
       index,
-      target.checked,
+      target.checked
     )
     hasPendingChanges.value = true
 
@@ -142,6 +143,6 @@ export const useCheckboxCommit = ({
     isCommitting,
     hasPendingChanges,
     syncContent,
-    listenToCheckboxes,
+    listenToCheckboxes
   }
 }

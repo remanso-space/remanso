@@ -19,11 +19,11 @@ export const useOverlay = (listen = true) => {
     }
     useEventListener(window, "scroll", updateScroll, {
       passive: true,
-      capture: false,
+      capture: false
     })
     useEventListener(document.body, "scroll", updateScroll, {
       passive: true,
-      capture: false,
+      capture: false
     })
   }
 
@@ -47,6 +47,6 @@ export const useOverlay = (listen = true) => {
     x,
     y,
     isMobile,
-    scrollToNote,
+    scrollToNote
   }
 }

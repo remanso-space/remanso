@@ -1,8 +1,8 @@
-import { useAsyncState } from '@vueuse/core'
+import { useAsyncState } from "@vueuse/core"
 
-import { data } from '@/data/data'
-import { DataType } from '@/data/DataType.enum'
-import { RepetitionCard } from '@/modules/card/models/RepetitionCard'
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import { RepetitionCard } from "@/modules/card/models/RepetitionCard"
 
 export const useNeedReviewCards = () => {
   const { state: cardsToReview, isReady } = useAsyncState(async () => {
