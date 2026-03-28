@@ -162,7 +162,7 @@ h1 {
   flex: 1;
   flex-direction: column;
   gap: 1rem;
-  justify-content: center;
+
 }
 
 .github-form {
