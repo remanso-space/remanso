@@ -16,34 +16,34 @@ const { userInput, repoInput, submit } = useForm()
 <template>
   <div class="welcome-world">
     <div class="welcome-content">
-    <h1 class="title is-1">
-      <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
-      Remanso
-    </h1>
+      <h1 class="title is-1">
+        <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
+        Remanso
+      </h1>
 
-    <repo-list />
+      <repo-list />
 
-    <last-visited />
+      <last-visited />
 
-    <form class="github-form" @submit.prevent>
-      <div>github/</div>
-      <input
-        v-model="userInput"
-        class="input input-ghost"
-        type="text"
-        placeholder="user"
-      />
-      /
-      <input
-        v-model="repoInput"
-        class="input input-ghost"
-        type="text"
-        placeholder="repo"
-      />
-      <button type="submit" class="btn btn-sm btn-primary" @click="submit">
-        go
-      </button>
-    </form>
+      <form class="github-form" @submit.prevent>
+        <div>github/</div>
+        <input
+          v-model="userInput"
+          class="input input-ghost"
+          type="text"
+          placeholder="user"
+        />
+        /
+        <input
+          v-model="repoInput"
+          class="input input-ghost"
+          type="text"
+          placeholder="repo"
+        />
+        <button type="submit" class="btn btn-sm btn-primary" @click="submit">
+          go
+        </button>
+      </form>
     </div>
 
     <footer>
@@ -144,7 +144,6 @@ h1 {
 }
 
 .welcome-world {
-  padding: 1rem;
   margin: auto;
   display: flex;
   flex: 1;
@@ -162,7 +161,7 @@ h1 {
   flex: 1;
   flex-direction: column;
   gap: 1rem;
-
+  padding: 0 0.5rem;
 }
 
 .github-form {
@@ -177,8 +176,10 @@ h1 {
 
 footer {
   display: flex;
-  gap: 1rem;
+  gap: 0.2rem;
   align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem;
 }
 
 .profile-avatar {

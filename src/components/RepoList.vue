@@ -40,6 +40,7 @@ const getStyle = (seed: string) => {
 <style scoped lang="scss">
 .repo-list {
   display: flex;
+  justify-content: space-evenly;
   gap: 1rem;
   flex-wrap: wrap;
 
