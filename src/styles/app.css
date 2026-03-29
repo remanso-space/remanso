@@ -52,7 +52,6 @@
 html,
 body {
   height: 100dvh;
-  overflow: hidden;
   scroll-behavior: smooth;
 }
 
@@ -69,7 +68,6 @@ body {
 #app {
   height: 100dvh;
   display: flex;
-  overflow: hidden;
 }
 
 a {
