@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { onBeforeMount, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeMount, ref } from "vue"
+import { useRoute, useRouter } from "vue-router"
 
-import { useGitHubLogin } from '@/hooks/useGitHubLogin.hook'
-import { signIn } from '@/modules/user/service/signIn'
+import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
+import { signIn } from "@/modules/user/service/signIn"
 
 const route = useRoute()
 const router = useRouter()
@@ -16,14 +16,14 @@ onBeforeMount(async () => {
   if (code) {
     const token = await signIn(code.toString())
 
-    if ('error' in token) {
+    if ("error" in token) {
       hasError.value = true
     } else {
       token.access_token
       saveCredentials(token)
     }
 
-    router.replace({ name: 'Home' })
+    router.replace({ name: "Home" })
   }
 })
 </script>

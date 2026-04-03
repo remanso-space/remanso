@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
-import BackButton from "@/components/BackButton.vue"
-import StackedPublicNote from "@/components/StackedPublicNote.vue"
-import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
-import { getAuthor } from "@/modules/atproto/getAuthor"
-import type { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
-import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
-import { getUrl } from "@/modules/atproto/getUrl"
-import { fromShortDid } from "@/modules/atproto/shortDid"
-import { downloadFont } from "@/utils/downloadFont"
-import { slugify } from "@/utils/slugify"
 import { computedAsync } from "@vueuse/core"
+import { useTitle } from "@vueuse/core"
 import { computed, nextTick, ref, watch } from "vue"
 import { useRouter } from "vue-router"
-import { errorMessage } from "@/utils/notif"
-import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
-import ThemeSwap from "@/components/ThemeSwap.vue"
+
+import HomeButton from "@/components/HomeButton.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
-import { useTitle } from "@vueuse/core"
+import StackedPublicNote from "@/components/StackedPublicNote.vue"
+import ThemeSwap from "@/components/ThemeSwap.vue"
+import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
+import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
+import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
+import { getAuthor } from "@/modules/atproto/getAuthor"
+import { getUrl } from "@/modules/atproto/getUrl"
+import type { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
+import { fromShortDid } from "@/modules/atproto/shortDid"
+import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
 import { displayLanguage } from "@/utils/displayLanguage"
+import { downloadFont } from "@/utils/downloadFont"
+import { errorMessage } from "@/utils/notif"
+import { slugify } from "@/utils/slugify"
 
 const props = defineProps<{ shortDid: string; rkey: string; slug?: string }>()
 const router = useRouter()
@@ -29,7 +30,7 @@ const rkey = computed(() => props.rkey)
 const author = computedAsync(async () => getAuthor(did.value))
 const url = computedAsync(
   async () => getUrl({ did: did.value, rkey: rkey.value }),
-  null,
+  null
 )
 
 const noteNotFound = ref(false)
@@ -68,7 +69,7 @@ watch(noteRecord, () => {
     const root = document.documentElement
     root.style.setProperty(
       "--font-size",
-      `${noteRecord.value.value.fontSize}pt`,
+      `${noteRecord.value.value.fontSize}pt`
     )
   }
 })
@@ -81,10 +82,10 @@ const content = computed(() =>
     ? toHTML(
         withATProtoImages(noteRecord.value.value.content, {
           pds: author.value.pds,
-          did: did.value,
-        }),
+          did: did.value
+        })
       )
-    : "",
+    : ""
 )
 
 const breadcrumb = computed(() =>
@@ -92,7 +93,7 @@ const breadcrumb = computed(() =>
     ? author.value?.handle
       ? `${title.value} • ${author.value.handle}`
       : title.value
-    : `Remanso`,
+    : `Remanso`
 )
 
 useTitle(breadcrumb)
@@ -100,12 +101,12 @@ useTitle(breadcrumb)
 const publishedAt = computed(() =>
   noteRecord.value?.value.publishedAt
     ? new Date(noteRecord.value?.value.publishedAt).toLocaleDateString()
-    : null,
+    : null
 )
 const language = computed(() =>
   noteRecord.value?.value.language
     ? displayLanguage(noteRecord.value.value.language)
-    : null,
+    : null
 )
 
 const mainNoteId = computed(() => `${props.shortDid}-${props.rkey}`)
@@ -120,7 +121,7 @@ watch(
     await nextTick()
     listenToClick()
   },
-  { immediate: true },
+  { immediate: true }
 )
 </script>
 
@@ -128,13 +129,7 @@ watch(
   <main class="public-note-view repo-note note-container">
     <div class="note article">
       <div class="header">
-        <back-button
-          :fallback="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
-          :prefer-fallback="false"
-        />
-
-        <img src="/favicon.png" alt="Remanso" class="remanso-logo" />
-
+        <home-button />
         <theme-swap />
       </div>
       <div class="subheader">
@@ -194,13 +189,6 @@ watch(
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-  }
-
-  .remanso-logo {
-    width: 32px;
-    height: 32px;
-    box-shadow: none;
-    view-transition-name: remanso-logo;
   }
 
   .subheader {

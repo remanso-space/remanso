@@ -1,17 +1,17 @@
-import { useAsyncState } from '@vueuse/core'
-import { computed } from 'vue'
+import { useAsyncState } from "@vueuse/core"
+import { computed } from "vue"
 
-import { data } from '@/data/data'
-import { DataType } from '@/data/DataType.enum'
-import { History } from '@/data/models/History'
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import { History } from "@/data/models/History"
 
-const HISTORY_ID = data.generateId(DataType.History, 'history')
+const HISTORY_ID = data.generateId(DataType.History, "history")
 
 export const useLastVisitedRepos = () => {
   const history = useAsyncState(
     () =>
       data.get<DataType.History, History>(
-        data.generateId(DataType.History, 'history')
+        data.generateId(DataType.History, "history")
       ),
     null
   )

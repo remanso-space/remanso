@@ -1,4 +1,5 @@
 import { computed } from "vue"
+
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 
 export const useFolderNotes = (folders: string[]) => {
@@ -8,8 +9,8 @@ export const useFolderNotes = (folders: string[]) => {
     store.files.filter(
       (file) =>
         folders.some((folder) => file.path?.startsWith(folder)) &&
-        file.path?.endsWith(".md"),
-    ),
+        file.path?.endsWith(".md")
+    )
   )
 
   const content = computed(() =>
@@ -23,10 +24,10 @@ export const useFolderNotes = (folders: string[]) => {
             })`
           })
           .join("\n")
-      : "",
+      : ""
   )
 
   return {
-    content,
+    content
   }
 }

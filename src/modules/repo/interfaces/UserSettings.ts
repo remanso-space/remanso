@@ -8,4 +8,6 @@ export interface UserSettings extends Model<DataType.UserSettings> {
   fontSize?: string
   chosenFontSize?: string
   backlink?: boolean
+  chosenTitleFont?: string
+  chosenBodyFont?: string
 }

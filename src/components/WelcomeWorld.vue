@@ -3,56 +3,52 @@ import RepoList from "@/components/RepoList.vue"
 import SignInAtproto from "@/components/SignInAtproto.vue"
 import SignInGithub from "@/components/SignInGithub.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
+import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useForm } from "@/hooks/useForm.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import LastVisited from "@/modules/history/components/LastVisited.vue"
 
 const { isLogged } = useGitHubLogin()
+const { isLoggedIn: isATProtoLoggedIn, avatarUrl } = useATProtoLogin()
 const { userInput, repoInput, submit } = useForm()
 </script>
 
 <template>
   <div class="welcome-world">
-    <h1 class="title is-1">
-      <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
-      Remanso
-    </h1>
-    <p>
-      <sign-in-atproto :with-sign-out="false" />
-    </p>
+    <div class="welcome-content">
+      <h1 class="title is-1">
+        <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
+        Remanso
+      </h1>
 
-    <repo-list />
+      <repo-list />
 
-    <last-visited />
+      <last-visited />
 
-    <div class="get-started">
-      <sign-in-github />
-      <router-link v-if="isLogged" :to="{ name: 'RepoList' }" class="btn btn-sm"
-        >Manage your repos</router-link
-      >
+      <form class="github-form" @submit.prevent>
+        <div>github/</div>
+        <input
+          v-model="userInput"
+          class="input input-ghost"
+          type="text"
+          placeholder="user"
+        />
+        /
+        <input
+          v-model="repoInput"
+          class="input input-ghost"
+          type="text"
+          placeholder="repo"
+        />
+        <button type="submit" class="btn btn-sm btn-primary" @click="submit">
+          go
+        </button>
+      </form>
     </div>
-
-    <form class="github-form" @submit.prevent>
-      <div>github/</div>
-      <input
-        v-model="userInput"
-        class="input input-ghost"
-        type="text"
-        placeholder="user"
-      />
-      /
-      <input
-        v-model="repoInput"
-        class="input input-ghost"
-        type="text"
-        placeholder="repo"
-      />
-      <button type="submit" class="btn btn-primary" @click="submit">go</button>
-    </form>
 
     <footer>
       <theme-swap />
-      Made with
+      made with
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icon-tabler-heart"
@@ -74,15 +70,63 @@ const { userInput, repoInput, submit } = useForm()
       <a href="https://apoena.dev" target="_blank" rel="noopener noreferrer"
         >apoena</a
       >
+      <button
+        class="btn btn-ghost btn-circle btn-sm profile-btn"
+        onclick="profile_modal.showModal()"
+      >
+        <img
+          v-if="isATProtoLoggedIn && avatarUrl"
+          :src="avatarUrl"
+          class="profile-avatar"
+          alt="Profile"
+        />
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+          <path d="M6 20c0 -2.21 2.686 -4 6 -4s6 1.79 6 4" />
+        </svg>
+      </button>
       <router-link
         :to="{
           name: 'FluxNoteView',
-          params: { user: 'remanso-space', repo: 'getting-started' },
+          params: { user: 'remanso-space', repo: 'getting-started' }
         }"
         class="btn btn-sm"
         >Get started</router-link
       >
     </footer>
+
+    <dialog id="profile_modal" class="modal">
+      <div class="modal-box profile-modal-box">
+        <h3 class="text-lg font-bold">Profile</h3>
+        <div class="profile-section">
+          <sign-in-atproto :with-sign-out="true" />
+        </div>
+        <div class="divider"></div>
+        <div class="profile-section">
+          <sign-in-github />
+          <router-link
+            v-if="isLogged"
+            :to="{ name: 'RepoList' }"
+            class="btn btn-sm"
+            >Manage your repos</router-link
+          >
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button></button>
+      </form>
+    </dialog>
   </div>
 </template>
 
@@ -100,26 +144,26 @@ h1 {
 }
 
 .welcome-world {
-  padding: 1rem;
   margin: auto;
   display: flex;
   flex: 1;
+  align-self: stretch;
   flex-direction: column;
-  justify-content: space-between;
-
-  .get-started {
-    margin: center;
-    text-align: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-  }
+  gap: 1rem;
 
   .title {
     text-align: center;
   }
 }
+
+.welcome-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 0.5rem;
+}
+
 .github-form {
   display: flex;
   align-items: center;
@@ -129,15 +173,33 @@ h1 {
     max-width: 140px;
   }
 }
+
 footer {
   display: flex;
-  gap: 1rem;
+  gap: 0.2rem;
   align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem;
+}
 
-  img {
-    vertical-align: middle;
-    margin-top: 0;
-  }
+.profile-avatar {
+  max-width: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: none;
+}
+
+.profile-modal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .to-user-repo {

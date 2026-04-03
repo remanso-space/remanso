@@ -26,8 +26,8 @@ const getStyle = (seed: string) => {
         name: 'FluxNoteView',
         params: {
           user: username,
-          repo: favoriteRepo.name,
-        },
+          repo: favoriteRepo.name
+        }
       }"
       class="btn"
       :style="getStyle(`${favoriteRepo.name}-${username}`)"
@@ -40,6 +40,7 @@ const getStyle = (seed: string) => {
 <style scoped lang="scss">
 .repo-list {
   display: flex;
+  justify-content: space-evenly;
   gap: 1rem;
   flex-wrap: wrap;
 

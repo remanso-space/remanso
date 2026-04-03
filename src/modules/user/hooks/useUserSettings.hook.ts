@@ -12,10 +12,15 @@ export const useUserSettings = () => {
   watchEffect(() => {
     const root = document.documentElement
 
-    const fontFamily = store.userSettings?.chosenFontFamily
     const fontSize = store.userSettings?.chosenFontSize
+    const bodyFont = store.userSettings?.chosenBodyFont
+    const titleFont = store.userSettings?.chosenTitleFont
 
-    downloadFont(fontFamily || DEFAULT_FONT_POLICY)
+    downloadFont(bodyFont || DEFAULT_FONT_POLICY, "--font-family")
+    downloadFont(
+      titleFont || bodyFont || DEFAULT_FONT_POLICY,
+      "--title-font-family"
+    )
     root.style.setProperty("--font-size", fontSize || DEFAULT_FONT_SIZE)
   })
 }

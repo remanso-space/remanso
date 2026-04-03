@@ -6,7 +6,7 @@ export const displayLanguage = (langCode?: string): string | null => {
   try {
     const locale = navigator.language ?? langCode
     const display = new Intl.DisplayNames([locale], {
-      type: "language",
+      type: "language"
     })
 
     return display.of(langCode) ?? null

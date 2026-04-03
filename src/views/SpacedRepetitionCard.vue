@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import FluxNote from '@/components/FluxNote.vue'
-import FlipCardList from '@/modules/card/components/FlipCardList.vue'
-import { useSpacedRepetitionCards } from '@/modules/card/hooks/useSpacedRepetitionCards'
+import FluxNote from "@/components/FluxNote.vue"
+import FlipCardList from "@/modules/card/components/FlipCardList.vue"
+import { useSpacedRepetitionCards } from "@/modules/card/hooks/useSpacedRepetitionCards"
 
 defineProps<{
   user: string

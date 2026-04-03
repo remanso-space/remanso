@@ -5,6 +5,7 @@
 
 import { readFileSync, writeFileSync } from "fs"
 import { join } from "path"
+
 import { commitTheme } from "./change-theme"
 
 // Chemins vers les fichiers
@@ -29,7 +30,7 @@ let themeConfigContent = readFileSync(themeConfigPath, "utf8")
 // Remplacer la valeur du thème clair
 themeConfigContent = themeConfigContent.replace(
   /light:\s*['"][^'"]*['"],/,
-  `light: '${newTheme}',`,
+  `light: '${newTheme}',`
 )
 
 // Écrire le contenu mis à jour dans le fichier
@@ -39,7 +40,7 @@ writeFileSync(themeConfigPath, themeConfigContent)
 let indexContent = readFileSync(indexPath, "utf8")
 indexContent = indexContent.replace(
   /data-theme="[^"]*"/,
-  `data-theme="${newTheme}"`,
+  `data-theme="${newTheme}"`
 )
 writeFileSync(indexPath, indexContent)
 
@@ -47,7 +48,7 @@ writeFileSync(indexPath, indexContent)
 let appCssContent = readFileSync(appCssPath, "utf8")
 appCssContent = appCssContent.replace(
   /(\s+)([a-zA-Z0-9-]+)(\s+--default,)/,
-  `$1${newTheme}$3`,
+  `$1${newTheme}$3`
 )
 writeFileSync(appCssPath, appCssContent)
 

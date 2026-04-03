@@ -1,10 +1,10 @@
-import { useAsyncState } from '@vueuse/core'
-import { ComputedRef, onUnmounted, toValue } from 'vue'
+import { useAsyncState } from "@vueuse/core"
+import { ComputedRef, onUnmounted, toValue } from "vue"
 
-import { backlinkEventBus } from '@/bus/backlinkEventBus'
-import { data } from '@/data/data'
-import { DataType } from '@/data/DataType.enum'
-import { BacklinkNote } from '@/modules/note/models/BacklinkNote'
+import { backlinkEventBus } from "@/bus/backlinkEventBus"
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import { BacklinkNote } from "@/modules/note/models/BacklinkNote"
 
 export const useBacklinks = (sha: string | ComputedRef<string>) => {
   sha = toValue(sha)

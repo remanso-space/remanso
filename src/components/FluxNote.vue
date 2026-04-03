@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import {
   computed,
-  defineAsyncComponent,
   nextTick,
   onMounted,
   onUnmounted,
   toRefs,
-  watch,
+  watch
 } from "vue"
 
+import HeaderNote from "@/components/HeaderNote.vue"
+import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedNote from "@/components/StackedNote.vue"
 import { useLinks } from "@/hooks/useLinks.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
@@ -19,11 +20,6 @@ import { useVisitRepo } from "@/modules/history/hooks/useVisitRepo.hook"
 import CacheAllNotes from "@/modules/note/components/CacheAllNote.vue"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { useUserSettings } from "@/modules/user/hooks/useUserSettings.hook"
-import SkeletonLoader from "@/components/SkeletonLoader.vue"
-
-const HeaderNote = defineAsyncComponent(
-  () => import("@/components/HeaderNote.vue"),
-)
 
 const props = withDefaults(
   defineProps<{
@@ -38,8 +34,8 @@ const props = withDefaults(
     content: null,
     parseContent: true,
     withContent: true,
-    withHeader: true,
-  },
+    withHeader: true
+  }
 )
 
 const user = computed(() => props.user)
@@ -61,7 +57,7 @@ const renderedContent = computed(() =>
     ? props.parseContent
       ? toHTML(props.content)
       : props.content
-    : store.readme,
+    : store.readme
 )
 
 const isLoading = computed(() => renderedContent.value === undefined)
@@ -73,7 +69,7 @@ watch(
     await nextTick()
     listenToClick()
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 watch(
@@ -81,7 +77,7 @@ watch(
   () => {
     store.setUserRepo(props.user, props.repo)
   },
-  { immediate: true },
+  { immediate: true }
 )
 
 onMounted(() => visitRepo())

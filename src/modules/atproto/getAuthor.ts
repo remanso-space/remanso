@@ -1,4 +1,4 @@
-import { createSchema, createFetch } from "@better-fetch/fetch"
+import { createFetch, createSchema } from "@better-fetch/fetch"
 import { type } from "arktype"
 
 export type Author = { handle: string; pds: string }
@@ -12,20 +12,20 @@ const schema = createSchema(
         did: "string",
         handle: "string",
         pds: "string",
-        signing_key: "string",
+        signing_key: "string"
       }),
       query: type({
-        identifier: "string",
-      }),
-    },
+        identifier: "string"
+      })
+    }
   },
-  { strict: true },
+  { strict: true }
 )
 
 const microcosmSlingshot = createFetch({
   baseURL: "https://slingshot.microcosm.blue",
   // plugins: [logger()],
-  schema,
+  schema
 })
 
 export const getAuthor = async (did: string): Promise<Author | null> => {
@@ -36,7 +36,7 @@ export const getAuthor = async (did: string): Promise<Author | null> => {
   try {
     const { data: author } = await microcosmSlingshot(
       "/xrpc/blue.microcosm.identity.resolveMiniDoc",
-      { query: { identifier: did } },
+      { query: { identifier: did } }
     )
 
     if (!author) {
@@ -62,7 +62,7 @@ export const getAuthors = async (dids: Set<string>) => {
 
       const { data: author } = await microcosmSlingshot(
         "/xrpc/blue.microcosm.identity.resolveMiniDoc",
-        { query: { identifier: did } },
+        { query: { identifier: did } }
       )
 
       if (!author) {
@@ -72,7 +72,7 @@ export const getAuthors = async (dids: Set<string>) => {
       correspondanceCache.set(did, author)
 
       return [did, author] as [string, Author | null]
-    }),
+    })
   )
 
   return new Map(correspondance)

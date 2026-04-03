@@ -1,17 +1,17 @@
 import { ComputedRef, onUnmounted, Ref, toValue } from "vue"
 
-import { isExternalLink } from "@/utils/link"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { parseAtUri } from "@/modules/atproto/parseAtUri"
 import { toShortDid } from "@/modules/atproto/shortDid"
 import { router } from "@/router/router"
+import { isExternalLink } from "@/utils/link"
 
 export const useATProtoLinks = (
   className: ComputedRef<string> | string,
   options: {
     currentAtUri?: Ref<string> | string | ComputedRef<string>
     mainNoteId: Ref<string> | string | ComputedRef<string>
-  },
+  }
 ) => {
   const { addStackedNote, scrollToFocusedNote } = useRouteQueryStackedNotes()
   const { currentAtUri, mainNoteId } = options
@@ -38,7 +38,7 @@ export const useATProtoLinks = (
 
     if (href.startsWith(window.location.origin)) {
       const { params } = router.resolve(
-        href.replace(window.location.origin, ""),
+        href.replace(window.location.origin, "")
       )
 
       if (!params.shortDid || !params.rkey) {
@@ -57,7 +57,7 @@ export const useATProtoLinks = (
       addStackedNote(
         toValue(currentAtUri) ?? "",
         noteId,
-        `${params.shortDid}-${params.rkey}`,
+        `${params.shortDid}-${params.rkey}`
       )
       return
     }
@@ -111,6 +111,6 @@ export const useATProtoLinks = (
   })
 
   return {
-    listenToClick,
+    listenToClick
   }
 }

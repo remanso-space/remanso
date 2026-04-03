@@ -5,7 +5,7 @@ import {
   nextTick,
   onMounted,
   ref,
-  watch,
+  watch
 } from "vue"
 
 import { useEditionMode } from "@/hooks/useEditionMode"
@@ -13,20 +13,20 @@ import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 import { useImages } from "@/hooks/useImages.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
+import { runMermaid, useShikiji } from "@/hooks/useMarkdown.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
-import { runMermaid, useShikiji } from "@/hooks/useMarkdown.hook"
 
 const LinkedNotes = defineAsyncComponent(
-  () => import("@/components/LinkedNotes.vue"),
+  () => import("@/components/LinkedNotes.vue")
 )
 
 const EditNote = defineAsyncComponent(
-  () => import("@/modules/note/components/EditNote.vue"),
+  () => import("@/modules/note/components/EditNote.vue")
 )
 
 const props = defineProps<{
@@ -50,7 +50,7 @@ const {
   rawContent,
   getRawContent,
   saveCacheNote,
-  getEditedSha,
+  getEditedSha
 } = useFile(sha)
 const initialRawContent = ref<string | null>(null)
 const className = computed(() => `stacked-note-${props.index}`)
@@ -67,7 +67,7 @@ const breadcrumbs = computed(() => displayedTitle.value.split(" / "))
 
 const { updateFile } = useGitHubContent({
   user: user.value,
-  repo: repo.value,
+  repo: repo.value
 })
 
 onMounted(async () => {
@@ -115,7 +115,7 @@ watch(mode, async (newMode) => {
   const newSha = await updateFile({
     content: rawContent.value,
     path: path.value,
-    sha: editedSha,
+    sha: editedSha
   })
 
   if (!newSha) {
@@ -125,7 +125,7 @@ watch(mode, async (newMode) => {
   }
 
   await saveCacheNote(encodeUTF8ToBase64(rawContent.value), {
-    editedSha: newSha,
+    editedSha: newSha
   })
   initialRawContent.value = rawContent.value
 })
@@ -137,7 +137,7 @@ watch(mode, async (newMode) => {
     :class="{
       [className]: true,
       overlay: displayNoteOverlay,
-      [`note-${sha}`]: true,
+      [`note-${sha}`]: true
     }"
   >
     <a
@@ -198,7 +198,9 @@ watch(mode, async (newMode) => {
           stroke-linejoin="round"
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+          <path
+            d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"
+          />
           <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
           <path d="M14 4l0 4l-6 0l0 -4" />
         </svg>

@@ -1,31 +1,62 @@
-import { computed, ref } from 'vue'
+import { computed, ref } from "vue"
 
-import { getAuthor } from '@/modules/atproto/getAuthor'
-import { restoreSession, sdkSignOut, signInWithHandle } from '@/modules/atproto/service/atprotoOAuth'
-import { clearSession, loadSession, saveSession } from '@/modules/atproto/service/atprotoSession'
+import { getAuthor } from "@/modules/atproto/getAuthor"
+import {
+  restoreSession,
+  sdkSignOut,
+  signInWithHandle
+} from "@/modules/atproto/service/atprotoOAuth"
+import {
+  clearSession,
+  loadSession,
+  saveSession
+} from "@/modules/atproto/service/atprotoSession"
 
 const did = ref<string | null>(null)
 const handle = ref<string | null>(null)
+const avatarUrl = ref<string | null>(null)
 
 let init = true
+
+const fetchAvatar = async (actorDid: string) => {
+  try {
+    const res = await fetch(
+      `https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor=${encodeURIComponent(actorDid)}`
+    )
+    if (res.ok) {
+      const data = await res.json()
+      avatarUrl.value = data.avatar ?? null
+    }
+  } catch {
+    avatarUrl.value = null
+  }
+}
 
 const initializeAuth = async () => {
   // Load cached session from IndexedDB first (fast, local) so the UI can render immediately
   const stored = await loadSession()
-  did.value = stored?.did ?? ''
-  handle.value = stored?.handle ?? ''
+  did.value = stored?.did ?? ""
+  handle.value = stored?.handle ?? ""
+  if (stored?.did) {
+    fetchAvatar(stored.did)
+  }
 
   // Then restore OAuth session in the background (may involve network)
   const session = await restoreSession()
   if (session) {
     const author = await getAuthor(session.did)
-    const resolvedHandle = author?.handle ?? ''
+    const resolvedHandle = author?.handle ?? ""
 
     did.value = session.did
     handle.value = resolvedHandle
     await saveSession(session.did, resolvedHandle)
+    fetchAvatar(session.did)
 
-    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.search
+    )
   }
 }
 
@@ -47,16 +78,18 @@ export const useATProtoLogin = () => {
       await sdkSignOut(did.value)
     }
     await clearSession()
-    did.value = ''
-    handle.value = ''
+    did.value = ""
+    handle.value = ""
+    avatarUrl.value = null
   }
 
   return {
     did,
     handle,
+    avatarUrl,
     isLoggedIn,
     isATProtoReady,
     signIn,
-    signOut,
+    signOut
   }
 }

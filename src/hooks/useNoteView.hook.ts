@@ -21,13 +21,13 @@ export const useNoteView = () => {
       obj[note] = pathToNotePathTitle(filePath)
 
       return obj
-    }, {}),
+    }, {})
   )
 
   const unsubscribeLink = noteEventBus.addEventBusListener(
     ({ path, currentNoteSHA }) => {
       const currentFile = store.files.find(
-        (file) => file.sha === currentNoteSHA,
+        (file) => file.sha === currentNoteSHA
       )
 
       const absolutePath = resolvePath(currentFile?.path ?? "", path)
@@ -39,7 +39,7 @@ export const useNoteView = () => {
       }
 
       addStackedNote(currentNoteSHA ?? "", file.sha)
-    },
+    }
   )
 
   onUnmounted(() => {
@@ -47,6 +47,6 @@ export const useNoteView = () => {
   })
 
   return {
-    titles,
+    titles
   }
 }

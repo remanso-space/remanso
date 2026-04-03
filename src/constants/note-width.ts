@@ -4,8 +4,8 @@ export const getNoteWidth = () => {
   if (cached === undefined) {
     cached = parseInt(
       getComputedStyle(document.documentElement).getPropertyValue(
-        "--note-width",
-      ),
+        "--note-width"
+      )
     )
   }
   return cached

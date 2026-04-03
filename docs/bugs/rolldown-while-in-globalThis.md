@@ -9,28 +9,27 @@ Rolldown's minifier drops the `while(`/`for(;` keyword when a `while (x in globa
 
 ## Target repositories
 
-- https://github.com/rolldown/rolldown/issues
-- https://github.com/oxc-project/oxc/issues (underlying minifier)
+- <https://github.com/rolldown/rolldown/issues>
+- <https://github.com/oxc-project/oxc/issues> (underlying minifier)
 
 ## Environment
 
-| Package | Version |
-|---|---|
-| `vite` | 8.0.1 |
-| `rolldown` | 1.0.0-rc.10 |
-| `@oxc-project/types` | 0.120.0 |
-| Triggered by | `@ark/schema` 0.56.0 / `arktype` 2.1.29 |
+| Package              | Version                                 |
+| -------------------- | --------------------------------------- |
+| `vite`               | 8.0.1                                   |
+| `rolldown`           | 1.0.0-rc.10                             |
+| `@oxc-project/types` | 0.120.0                                 |
+| Triggered by         | `@ark/schema` 0.56.0 / `arktype` 2.1.29 |
 
 ## Source
 
 File: `node_modules/@ark/schema/out/shared/registry.js`
 
 ```js
-let _registryName = "$ark";
-let suffix = 2;
-while (_registryName in globalThis)
-    _registryName = `$ark${suffix++}`;
-export const registryName = _registryName;
+let _registryName = "$ark"
+let suffix = 2
+while (_registryName in globalThis) _registryName = `$ark${suffix++}`
+export const registryName = _registryName
 ```
 
 ## Actual minified output
@@ -44,7 +43,10 @@ The `while(` keyword is missing. The orphaned `)` is a syntax error.
 ## Expected output
 
 ```js
-var dn=`$ark`,fn=2;for(;dn in globalThis;)dn=`$ark${fn++}`;var pn=dn;
+var dn = `$ark`,
+  fn = 2
+for (; dn in globalThis; ) dn = `$ark${fn++}`
+var pn = dn
 ```
 
 ## Impact
@@ -56,7 +58,7 @@ Chrome and Firefox appear to tolerate the malformed output.
 
 Direct Rolldown calls (even with the full `arktype` + `@better-fetch/fetch` bundle) do **not** reproduce the bug. It only manifests through Vite's full production build pipeline. This strongly suggests the issue is in the interaction between **Vite's module preprocessing** (dependency pre-bundling, plugin transforms, scope-flattening of ESM modules) and Rolldown's minifier `sequences` optimization pass.
 
-Hypothesis: Vite's pipeline produces a flattened scope where multiple `var` declarations from different original modules are consecutive. When the `sequences` optimizer then tries to fold those `var` declarations into the `for` loop init, it incorrectly drops the `for(var ` prefix when the loop condition contains the `in` operator.
+Hypothesis: Vite's pipeline produces a flattened scope where multiple `var` declarations from different original modules are consecutive. When the `sequences` optimizer then tries to fold those `var` declarations into the `for` loop init, it incorrectly drops the `for(var` prefix when the loop condition contains the `in` operator.
 
 ## Notes
 

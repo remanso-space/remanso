@@ -6,7 +6,7 @@ import { getOctokit } from "@/modules/repo/services/octo"
 
 export const getFiles = async (
   owner: string,
-  repo: string,
+  repo: string
 ): Promise<RepoFile[]> => {
   if (!owner || !repo) {
     return []
@@ -15,7 +15,7 @@ export const getFiles = async (
 
   const commits = await octokit.request("GET /repos/{owner}/{repo}/commits", {
     owner,
-    repo,
+    repo
   })
 
   const lastCommit = commits.data.shift()
@@ -30,8 +30,8 @@ export const getFiles = async (
       owner,
       repo,
       tree_sha: lastCommit.commit.tree.sha,
-      recursive: "true",
-    },
+      recursive: "true"
+    }
   )
 
   return treeResponse?.data.tree.filter((t) => t.type === "blob") ?? []
@@ -60,7 +60,7 @@ export const getMainReadme = async (owner: string, repo: string) => {
 
   const { render } = markdownBuilder()
   const { getCachedNote, saveCacheNote } = prepareNoteCache(
-    `${owner}-${repo}-README`,
+    `${owner}-${repo}-README`
   )
 
   try {
@@ -68,7 +68,7 @@ export const getMainReadme = async (owner: string, repo: string) => {
 
     const README = await octokit.repos.getReadme({
       owner,
-      repo,
+      repo
     })
 
     if (README) {
@@ -90,7 +90,7 @@ export const getMainReadme = async (owner: string, repo: string) => {
 export const getUserSettingsContent = async (
   user: string,
   repo: string,
-  files: RepoFile[],
+  files: RepoFile[]
 ): Promise<Omit<UserSettings, "chosenFontFamily"> | null> => {
   const configFile = files.find((file) => file.path === ".remanso.json")
 
@@ -104,13 +104,22 @@ export const getUserSettingsContent = async (
     return null
   }
 
-  return JSON.parse(atob(content)) as UserSettings
+  const raw = JSON.parse(atob(content)) as UserSettings & {
+    t?: string
+    p?: string
+  }
+  const { t, p, ...rest } = raw
+  return {
+    ...rest,
+    chosenTitleFont: t,
+    chosenBodyFont: p
+  }
 }
 
 export const queryFileContent = async (
   user: string,
   repo: string,
-  sha: string,
+  sha: string
 ) => {
   const octokit = await getOctokit()
 
@@ -123,8 +132,8 @@ export const queryFileContent = async (
     {
       owner: user,
       repo: repo,
-      file_sha: sha,
-    },
+      file_sha: sha
+    }
   )
 
   return file?.data.content ?? null

@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { computedAsync } from "@vueuse/core"
+import { computed } from "vue"
+
 import HomeButton from "@/components/HomeButton.vue"
 import PublicNoteList from "@/components/PublicNoteList.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
 import { fromShortDid } from "@/modules/atproto/shortDid"
-import { computedAsync } from "@vueuse/core"
-import { computed } from "vue"
 
 const props = defineProps<{ shortDid: string }>()
 const did = computed(() => fromShortDid(props.shortDid))

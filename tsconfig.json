@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "types": ["node", "vite/client", "vite-plugin-pwa/vue"],
     "paths": {

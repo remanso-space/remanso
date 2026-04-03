@@ -6,7 +6,10 @@ const assembleFontLink = (font: string) => {
     .replaceAll(" ", "+")}`
 }
 
-export const downloadFont = async (font: string): Promise<void> => {
+export const downloadFont = async (
+  font: string,
+  cssVar = "--font-family"
+): Promise<void> => {
   const href = assembleFontLink(font)
 
   // check if the href already exists
@@ -23,7 +26,7 @@ export const downloadFont = async (font: string): Promise<void> => {
   try {
     await new FontFaceObserver(font).load()
 
-    document.documentElement.style.setProperty("--font-family", font)
+    document.documentElement.style.setProperty(cssVar, font)
   } catch (error) {
     console.warn("error when loading font")
   }

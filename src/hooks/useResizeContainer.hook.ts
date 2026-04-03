@@ -1,17 +1,17 @@
-import { onMounted, watch, type Ref } from "vue"
+import { onMounted, type Ref, watch } from "vue"
 
 import { getNoteWidth } from "@/constants/note-width"
 import { useOverlay } from "@/hooks/useOverlay.hook"
 
 export const useResizeContainer = (
   containerClass: string,
-  stackedNotes: Readonly<Ref<readonly string[]>>,
+  stackedNotes: Readonly<Ref<readonly string[]>>
 ) => {
   const { isMobile } = useOverlay(false)
 
   const resizeContainer = () => {
     const container = document.querySelector(
-      `.${containerClass}`,
+      `.${containerClass}`
     ) as HTMLElement | null
 
     if (!container) {
@@ -32,6 +32,6 @@ export const useResizeContainer = (
   })
 
   watch(stackedNotes, resizeContainer, {
-    immediate: true,
+    immediate: true
   })
 }

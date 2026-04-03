@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AuthorizeUser from '@/components/AuthorizeUser.vue'
-import WelcomeWorld from '@/components/WelcomeWorld.vue'
+import AuthorizeUser from "@/components/AuthorizeUser.vue"
+import WelcomeWorld from "@/components/WelcomeWorld.vue"
 </script>
 
 <template>
@@ -16,6 +16,7 @@ import WelcomeWorld from '@/components/WelcomeWorld.vue'
   flex: 1;
   flex-direction: column;
   align-items: center;
+  height: 100dvh;
 }
 
 .authorize {

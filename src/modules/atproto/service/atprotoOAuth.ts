@@ -1,6 +1,6 @@
 import {
   BrowserOAuthClient,
-  buildLoopbackClientId,
+  buildLoopbackClientId
 } from "@atproto/oauth-client-browser"
 
 const getClientId = () =>
@@ -14,7 +14,7 @@ export const getOAuthClient = (): Promise<BrowserOAuthClient> => {
   if (!clientPromise) {
     clientPromise = BrowserOAuthClient.load({
       clientId: getClientId(),
-      handleResolver: "https://bsky.social",
+      handleResolver: "https://bsky.social"
     })
   }
   return clientPromise

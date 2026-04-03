@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref } from "vue"
 
-import FlipCard from '@/modules/card/components/FlipCard.vue'
-import { Repetition } from '@/modules/card/hooks/useSpacedRepetitionCards'
+import FlipCard from "@/modules/card/components/FlipCard.vue"
+import { Repetition } from "@/modules/card/hooks/useSpacedRepetitionCards"
 
 const props = defineProps<{ cards: Repetition[] }>()
 const emits = defineEmits<{
@@ -22,24 +22,24 @@ const sortedCards = ref(
 const currentIndex = ref(0)
 
 const goToNextCard = (success: boolean) => {
-  const id = sortedCards.value[currentIndex.value].repetition._id ?? ''
+  const id = sortedCards.value[currentIndex.value].repetition._id ?? ""
 
   if (success) {
-    emits('success', id)
+    emits("success", id)
   } else {
     const failedCard = sortedCards.value.at(currentIndex.value)
     if (failedCard) {
       sortedCards.value.push(failedCard)
     }
-    emits('fail', id)
+    emits("fail", id)
   }
 
   currentIndex.value++
 }
 
 const needsReview = () => {
-  const id = sortedCards.value[currentIndex.value].repetition._id ?? ''
-  emits('needsReview', id)
+  const id = sortedCards.value[currentIndex.value].repetition._id ?? ""
+  emits("needsReview", id)
   currentIndex.value++
 }
 </script>

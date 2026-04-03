@@ -1,6 +1,6 @@
-import { Ref, ref, watch } from 'vue'
+import { Ref, ref, watch } from "vue"
 
-import { getFollows } from '@/modules/atproto/service/getFollows'
+import { getFollows } from "@/modules/atproto/service/getFollows"
 
 export const useFollows = (did: Ref<string | null>) => {
   const follows = ref<Set<string>>(new Set())
@@ -14,7 +14,7 @@ export const useFollows = (did: Ref<string | null>) => {
         follows.value = new Set()
       }
     },
-    { immediate: true },
+    { immediate: true }
   )
 
   return { follows }

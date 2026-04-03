@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-const url = new URL('https://github.com/login/oauth/authorize')
-url.searchParams.append('client_id', 'Iv1.87be14adcc912fa0')
-url.searchParams.append('redirect_uri', location.href)
-url.searchParams.append('scope', 'repo')
+const url = new URL("https://github.com/login/oauth/authorize")
+url.searchParams.append("client_id", "Iv1.87be14adcc912fa0")
+url.searchParams.append("redirect_uri", location.href)
+url.searchParams.append("scope", "repo")
 </script>
 
 <template>

@@ -1,18 +1,19 @@
 <script lang="ts" setup>
+import { computedAsync } from "@vueuse/core"
 import { computed, nextTick, ref, watch } from "vue"
 import { useRoute } from "vue-router"
-import { errorMessage } from "@/utils/notif"
+
+import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
+import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
-import { computedAsync } from "@vueuse/core"
-import { getUrl } from "@/modules/atproto/getUrl"
-import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
 import { getAuthor } from "@/modules/atproto/getAuthor"
-import { fromShortDid } from "@/modules/atproto/shortDid"
+import { getUrl } from "@/modules/atproto/getUrl"
 import { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
-import SkeletonLoader from "@/components/SkeletonLoader.vue"
+import { fromShortDid } from "@/modules/atproto/shortDid"
+import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
+import { errorMessage } from "@/utils/notif"
 
 const props = defineProps<{
   didrkey: string
@@ -28,7 +29,7 @@ const index = computed(() => props.index)
 
 const author = computedAsync(async () => getAuthor(did.value))
 const url = computedAsync(async () =>
-  getUrl({ did: did.value, rkey: rkey.value }),
+  getUrl({ did: did.value, rkey: rkey.value })
 )
 
 const className = computed(() => `stacked-note-${props.index}`)
@@ -36,13 +37,13 @@ const titleClassName = computed(() => `title-${className.value}`)
 
 const route = useRoute()
 const mainNoteId = computed(
-  () => `${route.params.shortDid}-${route.params.rkey}`,
+  () => `${route.params.shortDid}-${route.params.rkey}`
 )
 
 const { scrollToFocusedNote } = useRouteQueryStackedNotes()
 const { listenToClick } = useATProtoLinks(className.value, {
   currentAtUri: didrkey,
-  mainNoteId,
+  mainNoteId
 })
 const { displayNoteOverlay } = useNoteOverlay(className.value, index)
 
@@ -69,10 +70,10 @@ const content = computed(() =>
     ? toHTML(
         withATProtoImages(noteRecord.value.value.content, {
           pds: author.value.pds,
-          did: did.value,
-        }),
+          did: did.value
+        })
       )
-    : "",
+    : ""
 )
 
 watch(
@@ -81,7 +82,7 @@ watch(
     await nextTick()
     listenToClick()
   },
-  { immediate: true },
+  { immediate: true }
 )
 </script>
 
@@ -91,7 +92,7 @@ watch(
     :class="{
       [className]: true,
       overlay: displayNoteOverlay,
-      [`note-${classNameId}`]: true,
+      [`note-${classNameId}`]: true
     }"
   >
     <a

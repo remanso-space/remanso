@@ -17,7 +17,7 @@ const { isATProtoReady } = useATProtoLogin()
 
 <style lang="scss">
 #main-app {
-  height: 100vh;
+  height: 100dvh;
   width: 100%;
   display: flex;
   flex: 1;
