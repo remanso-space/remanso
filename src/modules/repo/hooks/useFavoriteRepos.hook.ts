@@ -1,6 +1,6 @@
 import { computed, onMounted, ref } from "vue"
 
-import { data } from "@/data/data"
+import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { useRepos } from "@/hooks/useRepos.hook"
 import { RepoBase } from "@/modules/repo/interfaces/RepoBase"
@@ -27,7 +27,7 @@ export const useFavoriteRepos = () => {
 
   const toggleFavorite = async (repo: RepoBase, isFavorite: boolean) => {
     const favorite: FavoriteRepo = {
-      _id: data.generateId(DataType.FavoriteRepo, repo.id),
+      _id: generateId(DataType.FavoriteRepo, repo.id),
       $type: DataType.FavoriteRepo,
       isFavorite,
       name: repo.name,

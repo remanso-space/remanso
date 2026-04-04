@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 
-import { data } from "@/data/data"
+import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { RepoFile } from "@/modules/repo/interfaces/RepoFile"
 import { UserSettings } from "@/modules/repo/interfaces/UserSettings"
@@ -39,7 +39,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       this.user = user
       this.repo = repo
 
-      const savedRepoId = data.generateId(DataType.SavedRepo, `${user}-${repo}`)
+      const savedRepoId = generateId(DataType.SavedRepo, `${user}-${repo}`)
       const userSettingsId = `UserSetting-${user}-${repo}`
 
       const [cachedSavedRepo, cachedUserSettings] = await Promise.all([
@@ -131,7 +131,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         return
       }
 
-      const savedRepoId = data.generateId(
+      const savedRepoId = generateId(
         DataType.SavedRepo,
         `${this.user}-${this.repo}`
       )

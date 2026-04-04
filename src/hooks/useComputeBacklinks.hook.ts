@@ -1,7 +1,7 @@
 import { watch } from "vue"
 
 import { backlinkEventBus } from "@/bus/backlinkEventBus"
-import { data } from "@/data/data"
+import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { useFile } from "@/hooks/useFile.hook"
 import { Backlink } from "@/modules/note/models/Backlink"
@@ -42,7 +42,7 @@ export const useComputeBacklinks = () => {
           continue
         }
 
-        const fileBacklinkId = data.generateId(DataType.BacklinkNote, file.sha)
+        const fileBacklinkId = generateId(DataType.BacklinkNote, file.sha)
         const fileBacklink = await data.get<DataType.BacklinkNote, BacklinkNote>(
           fileBacklinkId
         )
@@ -102,7 +102,7 @@ export const useComputeBacklinks = () => {
       }
 
       for (const [sha, fileBacklinks] of backlinks) {
-        const fileBacklinkId = data.generateId(DataType.BacklinkNote, sha)
+        const fileBacklinkId = generateId(DataType.BacklinkNote, sha)
         const backlinkNote: BacklinkNote = {
           _id: fileBacklinkId,
           $type: DataType.BacklinkNote,

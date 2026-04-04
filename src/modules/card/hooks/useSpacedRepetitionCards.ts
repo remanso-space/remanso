@@ -4,7 +4,7 @@ import { useAsyncState } from "@vueuse/core"
 import { addDays, isAfter } from "date-fns"
 import { computed, nextTick, watch } from "vue"
 
-import { data } from "@/data/data"
+import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { useFile } from "@/hooks/useFile.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
@@ -51,7 +51,7 @@ export const useSpacedRepetitionCards = () => {
         const repetition = await data.getOrCreate<
           DataType.RepetitionCard,
           RepetitionCard
-        >(data.generateId(DataType.RepetitionCard, cardFile.path), {
+        >(generateId(DataType.RepetitionCard, cardFile.path), {
           $type: DataType.RepetitionCard,
           level: 1,
           repeatDate: new Date(),

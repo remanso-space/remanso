@@ -1,7 +1,7 @@
 import { useAsyncState } from "@vueuse/core"
 import { computed, ref } from "vue"
 
-import { data } from "@/data/data"
+import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { prepareNoteCache } from "@/modules/note/cache/prepareNoteCache"
 import { Note } from "@/modules/note/models/Note"
@@ -36,7 +36,7 @@ export const useOfflineNotes = () => {
 
       if (
         !file.sha ||
-        cachedNotesSet.has(data.generateId(DataType.Note, file.sha))
+        cachedNotesSet.has(generateId(DataType.Note, file.sha))
       ) {
         continue
       }

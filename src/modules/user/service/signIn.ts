@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest"
 import { addMinutes, addSeconds, isBefore } from "date-fns"
 
-import { data } from "@/data/data"
+import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { GithubAccessToken } from "@/data/models/GithubAccessToken"
 import { GithubToken } from "@/modules/user/interfaces/GithubToken"
@@ -26,7 +26,7 @@ export const needToRefreshToken = async () => {
   const accessToken = await data.get<
     DataType.GithubAccessToken,
     GithubAccessToken
-  >(data.generateId(DataType.GithubAccessToken, personalTokenId))
+  >(generateId(DataType.GithubAccessToken, personalTokenId))
 
   if (!accessToken) {
     return false
@@ -42,7 +42,7 @@ export const refreshToken = async () => {
   const accessToken = await data.get<
     DataType.GithubAccessToken,
     GithubAccessToken
-  >(data.generateId(DataType.GithubAccessToken, personalTokenId))
+  >(generateId(DataType.GithubAccessToken, personalTokenId))
 
   if (!accessToken) {
     return null
@@ -74,7 +74,7 @@ export const getAccessToken = async () => {
   const response = await data.get<
     DataType.GithubAccessToken,
     GithubAccessToken
-  >(data.generateId(DataType.GithubAccessToken, personalTokenId))
+  >(generateId(DataType.GithubAccessToken, personalTokenId))
 
   return response
 }
@@ -94,7 +94,7 @@ export const saveAccessToken = async (githubToken: GithubToken) => {
 
   const accessToken: GithubAccessToken = {
     ...actualPAT,
-    _id: data.generateId(DataType.GithubAccessToken, personalTokenId),
+    _id: generateId(DataType.GithubAccessToken, personalTokenId),
     $type: DataType.GithubAccessToken,
     token: githubToken.access_token,
     expiresIn: githubToken.expires_in,
