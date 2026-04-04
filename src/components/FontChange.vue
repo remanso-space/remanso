@@ -15,8 +15,8 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
 </script>
 
 <template>
-  <div class="font-change" v-if="sortedFontFamilies.length > 0">
-    <div>
+  <div class="font-change">
+    <div v-if="sortedFontFamilies.length > 0">
       <label for="title-font" class="font-label">t</label>
       <select
         id="title-font"
