@@ -95,10 +95,10 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             this.userSettings?.chosenBodyFont ??
             userSettings?.chosenBodyFont ??
             chosenFontFamily
-          this.userSettings = userSettings
-
-          if (!this.userSettings) {
-            return
+          if (userSettings) {
+            this.userSettings = userSettings
+          } else if (!this.userSettings) {
+            this.userSettings = { $type: DataType.UserSettings }
           }
 
           this.userSettings.chosenFontFamily =
