@@ -14,93 +14,105 @@ import { confirmMessage } from "@/utils/notif"
 
 const isMarkdown = (filename?: string) => filename?.endsWith(".md") ?? false
 
+const yieldToMain = () =>
+  "scheduler" in globalThis
+    ? (globalThis as unknown as { scheduler: { yield: () => Promise<void> } }).scheduler.yield()
+    : new Promise<void>((r) => setTimeout(r, 0))
+
 export const useComputeBacklinks = () => {
   const store = useUserRepoStore()
 
-  watch(store, async () => {
-    if (!store.userSettings?.backlink) {
-      return
-    }
+  watch(
+    () => store.files,
+    async () => {
+      await new Promise<void>((r) => setTimeout(r, 300))
 
-    let notifiedForComputation = false
-
-    const backlinks: Map<string, Backlink[]> = new Map()
-
-    for (const file of store.files) {
-      if (!isMarkdown(file.path) || !file.sha) {
-        continue
-      }
-
-      const fileBacklinkId = data.generateId(DataType.BacklinkNote, file.sha)
-      const fileBacklink = await data.get<DataType.BacklinkNote, BacklinkNote>(
-        fileBacklinkId
-      )
-      if (fileBacklink) {
-        continue
-      }
-
-      if (!backlinks.has(file.sha)) {
-        backlinks.set(file.sha, [])
-      }
-
-      const { getContent } = useFile(file.sha, false)
-      const note = await getContent()
-
-      if (!note) {
+      if (!store.userSettings?.backlink) {
         return
       }
 
-      const parser = new DOMParser()
-      const htmlDoc = parser.parseFromString(note, "text/html")
+      let notifiedForComputation = false
 
-      const links = htmlDoc.querySelectorAll("a")
+      const backlinks: Map<string, Backlink[]> = new Map()
 
-      for (const link of links) {
-        const href = link.getAttribute("href") ?? ""
+      for (const file of store.files) {
+        await yieldToMain()
 
-        if (isExternalLink(href) || !isMarkdown(href)) {
+        if (!isMarkdown(file.path) || !file.sha) {
           continue
         }
 
-        const path = resolvePath(file.path ?? "", href)
-        const backlinkFile = store.files.find((file) => file.path === path)
-
-        if (!backlinkFile?.sha || !backlinkFile?.path) {
+        const fileBacklinkId = data.generateId(DataType.BacklinkNote, file.sha)
+        const fileBacklink = await data.get<DataType.BacklinkNote, BacklinkNote>(
+          fileBacklinkId
+        )
+        if (fileBacklink) {
           continue
         }
 
-        const previousBacklinks = backlinks.get(backlinkFile.sha) ?? []
-
-        if (previousBacklinks.find((bl) => bl.sha === file.sha)) {
-          continue
+        if (!backlinks.has(file.sha)) {
+          backlinks.set(file.sha, [])
         }
 
-        if (!notifiedForComputation) {
-          notifiedForComputation = true
-          confirmMessage("Updating backlinks...")
+        const { getContent } = useFile(file.sha, false)
+        const note = await getContent()
+
+        if (!note) {
+          return
         }
 
-        backlinks.set(backlinkFile.sha, [
-          ...previousBacklinks,
-          {
-            sha: file.sha,
-            title: filenameToNoteTitle(file.path ?? "")
+        const parser = new DOMParser()
+        const htmlDoc = parser.parseFromString(note, "text/html")
+
+        const links = htmlDoc.querySelectorAll("a")
+
+        for (const link of links) {
+          const href = link.getAttribute("href") ?? ""
+
+          if (isExternalLink(href) || !isMarkdown(href)) {
+            continue
           }
-        ])
+
+          const path = resolvePath(file.path ?? "", href)
+          const backlinkFile = store.files.find((file) => file.path === path)
+
+          if (!backlinkFile?.sha || !backlinkFile?.path) {
+            continue
+          }
+
+          const previousBacklinks = backlinks.get(backlinkFile.sha) ?? []
+
+          if (previousBacklinks.find((bl) => bl.sha === file.sha)) {
+            continue
+          }
+
+          if (!notifiedForComputation) {
+            notifiedForComputation = true
+            confirmMessage("Updating backlinks...")
+          }
+
+          backlinks.set(backlinkFile.sha, [
+            ...previousBacklinks,
+            {
+              sha: file.sha,
+              title: filenameToNoteTitle(file.path ?? "")
+            }
+          ])
+        }
+      }
+
+      for (const [sha, fileBacklinks] of backlinks) {
+        const fileBacklinkId = data.generateId(DataType.BacklinkNote, sha)
+        const backlinkNote: BacklinkNote = {
+          _id: fileBacklinkId,
+          $type: DataType.BacklinkNote,
+          sha: sha,
+          links: fileBacklinks
+        }
+
+        await data.update(backlinkNote)
+        backlinkEventBus.emit({ fileSha: sha })
       }
     }
-
-    for (const [sha, fileBacklinks] of backlinks) {
-      const fileBacklinkId = data.generateId(DataType.BacklinkNote, sha)
-      const backlinkNote: BacklinkNote = {
-        _id: fileBacklinkId,
-        $type: DataType.BacklinkNote,
-        sha: sha,
-        links: fileBacklinks
-      }
-
-      await data.update(backlinkNote)
-      backlinkEventBus.emit({ fileSha: sha })
-    }
-  })
+  )
 }
