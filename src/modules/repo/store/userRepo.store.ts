@@ -20,6 +20,7 @@ interface State {
   readme?: string | null
   userSettings?: UserSettings | null
   needToLogin: boolean
+  _requestId: number
 }
 
 export const useUserRepoStore = defineStore("USER_REPO_STATE", {
@@ -29,20 +30,31 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     files: [],
     readme: undefined,
     userSettings: undefined,
-    needToLogin: false
+    needToLogin: false,
+    _requestId: 0
   }),
   actions: {
     async setUserRepo(user: string, repo: string) {
+      const requestId = ++this._requestId
       this.user = user
       this.repo = repo
 
       const savedRepoId = data.generateId(DataType.SavedRepo, `${user}-${repo}`)
-      const cachedSavedRepo = await data.get<DataType.SavedRepo, SavedRepo>(
-        savedRepoId
-      )
+      const userSettingsId = `UserSetting-${user}-${repo}`
+
+      const [cachedSavedRepo, cachedUserSettings] = await Promise.all([
+        data.get<DataType.SavedRepo, SavedRepo>(savedRepoId),
+        data.get<DataType.UserSettings, UserSettings>(userSettingsId)
+      ])
+
+      if (requestId !== this._requestId) return
 
       if (cachedSavedRepo) {
         this.files = cachedSavedRepo.files
+      }
+
+      if (cachedUserSettings) {
+        this.userSettings = cachedUserSettings
       }
 
       try {
@@ -51,18 +63,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         console.warn("impossible to refresh token", error)
       }
 
-      const userSettingsId = `UserSetting-${user}-${repo}`
-      const cachedUserSettings = await data.get<
-        DataType.UserSettings,
-        UserSettings
-      >(userSettingsId)
-
-      if (cachedUserSettings) {
-        this.userSettings = cachedUserSettings
-      }
+      if (requestId !== this._requestId) return
 
       getFiles(user, repo)
         .then(async (files) => {
+          if (requestId !== this._requestId) return
           data.update<DataType.SavedRepo, SavedRepo>({
             _id: savedRepoId,
             $type: DataType.SavedRepo,
@@ -74,6 +79,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
           return getUserSettingsContent(user, repo, files)
         })
         .then((userSettings) => {
+          if (requestId !== this._requestId) return
           const chosenFontFamily = userSettings?.fontFamilies?.find(
             (font) => font === this.userSettings?.chosenFontFamily
           )
@@ -109,6 +115,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         })
 
       getCachedMainReadme(user, repo).then(async (cachedReadme) => {
+        if (requestId !== this._requestId) return
         this.readme = cachedReadme
         this.readme = await getMainReadme(user, repo)
       })
@@ -142,11 +149,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       this.user = ""
       this.repo = ""
       this.resetFiles()
+      this.userSettings = undefined
     },
     resetFiles() {
       this.files = []
       this.readme = null
-      this.userSettings = undefined
     },
     setFontFamily(fontFamily: string) {
       if (!this.userSettings) {
