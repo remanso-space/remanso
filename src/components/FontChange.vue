@@ -7,7 +7,21 @@ import { useUserRepoStore } from "../modules/repo/store/userRepo.store"
 
 const store = useUserRepoStore()
 
-const fontFamilies = computed(() => store.userSettings?.fontFamilies ?? [])
+const DEFAULT_FONT_FAMILIES = [
+  "EB Garamond",
+  "Inter",
+  "Lato",
+  "Libertinus Serif",
+  "Lora",
+  "Merriweather",
+  "Playfair Display",
+  "Roboto",
+  "Source Serif 4"
+]
+
+const fontFamilies = computed(
+  () => store.userSettings?.fontFamilies ?? DEFAULT_FONT_FAMILIES
+)
 const sortedFontFamilies = computed(() =>
   [...fontFamilies.value].sort((a, b) => a.localeCompare(b))
 )
@@ -16,7 +30,7 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
 
 <template>
   <div class="font-change">
-    <div v-if="sortedFontFamilies.length > 0">
+    <div>
       <label for="title-font" class="font-label">t</label>
       <select
         id="title-font"
