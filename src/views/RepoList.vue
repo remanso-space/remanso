@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { vInfiniteScroll } from "@vueuse/components"
+
 import GoBack from "@/components/GoBack.vue"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useRepos } from "@/hooks/useRepos.hook"
@@ -6,12 +8,15 @@ import { useRepoList } from "@/modules/repo/hooks/useRepoList.hook"
 
 const { username } = useGitHubLogin()
 const { isReady } = useRepos()
-const { favoriteRepos, otherRepos, favoriteCheckboxes, toggleCheckbox } =
+const { favoriteRepos, otherRepos, favoriteCheckboxes, toggleCheckbox, canLoadMore, loadMore } =
   useRepoList()
 </script>
 
 <template>
-  <div class="repo-list">
+  <div
+    class="repo-list"
+    v-infinite-scroll="[loadMore, { canLoadMore: () => canLoadMore }]"
+  >
     <h1 class="title is-1">Repositories</h1>
     <go-back />
     <div v-if="!isReady">loading...</div>

@@ -6,7 +6,7 @@ import { RepoBase } from "@/modules/repo/interfaces/RepoBase"
 
 export const useRepoList = () => {
   const { savedFavoriteRepos, addFavorite, removeFavorite } = useFavoriteRepos()
-  const { repos } = useRepos()
+  const { repos, canLoadMore, loadMore } = useRepos()
 
   const favoriteRepos = computed(() => {
     return repos.value.filter((repo) =>
@@ -38,6 +38,8 @@ export const useRepoList = () => {
     favoriteRepos,
     otherRepos,
     favoriteCheckboxes,
-    toggleCheckbox
+    toggleCheckbox,
+    canLoadMore,
+    loadMore
   }
 }
