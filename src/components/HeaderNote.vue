@@ -143,7 +143,7 @@ defineProps<{ user: string; repo: string }>()
       </svg>
     </router-link>
     <dialog id="font_modal" class="modal">
-      <div class="modal-box w-11/12 max-w-5xl">
+      <div class="modal-box w-10/12 max-w-2xl">
         <h3 class="text-lg font-bold">Style settings</h3>
         <font-change />
       </div>
