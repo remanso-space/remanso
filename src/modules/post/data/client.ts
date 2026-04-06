@@ -29,31 +29,19 @@ export const noteRouter = contract.router({
   noteLists: {
     method: "GET",
     path: "/notes",
-    query: type({
-      cursor: "string | undefined",
-      limit: "number | undefined"
-    }),
+    query: contract.type<{ cursor?: string; limit?: number }>(),
     responses: {
-      200: type({
-        notes: PublicNoteListItem.array()
-      })
+      200: contract.type<{ notes: PublicNoteListItem[] }>()
     },
     summary: "List all notes"
   },
   noteListsByDid: {
     method: "GET",
     path: "/:did/notes",
-    pathParams: type({
-      did: "string"
-    }),
-    query: type({
-      cursor: "string | undefined",
-      limit: "number | undefined"
-    }),
+    pathParams: contract.type<{ did: string }>(),
+    query: contract.type<{ cursor?: string; limit?: number }>(),
     responses: {
-      200: type({
-        notes: PublicNoteListItem.array()
-      })
+      200: contract.type<{ notes: PublicNoteListItem[] }>()
     },
     summary: "List all notes"
   }

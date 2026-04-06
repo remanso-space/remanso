@@ -38,6 +38,12 @@ importers:
       '@toycode/markdown-it-class':
         specifier: ^1.2.4
         version: 1.2.4
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@22.15.24)(zod@3.25.76)
+      '@ts-rest/vue-query':
+        specifier: ^3.52.1
+        version: 3.52.1(@tanstack/vue-query@5.92.9(vue@3.5.18(typescript@5.9.3)))(@ts-rest/core@3.52.1(@types/node@22.15.24)(zod@3.25.76))(zod@3.25.76)
       '@vscode/markdown-it-katex':
         specifier: ^1.1.2
         version: 1.1.2
@@ -2111,6 +2117,27 @@ packages:
 
   '@toycode/markdown-it-class@1.2.4':
     resolution: {integrity: sha512-hA4gHBK8moObkOYdWTjhy1wYcYy0MJeM3JjSKbsXHRpRMvIKhk6Jm+t3bXsSScTdz/byWqQbs8YIwVYjHp+SlQ==}
+
+  '@ts-rest/core@3.52.1':
+    resolution: {integrity: sha512-tAjz7Kxq/grJodcTA1Anop4AVRDlD40fkksEV5Mmal88VoZeRKAG8oMHsDwdwPZz+B/zgnz0q2sF+cm5M7Bc7g==}
+    peerDependencies:
+      '@types/node': ^18.18.7 || >=20.8.4
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      zod:
+        optional: true
+
+  '@ts-rest/vue-query@3.52.1':
+    resolution: {integrity: sha512-89u7aS9LGDC7uNUC5CagWX1EB7vTwyXohYcizLi1D9v7MD/Cnu5OTQNf8SY3PuAK62RcFJXB2XZGsMAPC0svNw==}
+    peerDependencies:
+      '@tanstack/vue-query': ^4.0.0
+      '@ts-rest/core': ~3.52.0
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -8399,6 +8426,18 @@ snapshots:
       vue-demi: 0.14.10(vue@3.5.18(typescript@5.9.3))
 
   '@toycode/markdown-it-class@1.2.4': {}
+
+  '@ts-rest/core@3.52.1(@types/node@22.15.24)(zod@3.25.76)':
+    optionalDependencies:
+      '@types/node': 22.15.24
+      zod: 3.25.76
+
+  '@ts-rest/vue-query@3.52.1(@tanstack/vue-query@5.92.9(vue@3.5.18(typescript@5.9.3)))(@ts-rest/core@3.52.1(@types/node@22.15.24)(zod@3.25.76))(zod@3.25.76)':
+    dependencies:
+      '@tanstack/vue-query': 5.92.9(vue@3.5.18(typescript@5.9.3))
+      '@ts-rest/core': 3.52.1(@types/node@22.15.24)(zod@3.25.76)
+    optionalDependencies:
+      zod: 3.25.76
 
   '@tybys/wasm-util@0.10.1':
     dependencies:

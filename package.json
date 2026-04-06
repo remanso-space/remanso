@@ -28,6 +28,8 @@
     "@tailwindcss/postcss": "^4.1.16",
     "@tanstack/vue-query": "^5.92.9",
     "@toycode/markdown-it-class": "^1.2.4",
+    "@ts-rest/core": "^3.52.1",
+    "@ts-rest/vue-query": "^3.52.1",
     "@vscode/markdown-it-katex": "^1.1.2",
     "@vueuse/components": "^14.2.1",
     "@vueuse/core": "^13.6.0",
