@@ -34,10 +34,36 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     _requestId: 0
   }),
   actions: {
+    _persistFonts() {
+      if (!this.userSettings) return
+      try {
+        const { chosenTitleFont, chosenBodyFont, chosenFontSize, chosenFontFamily } =
+          this.userSettings
+        localStorage.setItem(
+          `remanso:fonts:${this.user}:${this.repo}`,
+          JSON.stringify({ chosenTitleFont, chosenBodyFont, chosenFontSize, chosenFontFamily })
+        )
+      } catch {
+        // ignore
+      }
+    },
     async setUserRepo(user: string, repo: string) {
       const requestId = ++this._requestId
       this.user = user
       this.repo = repo
+
+      let lsFonts: Partial<UserSettings> = {}
+      try {
+        const lsRaw = localStorage.getItem(`remanso:fonts:${user}:${repo}`)
+        if (lsRaw) lsFonts = JSON.parse(lsRaw)
+      } catch {
+        // ignore
+      }
+
+      if (Object.keys(lsFonts).length) {
+        if (!this.userSettings) this.userSettings = { $type: DataType.UserSettings }
+        Object.assign(this.userSettings, lsFonts)
+      }
 
       const savedRepoId = generateId(DataType.SavedRepo, `${user}-${repo}`)
       const userSettingsId = `UserSetting-${user}-${repo}`
@@ -54,7 +80,8 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       }
 
       if (cachedUserSettings) {
-        this.userSettings = cachedUserSettings
+        // localStorage font choices take priority over PouchDB cache
+        this.userSettings = { ...cachedUserSettings, ...lsFonts }
       }
 
       try {
@@ -157,10 +184,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     },
     setFontFamily(fontFamily: string) {
       if (!this.userSettings) {
-        return
+        this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenFontFamily = fontFamily
 
+      this._persistFonts()
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({
         ...this.userSettings,
@@ -169,10 +197,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     },
     setFontSize(fontSize: string) {
       if (!this.userSettings) {
-        return
+        this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenFontSize = fontSize
 
+      this._persistFonts()
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({
         ...this.userSettings,
@@ -181,10 +210,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     },
     setTitleFont(font: string) {
       if (!this.userSettings) {
-        return
+        this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenTitleFont = font
 
+      this._persistFonts()
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({
         ...this.userSettings,
@@ -193,10 +223,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     },
     setBodyFont(font: string) {
       if (!this.userSettings) {
-        return
+        this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenBodyFont = font
 
+      this._persistFonts()
       const userSettingsId = `UserSetting-${this.user}-${this.repo}`
       data.update<DataType.UserSettings, UserSettings>({
         ...this.userSettings,

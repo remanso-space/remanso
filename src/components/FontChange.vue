@@ -22,10 +22,28 @@ const DEFAULT_FONT_FAMILIES = [
 const fontFamilies = computed(
   () => store.userSettings?.fontFamilies ?? DEFAULT_FONT_FAMILIES
 )
-const sortedFontFamilies = computed(() =>
-  [...fontFamilies.value].sort((a, b) => a.localeCompare(b))
-)
+const sortedFontFamilies = computed(() => {
+  const base = fontFamilies.value
+  const extras = [
+    store.userSettings?.chosenTitleFont,
+    store.userSettings?.chosenBodyFont
+  ].filter((f): f is string => !!f && !base.includes(f))
+  return [...base, ...extras].sort((a, b) => a.localeCompare(b))
+})
 const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
+
+const titleFont = computed({
+  get: () => store.userSettings?.chosenTitleFont,
+  set: (value) => store.setTitleFont(value!)
+})
+const bodyFont = computed({
+  get: () => store.userSettings?.chosenBodyFont,
+  set: (value) => store.setBodyFont(value!)
+})
+const fontSize = computed({
+  get: () => store.userSettings?.chosenFontSize,
+  set: (value) => store.setFontSize(value!)
+})
 </script>
 
 <template>
@@ -35,8 +53,7 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
       <select
         id="title-font"
         class="select"
-        :value="store.userSettings?.chosenTitleFont"
-        @change="store.setTitleFont(($event.target as HTMLSelectElement).value)"
+        v-model="titleFont"
       >
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
@@ -47,8 +64,7 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
       <select
         id="body-font"
         class="select"
-        :value="store.userSettings?.chosenBodyFont"
-        @change="store.setBodyFont(($event.target as HTMLSelectElement).value)"
+        v-model="bodyFont"
       >
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
@@ -62,8 +78,7 @@ const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
       <select
         id="font-size"
         class="select"
-        :value="store.userSettings?.chosenFontSize"
-        @change="store.setFontSize(($event.target as HTMLSelectElement).value)"
+        v-model="fontSize"
       >
         <option v-for="size in fontSizes" :key="size" :value="size">
           {{ size }}
