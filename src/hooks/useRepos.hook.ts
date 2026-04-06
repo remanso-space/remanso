@@ -5,14 +5,16 @@ import { RepoBase } from "@/modules/repo/interfaces/RepoBase"
 import { getOctokit } from "@/modules/repo/services/octo"
 
 const PER_PAGE = 30
+const STALE_TIME_MS = 20 * 60 * 1000
+
+const repos = ref<RepoBase[]>([])
+const isReady = ref(false)
+const currentPage = ref(0)
+const totalCount = ref(0)
+let lastFetchedAt = 0
 
 export const useRepos = () => {
   const { username, accessToken } = useGitHubLogin()
-
-  const repos = ref<RepoBase[]>([])
-  const isReady = ref(false)
-  const currentPage = ref(0)
-  const totalCount = ref(0)
 
   const loadMore = async () => {
     if (!accessToken.value || !username.value) {
@@ -41,7 +43,17 @@ export const useRepos = () => {
 
   const canLoadMore = computed(() => repos.value.length < totalCount.value)
 
-  loadMore()
+  const isStale = Date.now() - lastFetchedAt > STALE_TIME_MS
+  if (!isReady.value || isStale) {
+    if (isStale && isReady.value) {
+      repos.value = []
+      currentPage.value = 0
+      totalCount.value = 0
+      isReady.value = false
+    }
+    lastFetchedAt = Date.now()
+    loadMore()
+  }
 
   return { repos, isReady, canLoadMore, loadMore }
 }
