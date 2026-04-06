@@ -135,8 +135,16 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
           this.userSettings.chosenTitleFont = chosenTitleFont
           this.userSettings.chosenBodyFont = chosenBodyFont
 
+          // Persist only repo config fields — chosen* are localStorage-only
+          const {
+            chosenTitleFont: _t,
+            chosenBodyFont: _b,
+            chosenFontSize: _s,
+            chosenFontFamily: _f,
+            ...repoConfig
+          } = this.userSettings
           data.update<DataType.UserSettings, UserSettings>({
-            ...this.userSettings,
+            ...repoConfig,
             _id: userSettingsId
           })
         })
@@ -187,52 +195,28 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenFontFamily = fontFamily
-
       this._persistFonts()
-      const userSettingsId = `UserSetting-${this.user}-${this.repo}`
-      data.update<DataType.UserSettings, UserSettings>({
-        ...this.userSettings,
-        _id: userSettingsId
-      })
     },
     setFontSize(fontSize: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenFontSize = fontSize
-
       this._persistFonts()
-      const userSettingsId = `UserSetting-${this.user}-${this.repo}`
-      data.update<DataType.UserSettings, UserSettings>({
-        ...this.userSettings,
-        _id: userSettingsId
-      })
     },
     setTitleFont(font: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenTitleFont = font
-
       this._persistFonts()
-      const userSettingsId = `UserSetting-${this.user}-${this.repo}`
-      data.update<DataType.UserSettings, UserSettings>({
-        ...this.userSettings,
-        _id: userSettingsId
-      })
     },
     setBodyFont(font: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenBodyFont = font
-
       this._persistFonts()
-      const userSettingsId = `UserSetting-${this.user}-${this.repo}`
-      data.update<DataType.UserSettings, UserSettings>({
-        ...this.userSettings,
-        _id: userSettingsId
-      })
     }
   }
 })
