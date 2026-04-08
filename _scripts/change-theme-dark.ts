@@ -28,8 +28,8 @@ let themeConfigContent = readFileSync(themeConfigPath, "utf8")
 
 // Remplacer la valeur du thème sombre
 themeConfigContent = themeConfigContent.replace(
-  /dark:\s*['"][^'"]*['"],/,
-  `dark: '${newTheme}',`
+  /dark:\s*['"][^'"]*['"](,?)/,
+  `dark: '${newTheme}'$1`
 )
 
 // Écrire le contenu mis à jour dans le fichier
