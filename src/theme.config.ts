@@ -3,5 +3,5 @@
 
 export const themeConfig = {
   light: "garden",
-  dark: 'abyss'
+  dark: 'forest'
 }
