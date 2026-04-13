@@ -6,7 +6,7 @@ const goHome = () => router.push({ name: "Home" })
 </script>
 
 <template>
-  <button class="btn btn-ghost btn-circle btn-lg" @click="goHome">
+  <button class="btn btn-ghost btn-circle btn-lg text-base-content" @click="goHome">
     <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
   </button>
 </template>
