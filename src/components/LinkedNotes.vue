@@ -24,9 +24,9 @@ const emitNote = (sha: string) => {
     <h5 class="subtitle is-5">🔗</h5>
     <ul class="links">
       <li v-for="link in backlink?.links" :key="link.sha">
-        <a @click.prevent="emitNote(link.sha)">
+        <button class="link" @click="emitNote(link.sha)">
           {{ link.title }}
-        </a>
+        </button>
       </li>
     </ul>
   </div>

@@ -24,7 +24,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <a class="btn btn-sm back-button" @click="goBack">
+  <button class="btn btn-sm back-button text-base-content" @click="goBack">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       class="icon icon-tabler icon-tabler-arrow-narrow-left"
@@ -41,5 +41,5 @@ const goBack = () => {
       <line x1="5" y1="12" x2="9" y2="16" />
       <line x1="5" y1="12" x2="9" y2="8" />
     </svg>
-  </a>
+  </button>
 </template>
