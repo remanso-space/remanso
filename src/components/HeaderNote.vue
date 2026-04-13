@@ -160,5 +160,9 @@ defineProps<{ user: string; repo: string }>()
   align-items: center;
   justify-content: space-between;
   margin-top: 10px;
+
+  button {
+    color: inherit;
+  }
 }
 </style>
