@@ -32,7 +32,7 @@ defineProps<{ user: string; repo: string }>()
       </svg>
     </router-link> -->
 
-    <a class="btn btn-ghost btn-circle" onclick="font_modal.showModal()">
+    <button class="btn btn-ghost btn-circle" onclick="font_modal.showModal()">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icons-tabler-outline icon-tabler-typography"
@@ -51,7 +51,7 @@ defineProps<{ user: string; repo: string }>()
         <path d="M10.2 6.3l5.8 13.7" />
         <path d="M5 20l6 -16l2 0l7 16" />
       </svg>
-    </a>
+    </button>
     <router-link
       class="btn btn-ghost btn-circle"
       :to="{ name: 'FluxNoteView', params: { user, repo } }"
