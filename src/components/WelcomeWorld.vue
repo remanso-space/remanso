@@ -462,9 +462,9 @@ const showReviewCard = computed(
                   <div class="backlinks-h mono">↖ linked from</div>
                   <ul>
                     <li>
-                      <a href="#">why links are better than folders</a>
+                      <a @click.prevent href="#">why links are better than folders</a>
                     </li>
-                    <li><a href="#">a reading diary</a></li>
+                    <li><a @click.prevent href="#">a reading diary</a></li>
                   </ul>
                 </div>
               </article>
@@ -489,7 +489,7 @@ const showReviewCard = computed(
                 <div class="note-backlinks">
                   <div class="backlinks-h mono">↖ linked from</div>
                   <ul>
-                    <li><a href="#">on keeping notes</a></li>
+                    <li><a @click.prevent href="#">on keeping notes</a></li>
                   </ul>
                 </div>
               </article>
