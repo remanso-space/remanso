@@ -311,7 +311,7 @@ const showReviewCard = computed(
               </p>
               <div class="hero-ed-paths">
                 <!-- CTA 01: GitHub repo -->
-                <div class="hero-ed-path w-2xl">
+                <div class="hero-ed-path">
                   <div class="hep-head">
                     <span class="hep-n mono">01</span>
                     <div>
