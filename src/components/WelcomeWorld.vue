@@ -396,8 +396,7 @@ const showReviewCard = computed(
             <div class="section-label mono">§ 01 — what is remanso</div>
             <p class="drop-cap manifesto-p">
               <em>Remanso</em> is a Portuguese word for the still pool that
-              forms where a river slows. It is not stagnant — water flows
-              through — but for a moment, it is calm enough to see the bottom.
+              forms where a river slows. The current still moves through — but for a moment, it is calm enough to see the bottom.
               This is what notes should feel like. A Remanso takes your
               markdown files and lays them out as a linked notebook you can
               read, follow, and add to. No lock-in. Your notes stay in Git.
