@@ -670,12 +670,10 @@ const showReviewCard = computed(
       rgba(107, 142, 78, 0.035),
       transparent 45%
     );
-  z-index: 0;
 }
 
 main {
   position: relative;
-  z-index: 1;
   flex: 1;
 }
 
@@ -1634,7 +1632,6 @@ img {
   margin-top: 5rem;
   background: linear-gradient(180deg, transparent, var(--hw-paper-warm));
   position: relative;
-  z-index: 1;
 }
 
 .footer-inner {
