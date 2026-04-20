@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import fontColorContrast from "font-color-contrast"
 import { getHex } from "pastel-color"
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
 
 import SignInAtproto from "@/components/SignInAtproto.vue"
@@ -56,6 +56,12 @@ const today = computed(() =>
     day: "numeric"
   })
 )
+
+const offsetHighlighted = ref(false)
+const flashOffset = () => {
+  offsetHighlighted.value = true
+  setTimeout(() => { offsetHighlighted.value = false }, 900)
+}
 
 const reviewRepo = computed(() => savedFavoriteRepos.value[0] ?? null)
 const showReviewCard = computed(
@@ -331,9 +337,7 @@ const showReviewCard = computed(
                       spellcheck="false"
                       autocapitalize="off"
                     />
-                    <button type="submit" class="hw-btn hw-btn-pink gh-go">
-                      Open →
-                    </button>
+                    <button type="submit" class="hw-btn hw-btn-pink gh-go">→</button>
                   </form>
                 </div>
                 <!-- CTA 02: Public notes -->
@@ -444,12 +448,12 @@ const showReviewCard = computed(
                 <div class="note-body">
                   <p>
                     A note should be small enough to hold one idea and
-                    <a class="note-link" href="#">durable enough</a>
+                    <a class="note-link" href="#" @click.prevent="flashOffset">durable enough</a>
                     to outlive the day it was written.
                   </p>
                   <p>
                     Luhmann called this the
-                    <a class="note-link" href="#">zettelkasten</a>: a slip-box
+                    <a class="note-link" href="#" @click.prevent>zettelkasten</a>: a slip-box
                     of thoughts you converse with, rather than a hoard of pages
                     you re-read.
                   </p>
@@ -464,7 +468,7 @@ const showReviewCard = computed(
                   </ul>
                 </div>
               </article>
-              <article class="note-preview note-preview-offset">
+              <article class="note-preview note-preview-offset" :class="{ 'note-preview--flash': offsetHighlighted }">
                 <div class="note-header">
                   <span class="mono note-breadcrumb"
                     >remanso-space / getting-started</span
@@ -1204,6 +1208,19 @@ main {
 .note-preview-offset {
   margin-top: 2.5rem;
   transform: rotate(0.4deg);
+  transition: box-shadow 0.15s ease, outline-color 0.15s ease;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+}
+
+.note-preview--flash {
+  animation: note-flash 0.9s ease forwards;
+}
+
+@keyframes note-flash {
+  0%   { box-shadow: 0 0 0 3px var(--hw-pink-wash-2), 0 1px 0 rgba(0,0,0,.02), 0 20px 40px -25px rgba(0,0,0,.15); }
+  25%  { box-shadow: 0 0 0 6px var(--hw-pink-wash-2), 0 1px 0 rgba(0,0,0,.02), 0 20px 40px -25px rgba(0,0,0,.15); }
+  100% { box-shadow: 0 1px 0 rgba(0,0,0,.02), 0 20px 40px -25px rgba(0,0,0,.15); }
 }
 
 .note-header {
