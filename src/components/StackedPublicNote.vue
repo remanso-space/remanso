@@ -180,6 +180,7 @@ $border-color: rgba(18, 19, 58, 0.2);
     section {
       padding: 1rem 0 2rem;
       overflow-x: auto;
+      overflow-y: hidden;
     }
 
     .note-content {

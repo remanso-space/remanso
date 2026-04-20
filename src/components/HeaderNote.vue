@@ -32,7 +32,10 @@ defineProps<{ user: string; repo: string }>()
       </svg>
     </router-link> -->
 
-    <button class="btn btn-ghost btn-circle text-base-content" onclick="font_modal.showModal()">
+    <button
+      class="btn btn-ghost btn-circle text-base-content"
+      onclick="font_modal.showModal()"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="icon icon-tabler icons-tabler-outline icon-tabler-typography"
@@ -162,7 +165,7 @@ defineProps<{ user: string; repo: string }>()
   margin-top: 10px;
 
   button {
-    color: inherit;
+    color: var(--color-accent);
   }
 }
 </style>
