@@ -15,8 +15,7 @@ import WelcomeWorld from "@/components/WelcomeWorld.vue"
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  height: 100dvh;
+  min-height: 100dvh;
 }
 
 .authorize {

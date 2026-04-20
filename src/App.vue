@@ -19,6 +19,7 @@ const { isATProtoReady } = useATProtoLogin()
 #main-app {
   height: 100dvh;
   width: 100%;
+  max-width: none;
   display: flex;
   flex: 1;
 }
