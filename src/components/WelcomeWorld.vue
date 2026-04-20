@@ -300,12 +300,12 @@ const showReviewCard = computed(
               <h1 class="display">
                 Remanso is where your<br />
                 <em>scattered thinking</em><br />
-                settles into a pool.
+                comes to rest.
               </h1>
               <p class="lede">
                 Point it at any markdown — a GitHub repo of your own, or public
                 notes from the open ATProto network — and Remanso turns it into a
-                calm, stackable notebook with backlinks and margin enough to think.
+                calm, stackable notebook with backlinks where your thinking finally runs clear.
               </p>
               <div class="hero-ed-paths">
                 <!-- CTA 01: GitHub repo -->
