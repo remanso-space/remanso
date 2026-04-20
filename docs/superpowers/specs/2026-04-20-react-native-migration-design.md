@@ -74,8 +74,8 @@ CREATE TABLE IF NOT EXISTS github_tokens (
 
 CREATE TABLE IF NOT EXISTS atproto_sessions (
   id TEXT PRIMARY KEY,
-  did TEXT NOT NULL,
-  session_json TEXT NOT NULL
+  did TEXT NOT NULL
+  -- full session_json stored in Expo SecureStore keyed by id
 );
 
 CREATE TABLE IF NOT EXISTS saved_repos (
