@@ -512,7 +512,7 @@ const showReviewCard = computed(
               <li>
                 <span class="zk-n mono">02</span>
                 <div>
-                  <h4>Link, don't file.</h4>
+                  <h4>Link, don't nest.</h4>
                   <p>
                     Folders calcify. Links compound. Every
                     <code>[like this](new-idea.md)</code> becomes a door to a new idea.
