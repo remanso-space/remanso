@@ -974,8 +974,8 @@ main {
 .hero-ed-path {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  padding: 1.1rem 1.2rem;
+  gap: 1.5rem;
+  padding: 2.25rem 2rem;
   background: var(--hw-surface);
   border: 1px solid var(--hw-rule);
   border-radius: 6px;
@@ -990,36 +990,36 @@ main {
 
 .hep-head {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.85rem;
   align-items: flex-start;
 }
 
 .hep-n {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   letter-spacing: 0.12em;
   color: var(--hw-pink-deep);
-  padding-top: 0.25rem;
+  padding-top: 0.35rem;
 }
 
 .hep-t {
   font-family: var(--hw-serif);
-  font-size: 1.05rem;
+  font-size: 1.45rem;
   font-weight: 600;
   line-height: 1.2;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.4rem;
 }
 
 .hep-d {
-  font-size: 0.82rem;
+  font-size: 1.05rem;
   color: var(--hw-ink-soft);
-  line-height: 1.45;
+  line-height: 1.55;
   text-wrap: pretty;
 }
 
 .hep-btn {
   align-self: flex-start;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.9rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 1.05rem;
 }
 
 .hero-ed-sample {
