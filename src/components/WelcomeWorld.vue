@@ -139,25 +139,25 @@ const showReviewCard = computed(
             <div class="li-quick">
               <div class="li-quick-label mono">jump to a repo</div>
               <form class="gh-form compact" @submit.prevent="submit">
-                <span class="gh-prefix mono">github/</span>
-                <input
-                  v-model="userInput"
-                  placeholder="user"
-                  class="gh-input"
-                  spellcheck="false"
-                  autocapitalize="off"
-                />
-                <span class="gh-slash">/</span>
-                <input
-                  v-model="repoInput"
-                  placeholder="repo"
-                  class="gh-input"
-                  spellcheck="false"
-                  autocapitalize="off"
-                />
-                <button type="submit" class="hw-btn hw-btn-pink gh-go">
-                  Open →
-                </button>
+                <label class="input gh-input-group">
+                  <span class="gh-prefix mono">github/</span>
+                  <input
+                    v-model="userInput"
+                    placeholder="user"
+                    class="gh-input"
+                    spellcheck="false"
+                    autocapitalize="off"
+                  />
+                  <span class="gh-slash">/</span>
+                  <input
+                    v-model="repoInput"
+                    placeholder="repo"
+                    class="gh-input"
+                    spellcheck="false"
+                    autocapitalize="off"
+                  />
+                </label>
+                <button type="submit" class="hw-btn hw-btn-pink gh-go">→</button>
               </form>
             </div>
           </div>
@@ -211,22 +211,24 @@ const showReviewCard = computed(
                   or open one directly
                 </div>
                 <form class="gh-form" @submit.prevent="submit">
-                  <span class="gh-prefix mono">github/</span>
-                  <input
-                    v-model="userInput"
-                    placeholder="user"
-                    class="gh-input"
-                    spellcheck="false"
-                    autocapitalize="off"
-                  />
-                  <span class="gh-slash">/</span>
-                  <input
-                    v-model="repoInput"
-                    placeholder="repo"
-                    class="gh-input"
-                    spellcheck="false"
-                    autocapitalize="off"
-                  />
+                  <label class="input gh-input-group">
+                    <span class="gh-prefix mono">github/</span>
+                    <input
+                      v-model="userInput"
+                      placeholder="user"
+                      class="gh-input"
+                      spellcheck="false"
+                      autocapitalize="off"
+                    />
+                    <span class="gh-slash">/</span>
+                    <input
+                      v-model="repoInput"
+                      placeholder="repo"
+                      class="gh-input"
+                      spellcheck="false"
+                      autocapitalize="off"
+                    />
+                  </label>
                   <button type="submit" class="hw-btn hw-btn-pink gh-go">
                     Open →
                   </button>
@@ -309,7 +311,7 @@ const showReviewCard = computed(
               </p>
               <div class="hero-ed-paths">
                 <!-- CTA 01: GitHub repo -->
-                <div class="hero-ed-path">
+                <div class="hero-ed-path w-2xl">
                   <div class="hep-head">
                     <span class="hep-n mono">01</span>
                     <div>
@@ -321,22 +323,24 @@ const showReviewCard = computed(
                     </div>
                   </div>
                   <form class="gh-form" @submit.prevent="submit">
-                    <span class="gh-prefix mono">github/</span>
-                    <input
-                      v-model="userInput"
-                      placeholder="user"
-                      class="gh-input"
-                      spellcheck="false"
-                      autocapitalize="off"
-                    />
-                    <span class="gh-slash">/</span>
-                    <input
-                      v-model="repoInput"
-                      placeholder="repo"
-                      class="gh-input"
-                      spellcheck="false"
-                      autocapitalize="off"
-                    />
+                    <label class="input gh-input-group">
+                      <span class="gh-prefix mono">github/</span>
+                      <input
+                        v-model="userInput"
+                        placeholder="user"
+                        class="gh-input"
+                        spellcheck="false"
+                        autocapitalize="off"
+                      />
+                      <span class="gh-slash">/</span>
+                      <input
+                        v-model="repoInput"
+                        placeholder="repo"
+                        class="gh-input"
+                        spellcheck="false"
+                        autocapitalize="off"
+                      />
+                    </label>
                     <button type="submit" class="hw-btn hw-btn-pink gh-go">→</button>
                   </form>
                 </div>
@@ -347,6 +351,7 @@ const showReviewCard = computed(
                     <div>
                       <div class="hep-t">From the open network</div>
                       <div class="hep-d">
+                        Your `.pub.md` files become public.
                         Read public notes published via ATProto — no account
                         needed.
                       </div>
@@ -855,31 +860,44 @@ main {
 
 /* ── GitHub form ────────────────────────────────────────────── */
 .gh-form {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.35rem 0.5rem 0.35rem 0.9rem;
-  background: var(--hw-surface);
-  border: 1px solid var(--hw-rule);
-  border-radius: 999px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02),
-    0 6px 18px -10px rgba(201, 74, 125, 0.15);
-  transition: border-color 0.15s, box-shadow 0.15s;
-  flex-wrap: wrap;
-
-  &:focus-within {
-    border-color: var(--hw-pink);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02),
-      0 10px 28px -10px rgba(201, 74, 125, 0.25);
-  }
+  display: flex;
+  align-items: stretch;
 
   &.compact {
-    padding: 0.2rem 0.4rem 0.2rem 0.75rem;
+    .gh-input-group {
+      padding: 0.15rem 0.35rem 0.15rem 0.75rem;
+    }
 
     .gh-go {
       padding: 0.3rem 0.7rem;
       font-size: 0.85rem;
     }
+  }
+}
+
+.gh-input-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.45rem 0.35rem 0.9rem;
+  background: var(--hw-surface);
+  border: 1px solid var(--hw-rule);
+  border-right: none;
+  border-radius: 999px 0 0 999px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02),
+    0 6px 18px -10px rgba(201, 74, 125, 0.15);
+  cursor: text;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  height: auto;
+  outline: none;
+
+  &:focus-within {
+    border-color: var(--hw-pink);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02),
+      0 10px 28px -10px rgba(201, 74, 125, 0.25);
+    outline: none;
   }
 }
 
@@ -895,14 +913,15 @@ main {
 }
 
 .gh-input {
+  flex: 1;
+  min-width: 0;
   border: 0;
   outline: 0;
   background: transparent;
   font-family: var(--hw-mono);
   font-size: 0.95rem;
   color: var(--hw-ink);
-  width: 8ch;
-  padding: 0.35rem 0.25rem;
+  padding: 0;
 
   &::placeholder {
     color: var(--hw-ink-faint);
@@ -911,10 +930,13 @@ main {
 }
 
 .gh-go {
-  margin-left: 0.25rem;
+  flex-shrink: 0;
   padding: 0.4rem 0.9rem;
   font-size: 0.9rem;
-  border-radius: 999px;
+  border-radius: 0 999px 999px 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
 }
 
 /* ── Hero (logged out) ──────────────────────────────────────── */
@@ -1863,10 +1885,7 @@ img {
     }
   }
 
-  .gh-form {
-    border-radius: 8px;
-    flex-wrap: nowrap;
-  }
+
 }
 
 </style>
