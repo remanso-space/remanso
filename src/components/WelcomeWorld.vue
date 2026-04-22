@@ -60,7 +60,9 @@ const today = computed(() =>
 const offsetHighlighted = ref(false)
 const flashOffset = () => {
   offsetHighlighted.value = true
-  setTimeout(() => { offsetHighlighted.value = false }, 900)
+  setTimeout(() => {
+    offsetHighlighted.value = false
+  }, 900)
 }
 
 const reviewRepo = computed(() => savedFavoriteRepos.value[0] ?? null)
@@ -91,7 +93,10 @@ const showReviewCard = computed(
           >Public&nbsp;notes</router-link
         >
         <router-link
-          :to="{ name: 'FluxNoteView', params: { user: 'remanso-space', repo: 'getting-started' } }"
+          :to="{
+            name: 'FluxNoteView',
+            params: { user: 'remanso-space', repo: 'getting-started' }
+          }"
           class="navlink"
           >Getting&nbsp;started</router-link
         >
@@ -111,7 +116,11 @@ const showReviewCard = computed(
           </span>
           <span class="profile-name">{{ displayUsername }}</span>
         </button>
-        <button v-else class="hw-btn hw-btn-ghost" onclick="profile_modal.showModal()">
+        <button
+          v-else
+          class="hw-btn hw-btn-ghost"
+          onclick="profile_modal.showModal()"
+        >
           Sign in
         </button>
       </div>
@@ -157,7 +166,9 @@ const showReviewCard = computed(
                     autocapitalize="off"
                   />
                 </label>
-                <button type="submit" class="hw-btn hw-btn-pink gh-go">→</button>
+                <button type="submit" class="hw-btn hw-btn-pink gh-go">
+                  →
+                </button>
               </form>
             </div>
           </div>
@@ -182,7 +193,7 @@ const showReviewCard = computed(
                   :class="{
                     'size-xl': i === 0 && savedFavoriteRepos.length > 1,
                     'size-lg': i > 0 || savedFavoriteRepos.length === 1,
-                    'featured': i === 0 && savedFavoriteRepos.length > 1
+                    featured: i === 0 && savedFavoriteRepos.length > 1
                   }"
                   :style="tileStyle(`${repo.name}-${username}`)"
                   href="#"
@@ -251,9 +262,14 @@ const showReviewCard = computed(
                   :key="`${repo.user}-${repo.repo}`"
                 >
                   <router-link
-                    :to="{ name: 'FluxNoteView', params: { user: repo.user, repo: repo.repo } }"
+                    :to="{
+                      name: 'FluxNoteView',
+                      params: { user: repo.user, repo: repo.repo }
+                    }"
                   >
-                    <span class="r-path mono">{{ repo.user }} / {{ repo.repo }}</span>
+                    <span class="r-path mono"
+                      >{{ repo.user }} / {{ repo.repo }}</span
+                    >
                   </router-link>
                 </li>
               </ul>
@@ -296,246 +312,259 @@ const showReviewCard = computed(
       <!-- =========== Editorial (always visible) ============== -->
       <!-- Hero -->
       <section class="hero-ed">
-          <div class="hero-ed-inner">
-            <div class="hero-ed-left">
-              <div class="eyebrow mono">a quiet place for your notes</div>
-              <h1 class="display">
-                Remanso is where your<br />
-                <em>scattered thinking</em><br />
-                comes to rest.
-              </h1>
-              <p class="lede">
-                Point it at any markdown — a GitHub repo of your own, or public
-                notes from the open ATProto network — and Remanso turns it into a
-                calm, stackable notebook with backlinks where your thinking finally runs clear.
-              </p>
-              <div class="hero-ed-paths">
-                <!-- CTA 01: GitHub repo -->
-                <div class="hero-ed-path">
-                  <div class="hep-head">
-                    <span class="hep-n mono">01</span>
-                    <div>
-                      <div class="hep-t">From a GitHub repo</div>
-                      <div class="hep-d">
-                        Point it at your markdown. Public works instantly, private
-                        via OAuth.
-                      </div>
+        <div class="hero-ed-inner">
+          <div class="hero-ed-left">
+            <div class="eyebrow mono">a quiet place for your notes</div>
+            <h1 class="display">
+              Remanso is where your<br />
+              <em>scattered thinking</em><br />
+              comes to rest.
+            </h1>
+            <p class="lede">
+              Point it at any markdown — a GitHub repo of your own, or public
+              notes from the open ATProto network — and Remanso turns it into a
+              calm, stackable notebook with backlinks where your thinking
+              finally runs clear.
+            </p>
+            <div class="hero-ed-paths">
+              <!-- CTA 01: GitHub repo -->
+              <div class="hero-ed-path">
+                <div class="hep-head">
+                  <span class="hep-n mono">01</span>
+                  <div>
+                    <div class="hep-t">From a GitHub repo</div>
+                    <div class="hep-d">
+                      Point it at your markdown. Public works instantly, private
+                      via OAuth.
                     </div>
                   </div>
-                  <form class="gh-form" @submit.prevent="submit">
-                    <label class="input gh-input-group">
-                      <span class="gh-prefix mono">github/</span>
-                      <input
-                        v-model="userInput"
-                        placeholder="user"
-                        class="gh-input"
-                        spellcheck="false"
-                        autocapitalize="off"
-                      />
-                      <span class="gh-slash">/</span>
-                      <input
-                        v-model="repoInput"
-                        placeholder="repo"
-                        class="gh-input"
-                        spellcheck="false"
-                        autocapitalize="off"
-                      />
-                    </label>
-                    <button type="submit" class="hw-btn hw-btn-pink gh-go">→</button>
-                  </form>
                 </div>
-                <!-- CTA 02: Public notes -->
-                <div class="hero-ed-path">
-                  <div class="hep-head">
-                    <span class="hep-n mono">02</span>
-                    <div>
-                      <div class="hep-t">From the open network</div>
-                      <div class="hep-d">
-                        Your `.pub.md` files become public.
-                        Read public notes published via ATProto — no account
-                        needed.
-                      </div>
-                    </div>
-                  </div>
-                  <router-link
-                    :to="{ name: 'PublicNoteListView' }"
-                    class="hw-btn hw-btn-pink hep-btn"
-                  >
-                    Browse public notes →
-                  </router-link>
-                </div>
+                <form class="gh-form" @submit.prevent="submit">
+                  <label class="input gh-input-group">
+                    <span class="gh-prefix mono">github/</span>
+                    <input
+                      v-model="userInput"
+                      placeholder="user"
+                      class="gh-input"
+                      spellcheck="false"
+                      autocapitalize="off"
+                    />
+                    <span class="gh-slash">/</span>
+                    <input
+                      v-model="repoInput"
+                      placeholder="repo"
+                      class="gh-input"
+                      spellcheck="false"
+                      autocapitalize="off"
+                    />
+                  </label>
+                  <button type="submit" class="hw-btn hw-btn-pink gh-go">
+                    →
+                  </button>
+                </form>
               </div>
-              <div class="hero-ed-sample mono">
-                new here?
+              <!-- CTA 02: Public notes -->
+              <div class="hero-ed-path">
+                <div class="hep-head">
+                  <span class="hep-n mono">02</span>
+                  <div>
+                    <div class="hep-t">From the open network</div>
+                    <div class="hep-d">
+                      Your `.pub.md` files become public. Read public notes
+                      published via ATProto — no account needed.
+                    </div>
+                  </div>
+                </div>
                 <router-link
-                  :to="{ name: 'FluxNoteView', params: { user: 'remanso-space', repo: 'getting-started' } }"
+                  :to="{ name: 'PublicNoteListView' }"
+                  class="hw-btn hw-btn-pink hep-btn"
                 >
-                  try remanso-space/getting-started →
+                  Browse public notes →
                 </router-link>
               </div>
             </div>
-            <div class="hero-ed-right">
-              <div class="flower-stage">
-                <img
-                  src="/favicon.png"
-                  alt="Remanso"
-                  class="flower-mark"
-                  width="240"
-                  height="240"
-                />
-                <div class="flower-ripple" />
-                <div class="flower-ripple r2" />
-              </div>
+            <div class="hero-ed-sample mono">
+              new here?
+              <router-link
+                :to="{
+                  name: 'FluxNoteView',
+                  params: { user: 'remanso-space', repo: 'getting-started' }
+                }"
+              >
+                try remanso-space/getting-started →
+              </router-link>
             </div>
           </div>
-        </section>
-
-        <!-- Manifesto -->
-        <section class="manifesto" id="about">
-          <div class="manifesto-inner">
-            <div class="section-label mono">§ 01 — what is remanso</div>
-            <p class="drop-cap manifesto-p">
-              <em>Remanso</em> is a Portuguese word for the still pool that
-              forms where a river slows. The current still moves through — but for a moment, it is calm enough to see the bottom.
-              This is what notes should feel like. A Remanso takes your
-              markdown files and lays them out as a linked notebook you can
-              read, follow, and add to. No lock-in. Your notes stay in Git.
-            </p>
-            <div class="feature-row">
-              <div class="feat">
-                <span class="feat-icon">≣</span>
-                <h4>Stacked notes</h4>
-                <p>
-                  Click a link and the next note slides in beside the current
-                  one. Your train of thought stays visible — never lose where
-                  you came from.
-                </p>
-              </div>
-              <div class="feat">
-                <span class="feat-icon">↹</span>
-                <h4>Automatic backlinks</h4>
-                <p>
-                  Every mention becomes a two-way link. See every note that
-                  points back at the one you're reading.
-                </p>
-              </div>
-              <div class="feat">
-                <span class="feat-icon">◈</span>
-                <h4>Your files, your Git</h4>
-                <p>
-                  Remanso reads GitHub directly. Edit in your favourite editor.
-                  Ship to Bluesky via ATProto when you're ready to share.
-                </p>
-              </div>
+          <div class="hero-ed-right">
+            <div class="flower-stage">
+              <img
+                src="/favicon.png"
+                alt="Remanso"
+                class="flower-mark"
+                width="240"
+                height="240"
+              />
+              <div class="flower-ripple" />
+              <div class="flower-ripple r2" />
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- Demo notes -->
-        <section class="demo" id="getting-started">
-          <div class="demo-inner">
-            <div class="section-label mono">§ 02 — a note, in full</div>
-            <h2 class="h2">
-              This is what a note looks like.<br />
-              <span class="h2-quiet italic">
-                Tap a link to stack another beside it.
-              </span>
-            </h2>
-            <div class="demo-notes">
-              <article class="note-preview">
-                <div class="note-header">
-                  <span class="mono note-breadcrumb"
-                    >remanso-space / getting-started</span
+      <!-- Manifesto -->
+      <section class="manifesto" id="about">
+        <div class="manifesto-inner">
+          <div class="section-label mono">§ 01 — what is remanso</div>
+          <p class="drop-cap manifesto-p">
+            <em>Remanso</em> is a Portuguese word for the still pool that forms
+            where a river slows. The current still moves through — but for a
+            moment, it is calm enough to see the bottom. This is what notes
+            should feel like. A Remanso takes your markdown files and lays them
+            out as a linked notebook you can read, follow, and add to. No
+            lock-in. Your notes stay in Git.
+          </p>
+          <div class="feature-row">
+            <div class="feat">
+              <span class="feat-icon">≣</span>
+              <h4>Stacked notes</h4>
+              <p>
+                Click a link and the next note slides in beside the current one.
+                Your train of thought stays visible — never lose where you came
+                from.
+              </p>
+            </div>
+            <div class="feat">
+              <span class="feat-icon">↹</span>
+              <h4>Automatic backlinks</h4>
+              <p>
+                Every mention becomes a two-way link. See every note that points
+                back at the one you're reading.
+              </p>
+            </div>
+            <div class="feat">
+              <span class="feat-icon">◈</span>
+              <h4>Your files, your Git</h4>
+              <p>
+                Remanso reads GitHub directly. Edit in your favourite editor.
+                Ship to Bluesky via ATProto when you're ready to share.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Demo notes -->
+      <section class="demo" id="getting-started">
+        <div class="demo-inner">
+          <div class="section-label mono">§ 02 — a note, in full</div>
+          <h2 class="h2">
+            This is what a note looks like.<br />
+            <span class="h2-quiet italic">
+              Tap a link to stack another beside it.
+            </span>
+          </h2>
+          <div class="demo-notes">
+            <article class="note-preview">
+              <div class="note-header">
+                <span class="mono note-breadcrumb"
+                  >remanso-space / getting-started</span
+                >
+              </div>
+              <h3 class="note-title">On keeping notes</h3>
+              <div class="note-body">
+                <p>
+                  A note should be small enough to hold one idea and
+                  <a class="note-link" href="#" @click.prevent="flashOffset"
+                    >durable enough</a
                   >
-                </div>
-                <h3 class="note-title">On keeping notes</h3>
-                <div class="note-body">
-                  <p>
-                    A note should be small enough to hold one idea and
-                    <a class="note-link" href="#" @click.prevent="flashOffset">durable enough</a>
-                    to outlive the day it was written.
-                  </p>
-                  <p>
-                    Luhmann called this the
-                    <a class="note-link" href="#" @click.prevent>zettelkasten</a>: a slip-box
-                    of thoughts you converse with, rather than a hoard of pages
-                    you re-read.
-                  </p>
-                </div>
-                <div class="note-backlinks">
-                  <div class="backlinks-h mono">↖ linked from</div>
-                  <ul>
-                    <li>
-                      <a @click.prevent href="#">why links are better than folders</a>
-                    </li>
-                    <li><a @click.prevent href="#">a reading diary</a></li>
-                  </ul>
-                </div>
-              </article>
-              <article class="note-preview note-preview-offset" :class="{ 'note-preview--flash': offsetHighlighted }">
-                <div class="note-header">
-                  <span class="mono note-breadcrumb"
-                    >remanso-space / getting-started</span
-                  >
-                </div>
-                <h3 class="note-title">Durable enough</h3>
-                <div class="note-body">
-                  <p>
-                    A durable note survives its own context. You should be able
-                    to pick it up six months from now and still know what it
-                    means.
-                  </p>
-                  <p>
-                    Rule of thumb: write the title as the claim, and the body as
-                    the argument.
-                  </p>
-                </div>
-                <div class="note-backlinks">
-                  <div class="backlinks-h mono">↖ linked from</div>
-                  <ul>
-                    <li><a @click.prevent href="#">on keeping notes</a></li>
-                  </ul>
-                </div>
-              </article>
-            </div>
+                  to outlive the day it was written.
+                </p>
+                <p>
+                  Luhmann called this the
+                  <a class="note-link" href="#" @click.prevent>zettelkasten</a>:
+                  a slip-box of thoughts you converse with, rather than a hoard
+                  of pages you re-read.
+                </p>
+              </div>
+              <div class="note-backlinks">
+                <div class="backlinks-h mono">↖ linked from</div>
+                <ul>
+                  <li>
+                    <a @click.prevent href="#"
+                      >why links are better than folders</a
+                    >
+                  </li>
+                  <li><a @click.prevent href="#">a reading diary</a></li>
+                </ul>
+              </div>
+            </article>
+            <article
+              class="note-preview note-preview-offset"
+              :class="{ 'note-preview--flash': offsetHighlighted }"
+            >
+              <div class="note-header">
+                <span class="mono note-breadcrumb"
+                  >remanso-space / getting-started</span
+                >
+              </div>
+              <h3 class="note-title">Durable enough</h3>
+              <div class="note-body">
+                <p>
+                  A durable note survives its own context. You should be able to
+                  pick it up six months from now and still know what it means.
+                </p>
+                <p>
+                  Rule of thumb: write the title as the claim, and the body as
+                  the argument.
+                </p>
+              </div>
+              <div class="note-backlinks">
+                <div class="backlinks-h mono">↖ linked from</div>
+                <ul>
+                  <li><a @click.prevent href="#">on keeping notes</a></li>
+                </ul>
+              </div>
+            </article>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- Zettelkasten primer -->
-        <section class="zk" id="zk">
-          <div class="zk-inner">
-            <div class="section-label mono">§ 03 — zettelkasten, in a minute</div>
-            <ol class="zk-steps">
-              <li>
-                <span class="zk-n mono">01</span>
-                <div>
-                  <h4>One idea per note.</h4>
-                  <p>Keep them small. A note that does one thing gets reused.</p>
-                </div>
-              </li>
-              <li>
-                <span class="zk-n mono">02</span>
-                <div>
-                  <h4>Link, don't nest.</h4>
-                  <p>
-                    Folders calcify. Links compound. Every
-                    <code>[like this](new-idea.md)</code> becomes a door to a new idea.
-                  </p>
-                </div>
-              </li>
-              <li>
-                <span class="zk-n mono">03</span>
-                <div>
-                  <h4>Let the web emerge.</h4>
-                  <p>
-                    Don't plan the structure. Write, link, re-read. Structure is
-                    a consequence of attention.
-                  </p>
-                </div>
-              </li>
-            </ol>
-          </div>
-        </section>
+      <!-- Zettelkasten primer -->
+      <section class="zk" id="zk">
+        <div class="zk-inner">
+          <div class="section-label mono">§ 03 — zettelkasten, in a minute</div>
+          <ol class="zk-steps">
+            <li>
+              <span class="zk-n mono">01</span>
+              <div>
+                <h4>One idea per note.</h4>
+                <p>Keep them small. A note that does one thing gets reused.</p>
+              </div>
+            </li>
+            <li>
+              <span class="zk-n mono">02</span>
+              <div>
+                <h4>Link, don't nest.</h4>
+                <p>
+                  Folders calcify. Links compound. Every
+                  <code>[like this](new-idea.md)</code> becomes a door to a new
+                  idea.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span class="zk-n mono">03</span>
+              <div>
+                <h4>Let the web emerge.</h4>
+                <p>
+                  Don't plan the structure. Write, link, re-read. Structure is a
+                  consequence of attention.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
     </main>
 
     <!-- ── Footer ─────────────────────────────────────────── -->
@@ -558,11 +587,16 @@ const showReviewCard = computed(
           <div>
             <div class="footer-h">Product</div>
             <router-link
-              :to="{ name: 'FluxNoteView', params: { user: 'remanso-space', repo: 'getting-started' } }"
+              :to="{
+                name: 'FluxNoteView',
+                params: { user: 'remanso-space', repo: 'getting-started' }
+              }"
               class="footer-link"
               >Getting started</router-link
             >
-            <router-link :to="{ name: 'PublicNoteListView' }" class="footer-link"
+            <router-link
+              :to="{ name: 'PublicNoteListView' }"
+              class="footer-link"
               >Public notes</router-link
             >
             <router-link :to="{ name: 'RepoList' }" class="footer-link"
@@ -580,13 +614,14 @@ const showReviewCard = computed(
       <div class="footer-fine">
         <theme-swap />
         <span>
-          made with <span style="color: var(--hw-pink-deep)">♥</span> by <a
-              href="https://apoena.dev"
-              target="_blank"
-              rel="noreferrer"
-              class="footer-link"
-              >apoena.dev ↗</a
-            >
+          made with <span style="color: var(--hw-pink-deep)">♥</span> by
+          <a
+            href="https://apoena.dev"
+            target="_blank"
+            rel="noreferrer"
+            class="footer-link"
+            >apoena.dev ↗</a
+          >
         </span>
       </div>
     </footer>
@@ -629,19 +664,31 @@ const showReviewCard = computed(
   /* Derived from DaisyUI base tokens — adapts to any theme automatically.
      base-100 is the lightest surface; base-200/300 are progressively deeper.
      Paper uses base-200 so cards (base-100) appear slightly elevated above it. */
-  --hw-surface:    var(--color-base-100);
-  --hw-paper:      var(--color-base-200);
+  --hw-surface: var(--color-base-100);
+  --hw-paper: var(--color-base-200);
   --hw-paper-warm: var(--color-base-300);
-  --hw-ink:        var(--color-base-content);
-  --hw-ink-soft:   color-mix(in oklch, var(--color-base-content) 65%, var(--color-base-200));
-  --hw-ink-faint:  color-mix(in oklch, var(--color-base-content) 38%, var(--color-base-200));
-  --hw-rule:       color-mix(in oklch, var(--color-base-content) 12%, var(--color-base-200));
+  --hw-ink: var(--color-base-content);
+  --hw-ink-soft: color-mix(
+    in oklch,
+    var(--color-base-content) 65%,
+    var(--color-base-200)
+  );
+  --hw-ink-faint: color-mix(
+    in oklch,
+    var(--color-base-content) 38%,
+    var(--color-base-200)
+  );
+  --hw-rule: color-mix(
+    in oklch,
+    var(--color-base-content) 12%,
+    var(--color-base-200)
+  );
 
   /* Brand accent — intentionally fixed, not derived from the active theme */
-  --hw-pink:       #e36598;
-  --hw-pink-deep:  color-mix(in oklch, #e36598 75%, var(--color-base-content));
-  --hw-pink-wash:  color-mix(in oklch, #e36598 12%, var(--color-base-200));
-  --hw-pink-wash-2:color-mix(in oklch, #e36598 22%, var(--color-base-200));
+  --hw-pink: #e36598;
+  --hw-pink-deep: color-mix(in oklch, #e36598 75%, var(--color-base-content));
+  --hw-pink-wash: color-mix(in oklch, #e36598 12%, var(--color-base-200));
+  --hw-pink-wash-2: color-mix(in oklch, #e36598 22%, var(--color-base-200));
   --hw-leaf: #6b8e4e;
   --hw-serif: "Libertinus Serif", "Iowan Old Style", "Palatino", serif;
   --hw-mono: "Courier Prime", "IBM Plex Mono", ui-monospace, monospace;
@@ -664,7 +711,8 @@ const showReviewCard = computed(
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       circle at 20% 10%,
       rgba(227, 101, 152, 0.04),
       transparent 40%
@@ -691,7 +739,10 @@ main {
   background: transparent;
   color: var(--hw-ink);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -826,7 +877,9 @@ main {
   cursor: pointer;
   font-family: var(--hw-serif);
   color: var(--hw-ink);
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 
   &:hover {
     border-color: var(--hw-pink);
@@ -885,16 +938,20 @@ main {
   border: 1px solid var(--hw-rule);
   border-right: none;
   border-radius: 999px 0 0 999px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02),
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.02),
     0 6px 18px -10px rgba(201, 74, 125, 0.15);
   cursor: text;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   height: auto;
   outline: none;
 
   &:focus-within {
     border-color: var(--hw-pink);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02),
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.02),
       0 10px 28px -10px rgba(201, 74, 125, 0.25);
     outline: none;
   }
@@ -1000,7 +1057,10 @@ main {
   background: var(--hw-surface);
   border: 1px solid var(--hw-rule);
   border-radius: 6px;
-  transition: border-color 0.15s, box-shadow 0.2s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.2s,
+    transform 0.15s;
 
   &:hover {
     border-color: var(--hw-pink-wash-2);
@@ -1218,7 +1278,9 @@ main {
   border: 1px solid var(--hw-rule);
   border-radius: 4px;
   padding: 1.5rem 1.75rem 1.25rem;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02), 0 20px 40px -25px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.02),
+    0 20px 40px -25px rgba(0, 0, 0, 0.15);
   max-width: 420px;
   font-size: 0.95rem;
   line-height: 1.6;
@@ -1227,7 +1289,9 @@ main {
 .note-preview-offset {
   margin-top: 2.5rem;
   transform: rotate(0.4deg);
-  transition: box-shadow 0.15s ease, outline-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    outline-color 0.15s ease;
   outline: 2px solid transparent;
   outline-offset: 3px;
 }
@@ -1237,9 +1301,23 @@ main {
 }
 
 @keyframes note-flash {
-  0%   { box-shadow: 0 0 0 3px var(--hw-pink-wash-2), 0 1px 0 rgba(0,0,0,.02), 0 20px 40px -25px rgba(0,0,0,.15); }
-  25%  { box-shadow: 0 0 0 6px var(--hw-pink-wash-2), 0 1px 0 rgba(0,0,0,.02), 0 20px 40px -25px rgba(0,0,0,.15); }
-  100% { box-shadow: 0 1px 0 rgba(0,0,0,.02), 0 20px 40px -25px rgba(0,0,0,.15); }
+  0% {
+    box-shadow:
+      0 0 0 3px var(--hw-pink-wash-2),
+      0 1px 0 rgba(0, 0, 0, 0.02),
+      0 20px 40px -25px rgba(0, 0, 0, 0.15);
+  }
+  25% {
+    box-shadow:
+      0 0 0 6px var(--hw-pink-wash-2),
+      0 1px 0 rgba(0, 0, 0, 0.02),
+      0 20px 40px -25px rgba(0, 0, 0, 0.15);
+  }
+  100% {
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.02),
+      0 20px 40px -25px rgba(0, 0, 0, 0.15);
+  }
 }
 
 .note-header {
@@ -1476,25 +1554,13 @@ img {
   padding: 1rem 1.1rem;
   border-radius: 6px;
   border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
   min-height: 110px;
   position: relative;
   overflow: hidden;
   text-decoration: none;
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: auto -20% -40% auto;
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.5),
-      transparent 60%
-    );
-    pointer-events: none;
-  }
 
   &:hover {
     transform: translateY(-2px);
@@ -1883,8 +1949,5 @@ img {
       grid-column: span 1;
     }
   }
-
-
 }
-
 </style>
