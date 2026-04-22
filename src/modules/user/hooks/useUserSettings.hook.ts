@@ -1,5 +1,6 @@
 import { watchEffect } from "vue"
 
+import { resetNoteWidthCache } from "@/constants/note-width"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { downloadFont } from "@/utils/downloadFont"
 
@@ -22,5 +23,11 @@ export const useUserSettings = () => {
       "--title-font-family"
     )
     root.style.setProperty("--font-size", fontSize || DEFAULT_FONT_SIZE)
+
+    const pageWidth = store.userSettings?.pageWidth
+    if (pageWidth) {
+      root.style.setProperty("--note-width", pageWidth)
+      resetNoteWidthCache()
+    }
   })
 }

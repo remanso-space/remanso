@@ -10,3 +10,7 @@ export const getNoteWidth = () => {
   }
   return cached
 }
+
+export const resetNoteWidthCache = () => {
+  cached = undefined
+}

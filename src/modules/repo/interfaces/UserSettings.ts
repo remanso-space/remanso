@@ -10,4 +10,5 @@ export interface UserSettings extends Model<DataType.UserSettings> {
   backlink?: boolean
   chosenTitleFont?: string
   chosenBodyFont?: string
+  pageWidth?: string
 }
