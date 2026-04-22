@@ -1,4 +1,4 @@
-import { onMounted, type Ref, watch } from "vue"
+import { onMounted, onUnmounted, type Ref, watch } from "vue"
 
 import { getNoteWidth } from "@/constants/note-width"
 import { useOverlay } from "@/hooks/useOverlay.hook"
@@ -21,7 +21,7 @@ export const useResizeContainer = (
     if (isMobile.value) {
       container.style.height = `${(stackedNotes.value.length + 1) * 100}vh`
     } else {
-      container.style.width = `${
+      container.style.minWidth = `${
         getNoteWidth() * (stackedNotes.value.length + 1)
       }px`
     }
@@ -29,6 +29,11 @@ export const useResizeContainer = (
 
   onMounted(() => {
     resizeContainer()
+    window.addEventListener("resize", resizeContainer)
+  })
+
+  onUnmounted(() => {
+    window.removeEventListener("resize", resizeContainer)
   })
 
   watch(stackedNotes, resizeContainer, {

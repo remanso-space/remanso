@@ -22,6 +22,8 @@ const { isATProtoReady } = useATProtoLogin()
   max-width: none;
   display: flex;
   flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 ::view-transition-old(root),

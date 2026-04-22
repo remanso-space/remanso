@@ -204,7 +204,7 @@ $header-height: 40px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    height: 100vh;
+    height: 100%;
     position: sticky;
 
     &:not(:first-child) {
