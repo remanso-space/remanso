@@ -124,6 +124,7 @@ onUnmounted(() => {
       :user="user"
       :repo="repo"
       :title="titles[stackedNote]"
+      :style="{ left: `calc(${index + 1} * var(--note-width))` }"
     />
   </main>
 </template>
