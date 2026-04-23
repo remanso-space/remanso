@@ -250,6 +250,7 @@ $header-height: 40px;
 
   .note {
     width: 100vw;
+    height: 100dvh;
     overflow-y: visible;
   }
 

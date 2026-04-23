@@ -56,6 +56,13 @@ body {
   scroll-behavior: smooth;
 }
 
+@media screen and (max-width: 768px) {
+  html,
+  body {
+    overflow-y: auto;
+  }
+}
+
 .columns {
   margin-left: 0;
   margin-right: 0;
