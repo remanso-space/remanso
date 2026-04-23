@@ -28,7 +28,7 @@ const { isATProtoReady } = useATProtoLogin()
 
 @media screen and (max-width: 768px) {
   #main-app {
-    overflow: visible;
+    overflow-y: auto;
   }
 }
 

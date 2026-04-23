@@ -10,31 +10,28 @@ export const useOverlay = (listen = true) => {
   const isMobile = computed(() => width.value <= MOBILE_BREAKPOINT)
 
   if (listen) {
-    // In Firefox/Chrome, body is the horizontal scroll container (body has
-    // computed overflow-x: auto from overflow-y: hidden). In Safari, the
-    // viewport (documentElement) is used instead. Listen on both.
     const updateScroll = () => {
-      x.value = document.body.scrollLeft || window.scrollX
-      y.value = document.body.scrollTop || window.scrollY
+      const mainApp = document.getElementById("main-app")
+      x.value = mainApp?.scrollLeft ?? 0
+      y.value = mainApp?.scrollTop ?? 0
     }
-    useEventListener(window, "scroll", updateScroll, {
-      passive: true,
-      capture: false
-    })
-    useEventListener(document.body, "scroll", updateScroll, {
-      passive: true,
-      capture: false
-    })
+    useEventListener(
+      () => document.getElementById("main-app"),
+      "scroll",
+      updateScroll,
+      { passive: true }
+    )
   }
 
   const scrollToNote = (to: number) => {
     const go = () => {
+      const mainApp = document.getElementById("main-app")
+      if (!mainApp) return
+
       if (isMobile.value) {
-        document.body.scrollTop = to
-        document.documentElement.scrollTop = to
+        mainApp.scrollTop = to
       } else {
-        document.body.scrollLeft = to
-        document.documentElement.scrollLeft = to
+        mainApp.scrollLeft = to
       }
     }
 
