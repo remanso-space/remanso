@@ -23,13 +23,6 @@ const { isATProtoReady } = useATProtoLogin()
   display: flex;
   flex: 1;
   overflow-x: auto;
-  overflow-y: hidden;
-}
-
-@media screen and (max-width: 768px) {
-  #main-app {
-    overflow-y: auto;
-  }
 }
 
 ::view-transition-old(root),
