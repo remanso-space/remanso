@@ -29,9 +29,9 @@ export const useOverlay = (listen = true) => {
       if (!mainApp) return
 
       if (isMobile.value) {
-        mainApp.scrollTop = to
+        mainApp.scrollTo({ top: to, behavior: "smooth" })
       } else {
-        mainApp.scrollLeft = to
+        mainApp.scrollTo({ left: to, behavior: "smooth" })
       }
     }
 
