@@ -9,21 +9,21 @@ Migrate Remanso from a Vue 3 web app to a fully native iOS + Android app built w
 
 ## Tech Stack
 
-| Concern | Current (Vue) | React Native |
-|---|---|---|
-| Framework | Vue 3 + Vite | Expo SDK (managed workflow) |
-| Routing | Vue Router | Expo Router (file-system routing over React Navigation v7) |
-| State | Pinia | Zustand |
-| Server state | TanStack Vue Query | TanStack Query (same library) |
-| Styling | DaisyUI + Tailwind CSS | NativeWind v4 |
-| Local DB | PouchDB (IndexedDB) | Expo SQLite |
-| Simple KV store | localStorage | MMKV |
-| Auth | OAuth redirects | expo-auth-session |
-| GitHub API | @octokit/rest | @octokit/rest (unchanged) |
-| i18n | vue-i18n | react-i18next |
-| Date utils | date-fns | date-fns (unchanged) |
-| Markdown content | markdown-it (DOM) | react-native-webview |
-| Fonts | CSS custom properties | expo-font |
+| Concern          | Current (Vue)          | React Native                                               |
+| ---------------- | ---------------------- | ---------------------------------------------------------- |
+| Framework        | Vue 3 + Vite           | Expo SDK (managed workflow)                                |
+| Routing          | Vue Router             | Expo Router (file-system routing over React Navigation v7) |
+| State            | Pinia                  | Zustand                                                    |
+| Server state     | TanStack Vue Query     | TanStack Query (same library)                              |
+| Styling          | DaisyUI + Tailwind CSS | NativeWind v4                                              |
+| Local DB         | PouchDB (IndexedDB)    | Expo SQLite                                                |
+| Simple KV store  | localStorage           | MMKV                                                       |
+| Auth             | OAuth redirects        | expo-auth-session                                          |
+| GitHub API       | @octokit/rest          | @octokit/rest (unchanged)                                  |
+| i18n             | vue-i18n               | react-i18next                                              |
+| Date utils       | date-fns               | date-fns (unchanged)                                       |
+| Markdown content | markdown-it (DOM)      | react-native-webview                                       |
+| Fonts            | CSS custom properties  | expo-font                                                  |
 
 ## Navigation Structure
 
@@ -137,14 +137,18 @@ Zustand replaces Pinia. The store shape is identical to `userRepo.store.ts`:
 
 ```ts
 const useRepoStore = create<RepoState>((set, get) => ({
-  user: '',
-  repo: '',
+  user: "",
+  repo: "",
   files: [],
   userSettings: null,
   needToLogin: false,
   setRepo: (user, repo) => set({ user, repo }),
-  loadFiles: async () => { /* Octokit call */ },
-  loadSettings: async () => { /* MMKV read */ },
+  loadFiles: async () => {
+    /* Octokit call */
+  },
+  loadSettings: async () => {
+    /* MMKV read */
+  }
 }))
 ```
 
@@ -165,6 +169,7 @@ The markdown-it pipeline (KaTeX, Mermaid, shiki, tabler icons, html5-media, GitH
 `NoteWebView` is a native UIView/View wrapper around a WebView engine. It is a React Native component — not a web app. The surrounding app (navigation chrome, tab bar, headers, settings, auth screens) is 100% native. Only the note content pane renders HTML. This is the standard pattern for rich content in React Native (used by GitHub Mobile, Linear, and others).
 
 The WebView communicates back to the native layer via `postMessage` for:
+
 - Internal note link taps (trigger React Navigation push)
 - External URL taps (open in system browser)
 - Backlink detection events

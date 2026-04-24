@@ -1,12 +1,5 @@
 <script lang="ts" setup>
-import {
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  toRefs,
-  watch
-} from "vue"
+import { computed, nextTick, onMounted, onUnmounted, toRefs, watch } from "vue"
 
 import HeaderNote from "@/components/HeaderNote.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
@@ -241,6 +234,7 @@ $header-height: 40px;
   .flux-note {
     .readme {
       padding: 0 0.75rem;
+      position: relative;
     }
   }
 

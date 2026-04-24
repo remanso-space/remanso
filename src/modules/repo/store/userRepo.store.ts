@@ -37,11 +37,20 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     _persistFonts() {
       if (!this.userSettings) return
       try {
-        const { chosenTitleFont, chosenBodyFont, chosenFontSize, chosenFontFamily } =
-          this.userSettings
+        const {
+          chosenTitleFont,
+          chosenBodyFont,
+          chosenFontSize,
+          chosenFontFamily
+        } = this.userSettings
         localStorage.setItem(
           `remanso:fonts:${this.user}:${this.repo}`,
-          JSON.stringify({ chosenTitleFont, chosenBodyFont, chosenFontSize, chosenFontFamily })
+          JSON.stringify({
+            chosenTitleFont,
+            chosenBodyFont,
+            chosenFontSize,
+            chosenFontFamily
+          })
         )
       } catch {
         // ignore
@@ -61,7 +70,8 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       }
 
       if (Object.keys(lsFonts).length) {
-        if (!this.userSettings) this.userSettings = { $type: DataType.UserSettings }
+        if (!this.userSettings)
+          this.userSettings = { $type: DataType.UserSettings }
         Object.assign(this.userSettings, lsFonts)
       }
 

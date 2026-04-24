@@ -25,6 +25,12 @@ const { isATProtoReady } = useATProtoLogin()
   overflow-x: auto;
 }
 
+@media screen and (max-width: 768px) {
+  #main-app {
+    overflow-y: auto;
+  }
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.25s;

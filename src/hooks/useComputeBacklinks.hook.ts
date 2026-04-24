@@ -16,7 +16,9 @@ const isMarkdown = (filename?: string) => filename?.endsWith(".md") ?? false
 
 const yieldToMain = () =>
   "scheduler" in globalThis
-    ? (globalThis as unknown as { scheduler: { yield: () => Promise<void> } }).scheduler.yield()
+    ? (
+        globalThis as unknown as { scheduler: { yield: () => Promise<void> } }
+      ).scheduler.yield()
     : new Promise<void>((r) => setTimeout(r, 0))
 
 export const useComputeBacklinks = () => {
@@ -43,9 +45,10 @@ export const useComputeBacklinks = () => {
         }
 
         const fileBacklinkId = generateId(DataType.BacklinkNote, file.sha)
-        const fileBacklink = await data.get<DataType.BacklinkNote, BacklinkNote>(
-          fileBacklinkId
-        )
+        const fileBacklink = await data.get<
+          DataType.BacklinkNote,
+          BacklinkNote
+        >(fileBacklinkId)
         if (fileBacklink) {
           continue
         }

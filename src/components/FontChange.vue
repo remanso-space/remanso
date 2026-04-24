@@ -50,22 +50,14 @@ const fontSize = computed({
   <div class="font-change">
     <div>
       <label for="title-font" class="font-label">t</label>
-      <select
-        id="title-font"
-        class="select"
-        v-model="titleFont"
-      >
+      <select id="title-font" class="select" v-model="titleFont">
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
         </option>
       </select>
 
       <label for="body-font" class="font-label">p</label>
-      <select
-        id="body-font"
-        class="select"
-        v-model="bodyFont"
-      >
+      <select id="body-font" class="select" v-model="bodyFont">
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
         </option>
@@ -75,11 +67,7 @@ const fontSize = computed({
       <theme-swap />
 
       <label for="font-size" class="font-label">s</label>
-      <select
-        id="font-size"
-        class="select"
-        v-model="fontSize"
-      >
+      <select id="font-size" class="select" v-model="fontSize">
         <option v-for="size in fontSizes" :key="size" :value="size">
           {{ size }}
         </option>

@@ -8,8 +8,14 @@ import { useRepoList } from "@/modules/repo/hooks/useRepoList.hook"
 
 const { username } = useGitHubLogin()
 const { isReady } = useRepos()
-const { favoriteRepos, otherRepos, favoriteCheckboxes, toggleCheckbox, canLoadMore, loadMore } =
-  useRepoList()
+const {
+  favoriteRepos,
+  otherRepos,
+  favoriteCheckboxes,
+  toggleCheckbox,
+  canLoadMore,
+  loadMore
+} = useRepoList()
 </script>
 
 <template>
