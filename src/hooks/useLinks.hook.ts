@@ -19,6 +19,15 @@ export const useLinks = (
     }
 
     if (href.startsWith("#")) {
+      event.preventDefault()
+      const id = href.slice(1)
+      const container = document.querySelector(`.${toValue(className)}`)
+      const heading = container?.querySelector(`#${CSS.escape(id)}`)
+      heading?.scrollIntoView({
+        block: "start",
+        inline: "nearest",
+        behavior: "smooth"
+      })
       return
     }
 
