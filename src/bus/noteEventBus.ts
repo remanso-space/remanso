@@ -4,6 +4,7 @@ interface EventBusParams {
   user: string
   repo: string
   path: string
+  hash?: string
   currentNoteSHA?: string
 }
 

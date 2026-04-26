@@ -20,6 +20,9 @@ importers:
       '@intlify/unplugin-vue-i18n':
         specifier: ^6.0.8
         version: 6.0.8(@vue/compiler-dom@3.5.28)(eslint@8.57.1)(rollup@2.79.2)(typescript@5.9.3)(vue-i18n@11.1.11(vue@3.5.18(typescript@5.9.3)))(vue@3.5.18(typescript@5.9.3))
+      '@mdit/plugin-tab':
+        specifier: ^0.24.2
+        version: 0.24.2(markdown-it@14.1.0)
       '@octokit/core':
         specifier: ^7.0.6
         version: 7.0.6
@@ -74,12 +77,18 @@ importers:
       fontfaceobserver:
         specifier: ^2.3.0
         version: 2.3.0
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       isomorphic-fetch:
         specifier: ^3.0.0
         version: 3.0.0
       markdown-it:
         specifier: ^14.1.0
         version: 14.1.0
+      markdown-it-anchor:
+        specifier: ^9.2.0
+        version: 9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.1.0)
       markdown-it-block-embed:
         specifier: ^0.0.3
         version: 0.0.3
@@ -1306,6 +1315,24 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@mdit/helper@0.23.2':
+    resolution: {integrity: sha512-w4oja7kZYnkSiodfn4Neg1gmlIkvQtmCBJTLvLFOaET7xt8KomDNPQeumpGobQ9dWkXFqBKHlxjTYgroPH+CvA==}
+    engines: {node: '>= 20'}
+    peerDependencies:
+      markdown-it: ^14.1.0
+    peerDependenciesMeta:
+      markdown-it:
+        optional: true
+
+  '@mdit/plugin-tab@0.24.2':
+    resolution: {integrity: sha512-9rN23SP4beO0shBOuSGLGR+Ia7fminVSH6xl5Rb6rh6rRYQ6R3NR2KkIfLZvoMCRiN2uDwhXT/R9LyXHOdRMUQ==}
+    engines: {node: '>= 20'}
+    peerDependencies:
+      markdown-it: ^14.1.0
+    peerDependenciesMeta:
+      markdown-it:
+        optional: true
 
   '@mermaid-js/parser@0.6.3':
     resolution: {integrity: sha512-lnjOhe7zyHjc+If7yT4zoedx2vo4sHaTmtkl1+or8BRTnCtDmcTpAjpzDSfCZrshM5bCoz0GyidzadJAH1xobA==}
@@ -3871,6 +3898,9 @@ packages:
   getpass@0.1.7:
     resolution: {integrity: sha512-0fzj9JxOLfJ+XGLhR8ze3unN0KZCgZwiSSDz168VERjK8Wl8kVSdcu2kspd4s4wtAa1y/qrVRiAA0WclVsu0ng==}
 
+  github-slugger@2.0.0:
+    resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
+
   glob-base@0.3.0:
     resolution: {integrity: sha512-ab1S1g1EbO7YzauaJLkgLp7DZVAqj9M/dvKlTt8DkXA2tiOIcSMrlVI2J1RZyB5iJVccEscjGn+kpOG9788MHA==}
     engines: {node: '>=0.10.0'}
@@ -4847,6 +4877,12 @@ packages:
   map-visit@1.0.0:
     resolution: {integrity: sha512-4y7uGv8bd2WdM9vpQsiQNo41Ln1NvhvDRuVt0k2JZQ+ezN2uaQes7lZeZ+QQUHOLQAtDaBJ+7wCbi+ab/KFs+w==}
     engines: {node: '>=0.10.0'}
+
+  markdown-it-anchor@9.2.0:
+    resolution: {integrity: sha512-sa2ErMQ6kKOA4l31gLGYliFQrMKkqSO0ZJgGhDHKijPf0pNFM9vghjAh3gn26pS4JDRs7Iwa9S36gxm3vgZTzg==}
+    peerDependencies:
+      '@types/markdown-it': '*'
+      markdown-it: '*'
 
   markdown-it-block-embed@0.0.3:
     resolution: {integrity: sha512-coWuC/uZY6Z1Gp3wthhJo5yjkG3/gHErNF/emaiEvD98fKzEHNP6GCYGfJfk5o0n31xiaYjbDgef+XtabKOZzA==}
@@ -7880,6 +7916,19 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@mdit/helper@0.23.2(markdown-it@14.1.0)':
+    dependencies:
+      '@types/markdown-it': 14.1.2
+    optionalDependencies:
+      markdown-it: 14.1.0
+
+  '@mdit/plugin-tab@0.24.2(markdown-it@14.1.0)':
+    dependencies:
+      '@mdit/helper': 0.23.2(markdown-it@14.1.0)
+      '@types/markdown-it': 14.1.2
+    optionalDependencies:
+      markdown-it: 14.1.0
+
   '@mermaid-js/parser@0.6.3':
     dependencies:
       langium: 3.3.1
@@ -10560,6 +10609,8 @@ snapshots:
     dependencies:
       assert-plus: 1.0.0
 
+  github-slugger@2.0.0: {}
+
   glob-base@0.3.0:
     dependencies:
       glob-parent: 2.0.0
@@ -11596,6 +11647,11 @@ snapshots:
   map-visit@1.0.0:
     dependencies:
       object-visit: 1.0.1
+
+  markdown-it-anchor@9.2.0(@types/markdown-it@14.1.2)(markdown-it@14.1.0):
+    dependencies:
+      '@types/markdown-it': 14.1.2
+      markdown-it: 14.1.0
 
   markdown-it-block-embed@0.0.3: {}
 

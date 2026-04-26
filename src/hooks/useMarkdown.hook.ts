@@ -1,7 +1,10 @@
+import { tab } from "@mdit/plugin-tab"
 import markdownItKatex from "@vscode/markdown-it-katex"
+import GithubSlugger from "github-slugger"
 import MarkdownIt, { Options } from "markdown-it"
 import Renderer, { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
 import type Token from "markdown-it/lib/token.mjs"
+import markdownItAnchor from "markdown-it-anchor"
 import blockEmbedPlugin from "markdown-it-block-embed"
 import markdownItCheckbox from "markdown-it-checkbox"
 import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
@@ -45,6 +48,8 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
   }
 }
 
+const slugger = new GithubSlugger()
+
 const md = new MarkdownIt({
   typographer: true,
   quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"]
@@ -64,6 +69,12 @@ const md = new MarkdownIt({
   })
   .use(MarkdownItGitHubAlerts)
   .use(markdownItTablerIcons)
+  .use(tab, {
+    name: "tabs"
+  })
+  .use(markdownItAnchor, {
+    slugify: (s: string) => slugger.slug(s)
+  })
 
 let shikijiInitialized = false
 
@@ -123,11 +134,16 @@ const stripFrontmatter = (content: string): string => {
   return match ? content.slice(match[0].length) : content
 }
 
+const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
+  slugger.reset()
+  return env ? md.render(content, env) : md.render(content)
+}
+
 export const markdownBuilder = (defaultPrefix?: Ref<string> | string) => {
   const getRawContent = (content: string) => decodeBase64ToUTF8(content)
   const renderFromUTF8 = (content: string, prefix?: string) => {
     return content
-      ? md.render(stripFrontmatter(content), {
+      ? renderMarkdown(stripFrontmatter(content), {
           docId: defaultPrefix ? toValue(defaultPrefix) : (prefix ?? "")
         })
       : ""
@@ -135,7 +151,7 @@ export const markdownBuilder = (defaultPrefix?: Ref<string> | string) => {
 
   return {
     toHTML: (content: string) =>
-      content ? md.render(stripFrontmatter(content)) : "",
+      content ? renderMarkdown(stripFrontmatter(content)) : "",
     render: (content: string, prefix?: string) =>
       renderFromUTF8(decodeBase64ToUTF8(content), prefix),
     renderFromUTF8,

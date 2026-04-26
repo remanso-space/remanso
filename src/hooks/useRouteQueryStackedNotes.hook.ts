@@ -20,9 +20,32 @@ export const useRouteQueryStackedNotes = () => {
 
   const { scrollToNote, isMobile } = useOverlay(false)
 
+  const scrollToHashInNote = (
+    cleanSha: string,
+    hash: string,
+    attempts = 30
+  ) => {
+    if (attempts <= 0) {
+      return
+    }
+
+    const heading = document.querySelector(
+      `.note-${cleanSha} #${CSS.escape(hash)}`
+    )
+    if (heading) {
+      heading.scrollIntoView({ block: "start", inline: "nearest" })
+      return
+    }
+
+    requestAnimationFrame(() => {
+      scrollToHashInNote(cleanSha, hash, attempts - 1)
+    })
+  }
+
   const scrollToFocusedNote = (
     noteId: string | null = null,
-    notes: string[] = stackedNotes.value
+    notes: string[] = stackedNotes.value,
+    hash?: string
   ) => {
     nextTick(() => {
       const index = noteId ? notes.findIndex((nid) => nid === noteId) : 0
@@ -47,16 +70,21 @@ export const useRouteQueryStackedNotes = () => {
           scrollToNote(0)
         }
       }
+
+      if (hash && noteId) {
+        scrollToHashInNote(noteId.replaceAll(":", "-"), hash)
+      }
     })
   }
 
   const addStackedNote = (
     currentSha: string,
     sha: string,
-    selector?: string
+    selector?: string,
+    hash?: string
   ) => {
     if (stackedNotes.value.includes(sha)) {
-      scrollToFocusedNote(selector ?? sha)
+      scrollToFocusedNote(selector ?? sha, stackedNotes.value, hash)
       return
     }
 
@@ -76,7 +104,7 @@ export const useRouteQueryStackedNotes = () => {
       stackedNotes.value = newStackedNotes
     }
 
-    scrollToFocusedNote(selector ?? sha, stackedNotes.value)
+    scrollToFocusedNote(selector ?? sha, stackedNotes.value, hash)
   }
 
   return {

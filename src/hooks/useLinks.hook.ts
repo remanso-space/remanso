@@ -30,8 +30,13 @@ export const useLinks = (
       return
     }
 
+    const hashIndex = href.indexOf("#")
+    const path = hashIndex === -1 ? href : href.slice(0, hashIndex)
+    const hash = hashIndex === -1 ? undefined : href.slice(hashIndex + 1)
+
     noteEventBus.emit({
-      path: href,
+      path,
+      hash,
       currentNoteSHA: toValue(sha),
       user: store.user,
       repo: store.repo

@@ -25,7 +25,7 @@ export const useNoteView = () => {
   )
 
   const unsubscribeLink = noteEventBus.addEventBusListener(
-    ({ path, currentNoteSHA }) => {
+    ({ path, hash, currentNoteSHA }) => {
       const currentFile = store.files.find(
         (file) => file.sha === currentNoteSHA
       )
@@ -38,7 +38,7 @@ export const useNoteView = () => {
         return
       }
 
-      addStackedNote(currentNoteSHA ?? "", file.sha)
+      addStackedNote(currentNoteSHA ?? "", file.sha, undefined, hash)
     }
   )
 
