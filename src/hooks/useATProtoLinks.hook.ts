@@ -17,8 +17,8 @@ export const useATProtoLinks = (
   const { currentAtUri, mainNoteId } = options
 
   const linkNote = (event: Event) => {
-    const target = event.target as HTMLElement
-    const href = target.getAttribute("href")
+    const anchor = (event.target as HTMLElement).closest("a")
+    const href = anchor?.getAttribute("href")
 
     if (!href) {
       return

@@ -11,8 +11,8 @@ export const useLinks = (
   const store = useUserRepoStore()
 
   const linkNote: EventListener = (event) => {
-    const target = event.target as HTMLElement
-    const href = target.getAttribute("href")
+    const anchor = (event.target as HTMLElement).closest("a")
+    const href = anchor?.getAttribute("href")
 
     if (!href) {
       return
