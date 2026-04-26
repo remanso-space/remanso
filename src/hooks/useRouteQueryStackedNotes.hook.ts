@@ -23,6 +23,7 @@ export const useRouteQueryStackedNotes = () => {
   const scrollToHashInNote = (
     cleanSha: string,
     hash: string,
+    smooth: boolean,
     attempts = 30
   ) => {
     if (attempts <= 0) {
@@ -33,20 +34,32 @@ export const useRouteQueryStackedNotes = () => {
       `.note-${cleanSha} #${CSS.escape(hash)}`
     )
     if (heading) {
-      heading.scrollIntoView({ block: "start", inline: "nearest" })
+      heading.scrollIntoView({
+        block: "start",
+        inline: "nearest",
+        behavior: smooth ? "smooth" : "auto"
+      })
       return
     }
 
     requestAnimationFrame(() => {
-      scrollToHashInNote(cleanSha, hash, attempts - 1)
+      scrollToHashInNote(cleanSha, hash, smooth, attempts - 1)
     })
   }
 
-  const scrollToFocusedNote = (
-    noteId: string | null = null,
-    notes: string[] = stackedNotes.value,
+  type ScrollToFocusedNoteOptions = {
+    noteId?: string | null
+    notes?: string[]
     hash?: string
-  ) => {
+    smoothHash?: boolean
+  }
+
+  const scrollToFocusedNote = ({
+    noteId = null,
+    notes = stackedNotes.value,
+    hash,
+    smoothHash = false
+  }: ScrollToFocusedNoteOptions = {}) => {
     nextTick(() => {
       const index = noteId ? notes.findIndex((nid) => nid === noteId) : 0
 
@@ -72,7 +85,7 @@ export const useRouteQueryStackedNotes = () => {
       }
 
       if (hash && noteId) {
-        scrollToHashInNote(noteId.replaceAll(":", "-"), hash)
+        scrollToHashInNote(noteId.replaceAll(":", "-"), hash, smoothHash)
       }
     })
   }
@@ -84,7 +97,11 @@ export const useRouteQueryStackedNotes = () => {
     hash?: string
   ) => {
     if (stackedNotes.value.includes(sha)) {
-      scrollToFocusedNote(selector ?? sha, stackedNotes.value, hash)
+      scrollToFocusedNote({
+        noteId: selector ?? sha,
+        hash,
+        smoothHash: true
+      })
       return
     }
 
@@ -104,7 +121,7 @@ export const useRouteQueryStackedNotes = () => {
       stackedNotes.value = newStackedNotes
     }
 
-    scrollToFocusedNote(selector ?? sha, stackedNotes.value, hash)
+    scrollToFocusedNote({ noteId: selector ?? sha, hash })
   }
 
   return {

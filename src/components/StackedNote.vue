@@ -142,7 +142,7 @@ watch(mode, async (newMode) => {
   >
     <a
       class="title-stacked-note-link"
-      @click.prevent="scrollToFocusedNote(props.sha)"
+      @click.prevent="scrollToFocusedNote({ noteId: props.sha })"
     >
       <div
         class="title-stacked-note breadcrumbs text-sm"

@@ -97,7 +97,7 @@ watch(
   >
     <a
       class="title-stacked-note-link"
-      @click.prevent="scrollToFocusedNote(didrkey)"
+      @click.prevent="scrollToFocusedNote({ noteId: didrkey })"
     >
       <div
         class="title-stacked-note breadcrumbs text-sm"

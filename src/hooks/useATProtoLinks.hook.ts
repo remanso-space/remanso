@@ -50,7 +50,7 @@ export const useATProtoLinks = (
         : `${params.shortDid}-${params.rkey}`
 
       if (noteId === toValue(mainNoteId)) {
-        scrollToFocusedNote(null)
+        scrollToFocusedNote()
         return
       }
 
@@ -67,7 +67,7 @@ export const useATProtoLinks = (
       const noteId = `${toShortDid(did)}-${rkey}`
 
       if (noteId === toValue(mainNoteId)) {
-        scrollToFocusedNote(null)
+        scrollToFocusedNote()
         return
       }
 
