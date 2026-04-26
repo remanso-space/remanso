@@ -34,22 +34,24 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     _requestId: 0
   }),
   actions: {
-    _persistFonts() {
+    _persistLayout() {
       if (!this.userSettings) return
       try {
         const {
           chosenTitleFont,
           chosenBodyFont,
           chosenFontSize,
-          chosenFontFamily
+          chosenFontFamily,
+          pageWidth
         } = this.userSettings
         localStorage.setItem(
-          `remanso:fonts:${this.user}:${this.repo}`,
+          `remanso:layout:${this.user}:${this.repo}`,
           JSON.stringify({
             chosenTitleFont,
             chosenBodyFont,
             chosenFontSize,
-            chosenFontFamily
+            chosenFontFamily,
+            pageWidth
           })
         )
       } catch {
@@ -61,18 +63,18 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       this.user = user
       this.repo = repo
 
-      let lsFonts: Partial<UserSettings> = {}
+      let lsLayout: Partial<UserSettings> = {}
       try {
-        const lsRaw = localStorage.getItem(`remanso:fonts:${user}:${repo}`)
-        if (lsRaw) lsFonts = JSON.parse(lsRaw)
+        const lsRaw = localStorage.getItem(`remanso:layout:${user}:${repo}`)
+        if (lsRaw) lsLayout = JSON.parse(lsRaw)
       } catch {
         // ignore
       }
 
-      if (Object.keys(lsFonts).length) {
+      if (Object.keys(lsLayout).length) {
         if (!this.userSettings)
           this.userSettings = { $type: DataType.UserSettings }
-        Object.assign(this.userSettings, lsFonts)
+        Object.assign(this.userSettings, lsLayout)
       }
 
       const savedRepoId = generateId(DataType.SavedRepo, `${user}-${repo}`)
@@ -90,8 +92,8 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       }
 
       if (cachedUserSettings) {
-        // localStorage font choices take priority over PouchDB cache
-        this.userSettings = { ...cachedUserSettings, ...lsFonts }
+        // localStorage layout choices take priority over PouchDB cache
+        this.userSettings = { ...cachedUserSettings, ...lsLayout }
       }
 
       try {
@@ -144,6 +146,8 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             chosenFontSize ?? this.userSettings.fontSize
           this.userSettings.chosenTitleFont = chosenTitleFont
           this.userSettings.chosenBodyFont = chosenBodyFont
+
+          this._persistLayout()
 
           // Persist only repo config fields — chosen* are localStorage-only
           const {
@@ -205,28 +209,28 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenFontFamily = fontFamily
-      this._persistFonts()
+      this._persistLayout()
     },
     setFontSize(fontSize: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenFontSize = fontSize
-      this._persistFonts()
+      this._persistLayout()
     },
     setTitleFont(font: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenTitleFont = font
-      this._persistFonts()
+      this._persistLayout()
     },
     setBodyFont(font: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
       this.userSettings.chosenBodyFont = font
-      this._persistFonts()
+      this._persistLayout()
     }
   }
 })
