@@ -1,4 +1,6 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import SignInGithub from "@/components/SignInGithub.vue"
+</script>
 
 <template>
   <main class="space-cowboy content">
@@ -43,6 +45,7 @@
     <router-link class="button is-links" :to="{ name: 'Home' }"
       >return to homepage</router-link
     >
+    <sign-in-github />
   </main>
 </template>
 

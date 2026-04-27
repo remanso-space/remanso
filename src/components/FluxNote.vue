@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, toRefs, watch } from "vue"
 
 import HeaderNote from "@/components/HeaderNote.vue"
+import SignInGithub from "@/components/SignInGithub.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedNote from "@/components/StackedNote.vue"
 import { useLinks } from "@/hooks/useLinks.hook"
@@ -102,6 +103,10 @@ onUnmounted(() => {
       </div>
       <slot />
       <skeleton-loader v-if="isLoading" />
+      <div v-else-if="withContent && !hasContent" class="repo-not-found">
+        <p>This repository is not accessible.</p>
+        <sign-in-github />
+      </div>
       <p
         v-else-if="withContent && hasContent"
         class="note-display"
@@ -187,6 +192,15 @@ $header-height: 40px;
         vertical-align: middle;
       }
     }
+  }
+
+  .repo-not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 0;
+    color: var(--color-base-content);
   }
 
   .note-display {
