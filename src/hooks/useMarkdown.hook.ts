@@ -1,3 +1,4 @@
+import type { MarkdownItTabData, MarkdownItTabInfo } from "@mdit/plugin-tab"
 import { tab } from "@mdit/plugin-tab"
 import markdownItKatex from "@vscode/markdown-it-katex"
 import GithubSlugger from "github-slugger"
@@ -50,6 +51,10 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
 
 const slugger = new GithubSlugger()
 
+let tabGroupCounter = 0
+let currentTabGroup = 0
+let currentTabActiveSet = false
+
 const md = new MarkdownIt({
   typographer: true,
   quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"]
@@ -70,7 +75,20 @@ const md = new MarkdownIt({
   .use(MarkdownItGitHubAlerts)
   .use(markdownItTablerIcons)
   .use(tab, {
-    name: "tabs"
+    name: "tabs",
+    openRender: (info: MarkdownItTabInfo) => {
+      currentTabGroup = ++tabGroupCounter
+      currentTabActiveSet = info.active >= 0
+      return '<div class="tabs tabs-lift">\n'
+    },
+    closeRender: () => "</div>\n",
+    tabOpenRender: (data: MarkdownItTabData) => {
+      const isChecked = data.isActive || (!currentTabActiveSet && data.index === 0)
+      const checked = isChecked ? " checked" : ""
+      const title = data.title.replace(/"/g, "&quot;")
+      return `<input type="radio" name="md-tabs-${currentTabGroup}" class="tab" aria-label="${title}"${checked}>\n<div class="tab-content bg-base-100 border-base-300 rounded-box p-6">\n`
+    },
+    tabCloseRender: () => "</div>\n"
   })
   .use(markdownItAnchor, {
     slugify: (s: string) => slugger.slug(s)
