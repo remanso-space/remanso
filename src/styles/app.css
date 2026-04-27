@@ -233,3 +233,12 @@ iframe {
 .todo-notes li:has(> input[type="checkbox"]) {
   list-style: none;
 }
+
+.tabs :where(pre):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0.2rem;
+  padding-inline-end: 0.2rem;
+  padding-bottom: 0.2rem;
+  padding-inline-start: 0.2rem;
+}
