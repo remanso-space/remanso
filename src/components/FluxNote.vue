@@ -101,9 +101,9 @@ onUnmounted(() => {
         <cache-all-notes />
       </div>
       <slot />
-      <skeleton-loader v-if="isLoading || !hasContent" />
+      <skeleton-loader v-if="isLoading" />
       <p
-        v-else-if="withContent"
+        v-else-if="withContent && hasContent"
         class="note-display"
         v-html="renderedContent"
       />
