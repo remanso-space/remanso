@@ -65,6 +65,19 @@ const flashOffset = () => {
   }, 900)
 }
 
+const firstHighlighted = ref(false)
+const flashFirst = () => {
+  firstHighlighted.value = true
+  setTimeout(() => {
+    firstHighlighted.value = false
+  }, 900)
+}
+
+const zettelRevealed = ref(false)
+const toggleZettel = () => {
+  zettelRevealed.value = !zettelRevealed.value
+}
+
 const reviewRepo = computed(() => savedFavoriteRepos.value[0] ?? null)
 const showReviewCard = computed(
   () => cardsToReview.value.length > 0 && reviewRepo.value !== null
@@ -464,7 +477,10 @@ const showReviewCard = computed(
             </span>
           </h2>
           <div class="demo-notes">
-            <article class="note-preview">
+            <article
+              class="note-preview"
+              :class="{ 'note-preview--flash': firstHighlighted }"
+            >
               <div class="note-header">
                 <span class="mono note-breadcrumb"
                   >remanso-space / getting-started</span
@@ -481,9 +497,10 @@ const showReviewCard = computed(
                 </p>
                 <p>
                   Luhmann called this the
-                  <a class="note-link" href="#" @click.prevent>zettelkasten</a>:
-                  a slip-box of thoughts you converse with, rather than a hoard
-                  of pages you re-read.
+                  <a class="note-link" href="#" @click.prevent="toggleZettel"
+                    >zettelkasten</a
+                  >: a slip-box of thoughts you converse with, rather than a
+                  hoard of pages you re-read.
                 </p>
               </div>
               <div class="note-backlinks">
@@ -498,33 +515,71 @@ const showReviewCard = computed(
                 </ul>
               </div>
             </article>
-            <article
-              class="note-preview note-preview-offset"
-              :class="{ 'note-preview--flash': offsetHighlighted }"
-            >
-              <div class="note-header">
-                <span class="mono note-breadcrumb"
-                  >remanso-space / getting-started</span
-                >
-              </div>
-              <h3 class="note-title">Durable enough</h3>
-              <div class="note-body">
-                <p>
-                  A durable note survives its own context. You should be able to
-                  pick it up six months from now and still know what it means.
-                </p>
-                <p>
-                  Rule of thumb: write the title as the claim, and the body as
-                  the argument.
-                </p>
-              </div>
-              <div class="note-backlinks">
-                <div class="backlinks-h mono">↖ linked from</div>
-                <ul>
-                  <li><a @click.prevent href="#">on keeping notes</a></li>
-                </ul>
-              </div>
-            </article>
+            <div class="note-stack">
+              <article
+                class="note-preview note-preview-offset"
+                :class="{ 'note-preview--flash': offsetHighlighted }"
+              >
+                <div class="note-header">
+                  <span class="mono note-breadcrumb"
+                    >remanso-space / getting-started</span
+                  >
+                </div>
+                <h3 class="note-title">Durable enough</h3>
+                <div class="note-body">
+                  <p>
+                    A durable note survives its own context. You should be able
+                    to pick it up six months from now and still know what it
+                    means.
+                  </p>
+                  <p>
+                    Rule of thumb: write the title as the claim, and the body
+                    as the argument.
+                  </p>
+                </div>
+                <div class="note-backlinks">
+                  <div class="backlinks-h mono">↖ linked from</div>
+                  <ul>
+                    <li>
+                      <a @click.prevent="flashFirst" href="#"
+                        >on keeping notes</a
+                      >
+                    </li>
+                  </ul>
+                </div>
+              </article>
+              <article
+                class="note-preview note-preview-zettel"
+                :class="{ 'is-revealed': zettelRevealed }"
+                :aria-hidden="!zettelRevealed"
+              >
+                <div class="note-header">
+                  <span class="mono note-breadcrumb"
+                    >remanso-space / getting-started</span
+                  >
+                </div>
+                <h3 class="note-title">Zettelkasten</h3>
+                <div class="note-body">
+                  <p>
+                    A <em>slip-box</em> of atomic notes wired together by links
+                    instead of filed away in folders. Niklas Luhmann kept
+                    ninety thousand of them in a wooden cabinet and wrote with
+                    them, not just about them.
+                  </p>
+                  <p>
+                    Each <em>Zettel</em> earns its keep by being linked to.
+                    Open one, follow a thread, end up somewhere you didn't plan
+                    to go.
+                  </p>
+                </div>
+                <div class="note-backlinks">
+                  <div class="backlinks-h mono">↖ linked from</div>
+                  <ul>
+                    <li><a @click.prevent href="#">on keeping notes</a></li>
+                  </ul>
+                </div>
+              </article>
+            </div>
           </div>
         </div>
       </section>
@@ -1298,6 +1353,39 @@ main {
 
 .note-preview--flash {
   animation: note-flash 0.9s ease forwards;
+}
+
+.note-stack {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+.note-preview-zettel {
+  position: absolute;
+  inset: 0;
+  margin-top: 2.5rem;
+  transform: rotate(-0.6deg) translate(0, 0) scale(0.97);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.3s ease;
+
+  &.is-revealed {
+    transform: rotate(-2deg) translate(28px, 28px) scale(0.97);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .note-preview-zettel {
+    &.is-revealed {
+      transform: rotate(-1.5deg) translate(12px, 22px) scale(0.96);
+    }
+  }
 }
 
 @keyframes note-flash {
