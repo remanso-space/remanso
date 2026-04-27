@@ -9,6 +9,7 @@ const STALE_TIME_MS = 20 * 60 * 1000
 
 const repos = ref<RepoBase[]>([])
 const isReady = ref(false)
+const isLoading = ref(false)
 const hasCredentialError = ref(false)
 const currentPage = ref(0)
 const totalCount = ref(0)
@@ -22,6 +23,8 @@ export const useRepos = () => {
       isReady.value = true
       return
     }
+    if (isLoading.value) return
+    isLoading.value = true
     try {
       const octokit = await getOctokit()
       const nextPage = currentPage.value + 1
@@ -53,10 +56,13 @@ export const useRepos = () => {
       }
     } finally {
       isReady.value = true
+      isLoading.value = false
     }
   }
 
-  const canLoadMore = computed(() => repos.value.length < totalCount.value)
+  const canLoadMore = computed(
+    () => !isLoading.value && repos.value.length < totalCount.value
+  )
 
   const isStale = Date.now() - lastFetchedAt > STALE_TIME_MS
   if (!isReady.value || isStale) {
@@ -65,6 +71,7 @@ export const useRepos = () => {
       currentPage.value = 0
       totalCount.value = 0
       isReady.value = false
+      isLoading.value = false
       hasCredentialError.value = false
     }
     lastFetchedAt = Date.now()
