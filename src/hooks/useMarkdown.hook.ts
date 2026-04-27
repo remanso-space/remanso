@@ -79,7 +79,7 @@ const md = new MarkdownIt({
     openRender: (info: MarkdownItTabInfo) => {
       currentTabGroup = ++tabGroupCounter
       currentTabActiveSet = info.active >= 0
-      return '<div class="tabs tabs-lift">\n'
+      return '<div class="tabs tabs-box">\n'
     },
     closeRender: () => "</div>\n",
     tabOpenRender: (data: MarkdownItTabData) => {
