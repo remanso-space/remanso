@@ -11,9 +11,11 @@ import markdownItCheckbox from "markdown-it-checkbox"
 import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
 import markdownItIframe from "markdown-it-iframe"
 import Shikiji from "markdown-it-shikiji"
+import type { LanguageRegistration } from "shikiji-core"
 import mermaid from "mermaid"
 import { Ref, toValue } from "vue"
 
+import alloyGrammar from "@/utils/alloy.tmLanguage.json"
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
@@ -116,7 +118,12 @@ export const useShikiji = async () => {
         "mermaid",
         "html",
         "css",
-        "json"
+        "json",
+        {
+          ...alloyGrammar,
+          name: "alloy",
+          aliases: ["als"]
+        } as unknown as LanguageRegistration
       ]
     })
   )
@@ -155,6 +162,19 @@ const stripFrontmatter = (content: string): string => {
 const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
   slugger.reset()
   return env ? md.render(content, env) : md.render(content)
+}
+
+export const renderCodeFile = async (
+  rawContent: string,
+  lang: string | null,
+  filename?: string
+): Promise<string> => {
+  await useShikiji()
+  const heading = filename ? `# ${filename}\n\n` : ""
+  if (lang !== null) {
+    return renderMarkdown(`${heading}\`\`\`\`${lang}\n${rawContent}\n\`\`\`\``)
+  }
+  return `${renderMarkdown(heading)}<pre><code>${md.utils.escapeHtml(rawContent)}</code></pre>`
 }
 
 export const markdownBuilder = (defaultPrefix?: Ref<string> | string) => {

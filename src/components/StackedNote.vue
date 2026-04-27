@@ -13,7 +13,8 @@ import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 import { useImages } from "@/hooks/useImages.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
-import { runMermaid, useShikiji } from "@/hooks/useMarkdown.hook"
+import { renderCodeFile, runMermaid, useShikiji } from "@/hooks/useMarkdown.hook"
+import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
@@ -53,6 +54,33 @@ const {
   getEditedSha
 } = useFile(sha)
 const initialRawContent = ref<string | null>(null)
+const isMarkdown = computed(() => (path.value ? isMarkdownPath(path.value) : true))
+const displayedContent = ref("")
+
+watch(
+  [rawContent, isMarkdown, path],
+  async ([raw, isMd, p]) => {
+    if (!raw) {
+      displayedContent.value = ""
+      return
+    }
+    if (isMd) {
+      displayedContent.value = content.value
+      return
+    }
+    const lang = p ? getFileLanguage(p) : null
+    const filename = p?.split("/").pop()
+    const result = await renderCodeFile(raw, lang, filename)
+    if (rawContent.value === raw) {
+      displayedContent.value = result
+    }
+  },
+  { immediate: true }
+)
+
+watch(content, (c) => {
+  if (isMarkdown.value) displayedContent.value = c
+})
 const className = computed(() => `stacked-note-${props.index}`)
 const { listenToClick } = useLinks(className.value, sha)
 const titleClassName = computed(() => `title-${className.value}`)
@@ -92,7 +120,7 @@ watch([content, mode], () => {
       runMermaid(`.note-${sha.value} .mermaid`)
     }
 
-    if (rawContent.value.includes("```")) {
+    if (isMarkdown.value && rawContent.value.includes("```")) {
       useShikiji()
     }
   })
@@ -157,6 +185,7 @@ watch(mode, async (newMode) => {
     </a>
     <section class="text-content">
       <button
+        v-if="isMarkdown"
         class="action button is-text is-light"
         :class="{ 'is-link': mode === 'edit' }"
         :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
@@ -205,10 +234,10 @@ watch(mode, async (newMode) => {
           <path d="M14 4l0 4l-6 0l0 -4" />
         </svg>
       </button>
-      <div v-if="mode === 'edit'" class="edit">
+      <div v-if="mode === 'edit' && isMarkdown" class="edit">
         <edit-note v-model="rawContent" />
       </div>
-      <div v-if="mode === 'read'" class="note-content" v-html="content"></div>
+      <div v-if="mode === 'read'" class="note-content" v-html="displayedContent"></div>
     </section>
     <linked-notes v-if="hasBacklinks && content" :sha="sha" />
   </div>
