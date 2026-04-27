@@ -1,3 +1,4 @@
+import { toRaw } from "vue"
 import { defineStore } from "pinia"
 
 import { data, generateId } from "@/data/data"
@@ -156,7 +157,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             chosenFontSize: _s,
             chosenFontFamily: _f,
             ...repoConfig
-          } = this.userSettings
+          } = toRaw(this.userSettings)
           data.update<DataType.UserSettings, UserSettings>({
             ...repoConfig,
             _id: userSettingsId
@@ -184,7 +185,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         DataType.SavedRepo,
         `${this.user}-${this.repo}`
       )
-      const newFiles = [...this.files.filter((f) => f.sha !== file.sha), file]
+      const newFiles = [...toRaw(this.files).filter((f) => f.sha !== file.sha), toRaw(file)]
       data.update<DataType.SavedRepo, SavedRepo>({
         _id: savedRepoId,
         $type: DataType.SavedRepo,
