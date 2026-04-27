@@ -2,12 +2,13 @@
 import { vInfiniteScroll } from "@vueuse/components"
 
 import GoBack from "@/components/GoBack.vue"
+import SignInGithub from "@/components/SignInGithub.vue"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useRepos } from "@/hooks/useRepos.hook"
 import { useRepoList } from "@/modules/repo/hooks/useRepoList.hook"
 
 const { username } = useGitHubLogin()
-const { isReady } = useRepos()
+const { isReady, hasCredentialError } = useRepos()
 const {
   favoriteRepos,
   otherRepos,
@@ -26,6 +27,10 @@ const {
     <h1 class="title is-1">Repositories</h1>
     <go-back />
     <div v-if="!isReady">loading...</div>
+    <div v-else-if="hasCredentialError">
+      <p>Your GitHub credentials are invalid or expired.</p>
+      <sign-in-github />
+    </div>
     <div v-else class="columns is-centered">
       <div class="column is-one-third">
         <table
