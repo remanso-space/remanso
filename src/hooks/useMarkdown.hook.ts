@@ -164,11 +164,15 @@ const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
   return env ? md.render(content, env) : md.render(content)
 }
 
-export const renderCodeFile = async (
-  rawContent: string,
-  lang: string | null,
+export const renderCodeFile = async ({
+  rawContent,
+  lang,
+  filename
+}: {
+  rawContent: string
+  lang: string | null
   filename?: string
-): Promise<string> => {
+}): Promise<string> => {
   await useShikiji()
   const heading = filename ? `# ${filename}\n\n` : ""
   if (lang !== null) {

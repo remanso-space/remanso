@@ -70,7 +70,7 @@ watch(
     }
     const lang = p ? getFileLanguage(p) : null
     const filename = p?.split("/").pop()
-    const result = await renderCodeFile(raw, lang, filename)
+    const result = await renderCodeFile({ rawContent: raw, lang, filename })
     if (rawContent.value === raw) {
       displayedContent.value = result
     }
