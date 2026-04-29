@@ -52,17 +52,17 @@ export const useRouteQueryStackedNotes = () => {
     index: number,
     attempts = 30
   ) => {
-    if (attempts <= 0) {
-      scrollToNote((index + 1) * height.value)
-      return
-    }
-
     const element = document.querySelector(
       `.note-${cleanNoteId}`
     ) as HTMLElement | null
 
     if (element) {
-      scrollToNote(element.offsetTop)
+      scrollToNote((index + 1) * element.clientHeight)
+      return
+    }
+
+    if (attempts <= 0) {
+      scrollToNote((index + 1) * height.value)
       return
     }
 
