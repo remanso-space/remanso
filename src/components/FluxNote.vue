@@ -211,7 +211,6 @@ $header-height: 40px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    height: 100%;
     position: sticky;
 
     &:not(:first-child) {
@@ -258,7 +257,6 @@ $header-height: 40px;
 
   .note {
     width: 100vw;
-    height: 100dvh;
     overflow-y: visible;
   }
 
