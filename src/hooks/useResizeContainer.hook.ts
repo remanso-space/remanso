@@ -19,7 +19,7 @@ export const useResizeContainer = (
     }
 
     if (isMobile.value) {
-      container.style.height = `${(stackedNotes.value.length + 1) * 100}vh`
+      container.style.height = `${(stackedNotes.value.length + 1) * 100}dvh`
     } else {
       container.style.minWidth = `${
         getNoteWidth() * (stackedNotes.value.length + 1)

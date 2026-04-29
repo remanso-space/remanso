@@ -533,8 +533,8 @@ const showReviewCard = computed(
                     means.
                   </p>
                   <p>
-                    Rule of thumb: write the title as the claim, and the body
-                    as the argument.
+                    Rule of thumb: write the title as the claim, and the body as
+                    the argument.
                   </p>
                 </div>
                 <div class="note-backlinks">
@@ -562,14 +562,14 @@ const showReviewCard = computed(
                 <div class="note-body">
                   <p>
                     A <em>slip-box</em> of atomic notes wired together by links
-                    instead of filed away in folders. Niklas Luhmann kept
-                    ninety thousand of them in a wooden cabinet and wrote with
-                    them, not just about them.
+                    instead of filed away in folders. Niklas Luhmann kept ninety
+                    thousand of them in a wooden cabinet and wrote with them,
+                    not just about them.
                   </p>
                   <p>
-                    Each <em>Zettel</em> earns its keep by being linked to.
-                    Open one, follow a thread, end up somewhere you didn't plan
-                    to go.
+                    Each <em>Zettel</em> earns its keep by being linked to. Open
+                    one, follow a thread, end up somewhere you didn't plan to
+                    go.
                   </p>
                 </div>
                 <div class="note-backlinks">

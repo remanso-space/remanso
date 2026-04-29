@@ -33,11 +33,23 @@
             { "match": "\\b(fact)\\b", "name": "keyword.language.fact.alloy" },
             { "match": "\\b(pred)\\b", "name": "keyword.language.pred.alloy" },
             { "match": "\\b(fun)\\b", "name": "keyword.language.fun.alloy" },
-            { "match": "\\b(module)\\b", "name": "keyword.language.module.alloy" },
-            { "match": "\\b(extends)\\b", "name": "keyword.language.extends.alloy" },
+            {
+              "match": "\\b(module)\\b",
+              "name": "keyword.language.module.alloy"
+            },
+            {
+              "match": "\\b(extends)\\b",
+              "name": "keyword.language.extends.alloy"
+            },
             { "match": ":", "name": "keyword.other.colon.alloy" },
-            { "match": "\\b(check)\\b", "name": "keyword.language.check.alloy" },
-            { "match": "\\b(assert)\\b", "name": "keyword.language.assert.alloy" },
+            {
+              "match": "\\b(check)\\b",
+              "name": "keyword.language.check.alloy"
+            },
+            {
+              "match": "\\b(assert)\\b",
+              "name": "keyword.language.assert.alloy"
+            },
             { "match": "\\b(run)\\b", "name": "keyword.language.run.alloy" },
             { "match": "\\b(open)\\b", "name": "keyword.other.open.alloy" },
             { "match": "\\b(as)\\b", "name": "keyword.other.as.alloy" },
@@ -47,9 +59,18 @@
         "modifier": {
           "patterns": [
             { "match": "\\b(var)\\b", "name": "keyword.modifier.var.alloy" },
-            { "match": "\\b(private)\\b", "name": "keyword.modifier.private.alloy" },
-            { "match": "\\b(abstract)\\b", "name": "keyword.modifier.abstract.alloy" },
-            { "match": "\\b(all|disj|lone|no|one|set|seq|some|sum|univ|none)\\b", "name": "keyword.modifier.set.alloy" }
+            {
+              "match": "\\b(private)\\b",
+              "name": "keyword.modifier.private.alloy"
+            },
+            {
+              "match": "\\b(abstract)\\b",
+              "name": "keyword.modifier.abstract.alloy"
+            },
+            {
+              "match": "\\b(all|disj|lone|no|one|set|seq|some|sum|univ|none)\\b",
+              "name": "keyword.modifier.set.alloy"
+            }
           ]
         },
         "operator": {
@@ -73,14 +94,26 @@
             },
             "unary": {
               "patterns": [
-                { "match": "!|#|~|\\*|\\^|(\\b(not)\\b)", "name": "keyword.operator.unary.alloy" }
+                {
+                  "match": "!|#|~|\\*|\\^|(\\b(not)\\b)",
+                  "name": "keyword.operator.unary.alloy"
+                }
               ]
             },
             "binary": {
               "patterns": [
-                { "match": "(?:\\|\\|)|&&|<=>|=>|&|\\+|-|\\+\\+|<:|:>|\\.|=|->", "name": "keyword.operator.binary.alloy" },
-                { "match": "\\b(and|or|iff|implies|else|in)\\b", "name": "keyword.operator.binary.alloy" },
-                { "match": "=|<|>|=<|>=", "name": "keyword.operator.binary.alloy" },
+                {
+                  "match": "(?:\\|\\|)|&&|<=>|=>|&|\\+|-|\\+\\+|<:|:>|\\.|=|->",
+                  "name": "keyword.operator.binary.alloy"
+                },
+                {
+                  "match": "\\b(and|or|iff|implies|else|in)\\b",
+                  "name": "keyword.operator.binary.alloy"
+                },
+                {
+                  "match": "=|<|>|=<|>=",
+                  "name": "keyword.operator.binary.alloy"
+                },
                 { "match": ",", "name": "keyword.other.comma.alloy" },
                 { "match": "\\|", "name": "keyword.other.split.alloy" }
               ]
@@ -97,8 +130,14 @@
           "patterns": [
             { "match": "\\b(for)\\b", "name": "keyword.control.for.alloy" },
             { "match": "\\b(but)\\b", "name": "keyword.control.but.alloy" },
-            { "match": "\\b(exactly)\\b", "name": "keyword.control.exactly.alloy" },
-            { "match": "\\b(expect)\\b", "name": "keyword.control.expect.alloy" },
+            {
+              "match": "\\b(exactly)\\b",
+              "name": "keyword.control.exactly.alloy"
+            },
+            {
+              "match": "\\b(expect)\\b",
+              "name": "keyword.control.expect.alloy"
+            },
             { "match": "\\b(steps)\\b", "name": "keyword.control.steps.alloy" }
           ]
         }
@@ -150,21 +189,34 @@
                 {
                   "begin": "(extends)",
                   "end": "(?=\\{)",
-                  "beginCaptures": { "1": { "name": "keyword.language.extends.alloy" } },
+                  "beginCaptures": {
+                    "1": { "name": "keyword.language.extends.alloy" }
+                  },
                   "patterns": [
-                    { "match": "(?:\\w|'|_|\\d|/)+", "name": "entity.other.inherited-class.alloy" }
+                    {
+                      "match": "(?:\\w|'|_|\\d|/)+",
+                      "name": "entity.other.inherited-class.alloy"
+                    }
                   ]
                 },
                 {
                   "begin": "(in)",
                   "end": "(?=\\{)",
-                  "beginCaptures": { "1": { "name": "keyword.other.in.alloy" } },
+                  "beginCaptures": {
+                    "1": { "name": "keyword.other.in.alloy" }
+                  },
                   "patterns": [
-                    { "match": "(?:\\w|'|_|\\d|/)+", "name": "entity.other.inherited-class.alloy" },
+                    {
+                      "match": "(?:\\w|'|_|\\d|/)+",
+                      "name": "entity.other.inherited-class.alloy"
+                    },
                     { "match": "\\+", "name": "keyword.operator.binary.alloy" }
                   ]
                 },
-                { "match": "(?:\\w|'|_|\\d|/)+", "name": "entity.name.type.signature.alloy" },
+                {
+                  "match": "(?:\\w|'|_|\\d|/)+",
+                  "name": "entity.name.type.signature.alloy"
+                },
                 { "match": ",", "name": "keyword.other.comma.alloy" }
               ]
             }

@@ -13,7 +13,11 @@ import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 import { useImages } from "@/hooks/useImages.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
-import { renderCodeFile, runMermaid, useShikiji } from "@/hooks/useMarkdown.hook"
+import {
+  renderCodeFile,
+  runMermaid,
+  useShikiji
+} from "@/hooks/useMarkdown.hook"
 import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
@@ -54,7 +58,9 @@ const {
   getEditedSha
 } = useFile(sha)
 const initialRawContent = ref<string | null>(null)
-const isMarkdown = computed(() => (path.value ? isMarkdownPath(path.value) : true))
+const isMarkdown = computed(() =>
+  path.value ? isMarkdownPath(path.value) : true
+)
 const displayedContent = ref("")
 
 watch(
@@ -237,7 +243,11 @@ watch(mode, async (newMode) => {
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
         <edit-note v-model="rawContent" />
       </div>
-      <div v-if="mode === 'read'" class="note-content" v-html="displayedContent"></div>
+      <div
+        v-if="mode === 'read'"
+        class="note-content"
+        v-html="displayedContent"
+      ></div>
     </section>
     <linked-notes v-if="hasBacklinks && content" :sha="sha" />
   </div>

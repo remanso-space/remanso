@@ -85,7 +85,8 @@ const md = new MarkdownIt({
     },
     closeRender: () => "</div>\n",
     tabOpenRender: (data: MarkdownItTabData) => {
-      const isChecked = data.isActive || (!currentTabActiveSet && data.index === 0)
+      const isChecked =
+        data.isActive || (!currentTabActiveSet && data.index === 0)
       const checked = isChecked ? " checked" : ""
       const title = data.title.replace(/"/g, "&quot;")
       return `<input type="radio" name="md-tabs-${currentTabGroup}" class="tab" aria-label="${title}"${checked}>\n<div class="tab-content bg-base-100 border-base-300 rounded-box p-2">\n`
