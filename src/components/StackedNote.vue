@@ -18,12 +18,12 @@ import {
   runMermaid,
   useShikiji
 } from "@/hooks/useMarkdown.hook"
-import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
+import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
 
 const LinkedNotes = defineAsyncComponent(
@@ -267,7 +267,7 @@ $border-color: rgba(18, 19, 58, 0.2);
   }
 
   section {
-    padding: 0 0.5rem 2rem;
+    padding: 0 0.5rem;
   }
 }
 
@@ -316,7 +316,7 @@ $border-color: rgba(18, 19, 58, 0.2);
     height: 100dvh;
 
     section {
-      padding: 1rem 0 2rem;
+      padding: 1rem 0;
       overflow-x: auto;
     }
 
