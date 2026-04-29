@@ -193,6 +193,8 @@ $border-color: rgba(18, 19, 58, 0.2);
   .stacked-note {
     border-top: 0;
     border-left: 1px solid $border-color;
+    position: sticky;
+    top: 0;
   }
 
   .title-stacked-note {

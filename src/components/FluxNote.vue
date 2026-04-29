@@ -211,7 +211,6 @@ $header-height: 40px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    position: sticky;
 
     &:not(:first-child) {
       border-top: 1px solid rgba(18, 19, 58, 0.2);

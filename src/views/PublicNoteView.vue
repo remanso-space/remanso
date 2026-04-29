@@ -241,7 +241,6 @@ watch(
     overflow-y: auto;
     height: 100vh;
     width: 100%;
-    position: sticky;
 
     .title {
       text-align: left;
