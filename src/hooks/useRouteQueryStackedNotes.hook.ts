@@ -47,6 +47,30 @@ export const useRouteQueryStackedNotes = () => {
     })
   }
 
+  const scrollToNoteElement = (
+    cleanNoteId: string,
+    index: number,
+    attempts = 30
+  ) => {
+    if (attempts <= 0) {
+      scrollToNote((index + 1) * height.value)
+      return
+    }
+
+    const element = document.querySelector(
+      `.note-${cleanNoteId}`
+    ) as HTMLElement | null
+
+    if (element) {
+      scrollToNote(element.offsetTop)
+      return
+    }
+
+    requestAnimationFrame(() => {
+      scrollToNoteElement(cleanNoteId, index, attempts - 1)
+    })
+  }
+
   type ScrollToFocusedNoteOptions = {
     noteId?: string | null
     notes?: string[]
@@ -65,13 +89,7 @@ export const useRouteQueryStackedNotes = () => {
 
       if (isMobile.value) {
         if (noteId) {
-          const cleanNoteId = noteId.replaceAll(":", "-")
-          const element = document.querySelector(
-            `.note-${cleanNoteId}`
-          ) as HTMLElement
-
-          const top = (index + 1) * (element?.clientHeight ?? height.value)
-          scrollToNote(top)
+          scrollToNoteElement(noteId.replaceAll(":", "-"), index)
         } else {
           scrollToNote(0)
         }
