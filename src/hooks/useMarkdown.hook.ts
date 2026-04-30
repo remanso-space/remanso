@@ -97,16 +97,11 @@ const md = new MarkdownIt({
     slugify: (s: string) => slugger.slug(s)
   })
 
-let shikijiInitialized = false
+let shikijiPromise: Promise<void> | null = null
 
-export const useShikiji = async () => {
-  if (shikijiInitialized) {
-    return
-  }
-
-  shikijiInitialized = true
-  md.use(
-    await Shikiji({
+export const useShikiji = (): Promise<void> => {
+  if (!shikijiPromise) {
+    shikijiPromise = Shikiji({
       themes: {
         light: "vitesse-light",
         dark: "vitesse-black"
@@ -126,8 +121,11 @@ export const useShikiji = async () => {
           aliases: ["als"]
         } as unknown as LanguageRegistration
       ]
+    }).then((plugin) => {
+      md.use(plugin)
     })
-  )
+  }
+  return shikijiPromise
 }
 
 let mermaidInitialized = false
