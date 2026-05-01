@@ -664,8 +664,8 @@ const showReviewCard = computed(
               <div>
                 <h4>Let the web emerge.</h4>
                 <p>
-                  Don't plan the structure. Write, link, re-read. Structure is a
-                  consequence of attention.
+                  Don't plan the structure. Write, link, re-read. Structure
+                  emerges from what you return to.
                 </p>
               </div>
             </li>
