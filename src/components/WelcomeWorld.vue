@@ -438,7 +438,23 @@ const showReviewCard = computed(
           </p>
           <div class="feature-row">
             <div class="feat">
-              <span class="feat-icon">≣</span>
+              <span class="feat-icon" aria-hidden="true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 4l-8 4l8 4l8 -4l-8 -4" />
+                  <path d="M4 12l8 4l8 -4" />
+                  <path d="M4 16l8 4l8 -4" />
+                </svg>
+              </span>
               <h4>Stacked notes</h4>
               <p>
                 Click a link and the next note slides in beside the current one.
@@ -447,7 +463,22 @@ const showReviewCard = computed(
               </p>
             </div>
             <div class="feat">
-              <span class="feat-icon">↹</span>
+              <span class="feat-icon" aria-hidden="true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 14l-4 -4l4 -4" />
+                  <path d="M5 10h11a4 4 0 1 1 0 8h-1" />
+                </svg>
+              </span>
               <h4>Automatic backlinks</h4>
               <p>
                 Every mention becomes a two-way link. See every note that points
@@ -455,7 +486,29 @@ const showReviewCard = computed(
               </p>
             </div>
             <div class="feat">
-              <span class="feat-icon">◈</span>
+              <span class="feat-icon" aria-hidden="true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M15 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+                  <path d="M11 8a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+                  <path d="M11 16a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+                  <path d="M12 15v-6" />
+                  <path d="M15 11l-2 -2" />
+                  <path d="M11 7l-1.9 -1.9" />
+                  <path
+                    d="M13.446 2.6l7.955 7.954a2.045 2.045 0 0 1 0 2.892l-7.955 7.955a2.045 2.045 0 0 1 -2.892 0l-7.955 -7.955a2.045 2.045 0 0 1 0 -2.892l7.955 -7.955a2.045 2.045 0 0 1 2.892 0"
+                  />
+                </svg>
+              </span>
               <h4>Your files, your Git</h4>
               <p>
                 Remanso reads GitHub directly. Edit in your favourite editor.
@@ -1278,16 +1331,19 @@ main {
 }
 
 .feat-icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--hw-mono);
-  font-size: 0.75rem;
   color: var(--hw-pink-deep);
   border: 1px solid var(--hw-pink);
   border-radius: 50%;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 /* ── Demo notes ─────────────────────────────────────────────── */
