@@ -347,7 +347,7 @@ onMounted(() => {
                 </div>
               </template>
 
-              <div class="section-label mono">§ from the network</div>
+              <div class="section-label mono">§ drifting in</div>
               <ul
                 v-if="hasPublicNotes"
                 class="network-side-list"
