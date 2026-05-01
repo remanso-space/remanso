@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import fontColorContrast from "font-color-contrast"
 import { getHex } from "pastel-color"
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
 import SignInAtproto from "@/components/SignInAtproto.vue"
@@ -10,9 +10,12 @@ import ThemeSwap from "@/components/ThemeSwap.vue"
 import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useForm } from "@/hooks/useForm.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
+import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
+import { toShortDid } from "@/modules/atproto/shortDid"
 import { useNeedReviewCards } from "@/modules/card/hooks/useNeedReviewCards"
 import { useLastVisitedRepos } from "@/modules/history/hooks/useLastVisitedRepos.hook"
 import { useFavoriteRepos } from "@/modules/repo/hooks/useFavoriteRepos.hook"
+import { slugify } from "@/utils/slugify"
 
 const { username, accessToken } = useGitHubLogin()
 const { isLoggedIn: isATProtoLoggedIn, handle, avatarUrl } = useATProtoLogin()
@@ -82,6 +85,40 @@ const reviewRepo = computed(() => savedFavoriteRepos.value[0] ?? null)
 const showReviewCard = computed(
   () => cardsToReview.value.length > 0 && reviewRepo.value !== null
 )
+
+const {
+  notes: publicNotes,
+  isLoading: publicNotesLoading,
+  onLoadMore: loadPublicNotes,
+  getAuthor: getPublicAuthor
+} = usePublicNoteList()
+const recentPublicNotes = computed(() => publicNotes.value.slice(0, 5))
+const sidebarPublicNotes = computed(() => publicNotes.value.slice(0, 3))
+const hasPublicNotes = computed(() => recentPublicNotes.value.length > 0)
+const publicNotesLoadFailed = computed(
+  () => !publicNotesLoading.value && publicNotes.value.length === 0
+)
+const formatPublicDate = (iso: string) =>
+  new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric"
+  })
+const publicNoteHandle = (did: string) => {
+  const handle = getPublicAuthor(did)
+  return handle ? `@${handle}` : toShortDid(did)
+}
+const publicNoteRoute = (note: { did: string; rkey: string; title: string }) => ({
+  name: "PublicNoteView",
+  params: {
+    shortDid: toShortDid(note.did),
+    rkey: note.rkey,
+    slug: slugify(note.title)
+  }
+})
+
+onMounted(() => {
+  loadPublicNotes()
+})
 </script>
 
 <template>
@@ -311,11 +348,42 @@ const showReviewCard = computed(
               </template>
 
               <div class="section-label mono">§ from the network</div>
+              <ul
+                v-if="hasPublicNotes"
+                class="network-side-list"
+              >
+                <li
+                  v-for="note in sidebarPublicNotes"
+                  :key="`${note.did}-${note.rkey}`"
+                >
+                  <router-link
+                    :to="publicNoteRoute(note)"
+                    class="network-side-link"
+                  >
+                    <span class="network-side-title">{{ note.title }}</span>
+                    <span class="mono network-side-meta">
+                      {{ publicNoteHandle(note.did) }}
+                      <span class="li-dot">·</span>
+                      {{ formatPublicDate(note.publishedAt) }}
+                    </span>
+                  </router-link>
+                </li>
+              </ul>
+              <ul
+                v-else-if="publicNotesLoading"
+                class="network-side-list"
+                aria-hidden="true"
+              >
+                <li v-for="i in 3" :key="i" class="network-side-skel">
+                  <span class="skel skel-title" />
+                  <span class="skel skel-date" />
+                </li>
+              </ul>
               <router-link
                 :to="{ name: 'PublicNoteListView' }"
-                class="hw-btn pub-notes-btn"
+                class="network-side-all"
               >
-                Browse public notes →
+                See all public notes →
               </router-link>
             </aside>
           </div>
@@ -376,23 +444,62 @@ const showReviewCard = computed(
                   </button>
                 </form>
               </div>
-              <!-- CTA 02: Public notes -->
-              <div class="hero-ed-path">
+              <!-- CTA 02: Public notes (live preview) -->
+              <div class="hero-ed-path hero-ed-path-network">
                 <div class="hep-head">
                   <span class="hep-n mono">02</span>
                   <div>
                     <div class="hep-t">From the open network</div>
                     <div class="hep-d">
-                      Your `.pub.md` files become public. Read public notes
-                      published via ATProto — no account needed.
+                      Live notes published via ATProto. No account needed —
+                      tap one and read.
                     </div>
                   </div>
                 </div>
+                <div
+                  v-if="hasPublicNotes"
+                  class="network-strip"
+                  role="list"
+                >
+                  <router-link
+                    v-for="note in recentPublicNotes"
+                    :key="`${note.did}-${note.rkey}`"
+                    :to="publicNoteRoute(note)"
+                    class="network-card"
+                    role="listitem"
+                  >
+                    <span class="mono network-card-handle">{{
+                      publicNoteHandle(note.did)
+                    }}</span>
+                    <span class="network-card-title">{{ note.title }}</span>
+                    <span class="mono network-card-date">{{
+                      formatPublicDate(note.publishedAt)
+                    }}</span>
+                  </router-link>
+                </div>
+                <div
+                  v-else-if="publicNotesLoading"
+                  class="network-strip"
+                  aria-hidden="true"
+                >
+                  <div
+                    v-for="i in 3"
+                    :key="i"
+                    class="network-card network-card--skel"
+                  >
+                    <span class="skel skel-handle" />
+                    <span class="skel skel-title" />
+                    <span class="skel skel-date" />
+                  </div>
+                </div>
+                <div v-else-if="publicNotesLoadFailed" class="network-empty">
+                  The pool is quiet right now.
+                </div>
                 <router-link
                   :to="{ name: 'PublicNoteListView' }"
-                  class="hw-btn hw-btn-pink hep-btn"
+                  class="network-all"
                 >
-                  Browse public notes →
+                  Browse all public notes →
                 </router-link>
               </div>
             </div>
@@ -1150,8 +1257,8 @@ main {
 }
 
 .hero-ed-paths {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   margin-top: 0.5rem;
 }
@@ -1173,6 +1280,179 @@ main {
     border-color: var(--hw-pink-wash-2);
     box-shadow: 0 18px 30px -22px rgba(201, 74, 125, 0.18);
     transform: translateY(-1px);
+  }
+}
+
+.hero-ed-path-network {
+  gap: 1.25rem;
+
+  &:hover {
+    transform: none;
+    border-color: var(--hw-rule);
+    box-shadow: none;
+  }
+}
+
+.network-strip {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 0.75rem;
+  margin: 0 -0.25rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--hw-pink-wash-2);
+    border-radius: 999px;
+  }
+}
+
+.network-card {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.9rem 1rem 0.85rem;
+  background: var(--hw-paper);
+  border: 1px solid var(--hw-rule);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--hw-ink);
+  position: relative;
+  min-height: 130px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.2s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--hw-pink);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--hw-pink-wash-2);
+    box-shadow: 0 14px 24px -18px rgba(201, 74, 125, 0.35);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .network-card-title {
+      color: var(--hw-pink-deep);
+    }
+  }
+}
+
+.network-card-handle {
+  font-size: 0.72rem;
+  color: var(--hw-ink-faint);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.network-card-title {
+  font-family: var(--hw-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--hw-ink);
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.15s ease;
+}
+
+.network-card-date {
+  font-size: 0.7rem;
+  color: var(--hw-ink-faint);
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  margin-top: auto;
+}
+
+.network-card--skel {
+  pointer-events: none;
+}
+
+.skel {
+  display: block;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--hw-pink-wash) 0%,
+    var(--hw-pink-wash-2) 50%,
+    var(--hw-pink-wash) 100%
+  );
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+
+.skel-handle {
+  height: 0.6rem;
+  width: 60%;
+}
+
+.skel-title {
+  height: 0.95rem;
+  width: 90%;
+  margin-top: 0.1rem;
+}
+
+.skel-date {
+  height: 0.55rem;
+  width: 30%;
+  margin-top: auto;
+}
+
+@keyframes skel-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.network-empty {
+  font-size: 0.9rem;
+  color: var(--hw-ink-faint);
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+.network-all {
+  align-self: flex-start;
+  font-family: var(--hw-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--hw-pink-deep);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--hw-pink-wash-2);
+  padding-bottom: 1px;
+
+  &:hover {
+    color: var(--hw-pink-deep);
+    border-bottom-color: var(--hw-pink);
   }
 }
 
@@ -1849,10 +2129,79 @@ img {
   padding: 0.35rem 0.8rem;
 }
 
-.pub-notes-btn {
-  width: 100%;
-  justify-content: center;
+.network-side-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+
+  li {
+    border-bottom: 1px dashed var(--hw-rule);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+}
+
+.network-side-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0;
+  text-decoration: none;
+  color: var(--hw-ink);
+  transition: color 0.15s ease;
+
+  &:hover {
+    .network-side-title {
+      color: var(--hw-pink-deep);
+    }
+  }
+}
+
+.network-side-title {
+  font-family: var(--hw-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--hw-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.15s ease;
+}
+
+.network-side-meta {
+  font-size: 0.72rem;
+  color: var(--hw-ink-faint);
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  letter-spacing: 0.02em;
+}
+
+.network-side-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.65rem 0;
+}
+
+.network-side-all {
+  display: inline-block;
   margin-top: 0.25rem;
+  font-family: var(--hw-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--hw-pink-deep);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--hw-pink-wash-2);
+  padding-bottom: 1px;
+
+  &:hover {
+    border-bottom-color: var(--hw-pink);
+  }
 }
 
 /* ── Footer ─────────────────────────────────────────────────── */
@@ -2009,10 +2358,6 @@ img {
   .flower-mark {
     width: 160px;
     height: 160px;
-  }
-
-  .hero-ed-paths {
-    grid-template-columns: 1fr;
   }
 
   .feature-row {
