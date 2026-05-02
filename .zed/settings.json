@@ -5,5 +5,19 @@
       "command": "node_modules/.bin/oxfmt",
       "arguments": ["--stdin-filepath", "{buffer_path}"]
     }
+  },
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["!deno", "..."]
+    },
+    "TSX": {
+      "language_servers": ["!deno", "..."]
+    },
+    "JavaScript": {
+      "language_servers": ["!deno", "..."]
+    },
+    "JSX": {
+      "language_servers": ["!deno", "..."]
+    }
   }
 }
