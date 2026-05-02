@@ -5,10 +5,6 @@
         "label": "Vue i18n",
         "uri": "https://vue-i18n.intlify.dev/guide/introduction.html"
       }
-    ],
-    "vite.config.ts": {
-      "label": "Remanso GitHub app",
-      "uri": "https://github.com/organizations/remanso-spance/settings/apps/lite-note"
-    }
+    ]
   }
 }
