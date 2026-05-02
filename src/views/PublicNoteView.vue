@@ -248,6 +248,8 @@ watch(
   }
 
   @media screen and (min-width: 769px) {
+    background-color: var(--note-canvas-bg);
+
     .repo-title-breadcrumb {
       padding: 0.5rem 1rem 0;
       transform-origin: 0 0;
@@ -265,6 +267,11 @@ watch(
     .note {
       min-width: var(--note-width);
       max-width: var(--note-width);
+      background-color: var(--color-base-100);
+    }
+
+    .article {
+      box-shadow: var(--note-sheet-shadow);
     }
   }
 

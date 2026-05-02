@@ -212,16 +212,14 @@ $header-height: 40px;
     flex-direction: column;
     overflow-y: auto;
 
-    &:not(:first-child) {
-      border-top: 1px solid rgba(18, 19, 58, 0.2);
-    }
-
     .title {
       text-align: left;
     }
   }
 
   @media screen and (min-width: 769px) {
+    background-color: var(--note-canvas-bg);
+
     .repo-title-breadcrumb {
       padding: 0.5rem 1rem 0;
       transform-origin: 0 0;
@@ -238,6 +236,11 @@ $header-height: 40px;
     .note {
       min-width: var(--note-width);
       max-width: var(--note-width);
+      background-color: var(--color-base-100);
+    }
+
+    .readme {
+      box-shadow: var(--note-sheet-shadow);
     }
   }
 }

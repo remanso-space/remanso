@@ -13,6 +13,8 @@
   --light-link: lighten(#445fb9, 45%);
   --background-color: #ffffff;
   --note-width: 500px;
+  --note-canvas-bg: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-200));
+  --note-sheet-shadow: 1px 0 8px rgb(0 0 0 / 6%);
   --color-contrast-content: var(--color-success);
   --notyf-margin: 0.5rem;
 }
