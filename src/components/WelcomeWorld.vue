@@ -821,7 +821,13 @@ onMounted(() => {
             <div class="footer-h">Learn</div>
             <a href="#about" class="footer-link">What is Remanso?</a>
             <a href="#zk" class="footer-link">Zettelkasten</a>
-            <a href="#" class="footer-link">ATProto &amp; Bluesky</a>
+            <a
+              href="https://atproto.com/"
+              target="_blank"
+              rel="noreferrer"
+              class="footer-link"
+              >atproto</a
+            >
           </div>
         </div>
       </div>
