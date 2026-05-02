@@ -1506,6 +1506,10 @@ main {
   }
 }
 
+.hero-ed-left {
+  min-width: 0;
+}
+
 .hero-ed-right {
   display: flex;
   justify-content: center;
