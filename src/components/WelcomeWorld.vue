@@ -1332,26 +1332,10 @@ main {
     border-color 0.15s ease,
     box-shadow 0.2s ease;
 
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--hw-pink);
-    opacity: 0;
-    transition: opacity 0.15s ease;
-  }
-
   &:hover {
     transform: translateY(-2px);
     border-color: var(--hw-pink-wash-2);
     box-shadow: 0 14px 24px -18px rgba(201, 74, 125, 0.35);
-
-    &::before {
-      opacity: 1;
-    }
 
     .network-card-title {
       color: var(--hw-pink-deep);
