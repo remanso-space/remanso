@@ -82,7 +82,7 @@ watch(mode, async (newMode) => {
       newContent.value
     }`
 
-    const newSha = await createFile({
+    const { sha: newSha } = await createFile({
       content,
       path: newContentPath
     })

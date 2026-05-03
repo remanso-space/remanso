@@ -74,7 +74,7 @@ export const useCheckboxCommit = ({
 
     isCommitting.value = true
 
-    const newSha = await updateFile({
+    const { sha: newSha } = await updateFile({
       content: pendingContent.value,
       path: pathValue,
       sha: currentSha.value

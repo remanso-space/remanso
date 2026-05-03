@@ -2,6 +2,8 @@ import { getOctokit } from "@/modules/repo/services/octo"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { confirmMessage, errorMessage } from "@/utils/notif"
 
+const isConflictStatus = (status: number) => status === 409 || status === 422
+
 export const useGitHubContent = ({
   user,
   repo
@@ -9,6 +11,21 @@ export const useGitHubContent = ({
   user: string
   repo: string
 }) => {
+  const fetchLatestSha = async (path: string): Promise<string | null> => {
+    try {
+      const octokit = await getOctokit()
+      const response = await octokit.request(
+        "GET /repos/{owner}/{repo}/contents/{path}",
+        { owner: user, repo, path }
+      )
+      const data = response?.data
+      if (Array.isArray(data) || !data) return null
+      return "sha" in data ? data.sha : null
+    } catch {
+      return null
+    }
+  }
+
   const putFile = async ({
     content,
     path,
@@ -17,7 +34,7 @@ export const useGitHubContent = ({
     content: string
     path: string
     sha?: string
-  }) => {
+  }): Promise<{ sha: string | null; conflict: boolean }> => {
     try {
       const octokit = await getOctokit()
 
@@ -35,18 +52,27 @@ export const useGitHubContent = ({
 
       confirmMessage("✅ Note saved")
 
-      return response?.data.content?.sha ?? null
+      return { sha: response?.data.content?.sha ?? null, conflict: false }
     } catch (error) {
+      const status = (error as { status?: number })?.status
+      if (status && isConflictStatus(status)) {
+        errorMessage("⚠ Conflict: this note changed on GitHub")
+        console.warn(error)
+        return { sha: null, conflict: true }
+      }
       errorMessage("❌ Note could not be saved")
       console.warn(error)
+      return { sha: null, conflict: false }
     }
-
-    return null
   }
 
   return {
-    updateFile: async (props: { content: string; path: string; sha: string }) =>
-      putFile(props),
+    fetchLatestSha,
+    updateFile: async (props: {
+      content: string
+      path: string
+      sha: string
+    }) => putFile(props),
     createFile: async (props: { content: string; path: string }) =>
       putFile(props)
   }
