@@ -16,7 +16,12 @@ export const useGitHubContent = ({
       const octokit = await getOctokit()
       const response = await octokit.request(
         "GET /repos/{owner}/{repo}/contents/{path}",
-        { owner: user, repo, path }
+        {
+          owner: user,
+          repo,
+          path,
+          headers: { "X-GitHub-Api-Version": "2022-11-28" }
+        }
       )
       const data = response?.data
       if (Array.isArray(data) || !data) return null
