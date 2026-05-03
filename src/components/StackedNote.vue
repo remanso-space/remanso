@@ -239,6 +239,25 @@ const onConflictOverwrite = async () => {
 const onConflictCancel = () => {
   if (mode.value === "read") toggleMode()
 }
+
+const onBadgeClick = async () => {
+  if (freshnessStatus.value !== "outdated") {
+    await checkFreshness()
+    return
+  }
+
+  const hasUnsavedEdits = rawContent.value !== initialRawContent.value
+  if (hasUnsavedEdits) {
+    conflictOpen.value = true
+    return
+  }
+
+  const newRaw = await pullLatest()
+  if (newRaw !== null) {
+    rawContent.value = newRaw
+    initialRawContent.value = newRaw
+  }
+}
 </script>
 
 <template>
@@ -270,7 +289,7 @@ const onConflictCancel = () => {
         <note-freshness-badge
           :status="freshnessStatus"
           :last-checked-at="lastCheckedAt"
-          @click="checkFreshness"
+          @click="onBadgeClick"
         />
         <button
           v-if="isMarkdown"
