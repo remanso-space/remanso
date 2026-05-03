@@ -18,6 +18,7 @@ import {
   runMermaid,
   useShikiji
 } from "@/hooks/useMarkdown.hook"
+import { useNoteFreshness } from "@/hooks/useNoteFreshness.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
@@ -28,6 +29,14 @@ import { filenameToNoteTitle } from "@/utils/noteTitle"
 
 const LinkedNotes = defineAsyncComponent(
   () => import("@/components/LinkedNotes.vue")
+)
+
+const NoteFreshnessBadge = defineAsyncComponent(
+  () => import("@/components/NoteFreshnessBadge.vue")
+)
+
+const NoteConflictModal = defineAsyncComponent(
+  () => import("@/components/NoteConflictModal.vue")
 )
 
 const EditNote = defineAsyncComponent(
@@ -104,9 +113,33 @@ const { updateFile } = useGitHubContent({
   repo: repo.value
 })
 
+const {
+  status: freshnessStatus,
+  lastCheckedAt,
+  latestSha,
+  check: checkFreshness,
+  pullLatest
+} = useNoteFreshness({
+  user: user.value,
+  repo: repo.value,
+  sha,
+  path,
+  getEditedSha
+})
+
+const conflictOpen = ref(false)
+
 onMounted(async () => {
   initialRawContent.value = await getRawContent()
 })
+
+watch(
+  path,
+  (p) => {
+    if (p) void checkFreshness()
+  },
+  { immediate: true }
+)
 
 const { mode, toggleMode } = useEditionMode()
 
@@ -132,7 +165,43 @@ watch([content, mode], () => {
   })
 })
 
+const performSave = async (overrideSha?: string) => {
+  if (!path.value) {
+    console.warn("no path found for this file")
+    return
+  }
+
+  const editedSha = overrideSha ?? (await getEditedSha()) ?? sha.value
+  const { sha: newSha, conflict } = await updateFile({
+    content: rawContent.value,
+    path: path.value,
+    sha: editedSha
+  })
+
+  if (conflict) {
+    await checkFreshness()
+    conflictOpen.value = true
+    if (mode.value === "read") toggleMode()
+    return
+  }
+
+  if (!newSha) {
+    console.warn("no new SHA found for this file")
+    return
+  }
+
+  await saveCacheNote(encodeUTF8ToBase64(rawContent.value), {
+    editedSha: newSha
+  })
+  initialRawContent.value = rawContent.value
+}
+
 watch(mode, async (newMode) => {
+  if (newMode === "edit") {
+    void checkFreshness()
+    return
+  }
+
   const hasUserFinishedToEdit =
     newMode === "read" && rawContent.value !== initialRawContent.value
 
@@ -141,28 +210,35 @@ watch(mode, async (newMode) => {
   }
   if (!path.value) {
     console.warn("no path found for this file")
-
     return
   }
 
-  const editedSha = (await getEditedSha()) ?? sha.value
-  const newSha = await updateFile({
-    content: rawContent.value,
-    path: path.value,
-    sha: editedSha
-  })
-
-  if (!newSha) {
-    console.warn("no new SHA found for this file")
-
+  await checkFreshness()
+  if (freshnessStatus.value === "outdated") {
+    conflictOpen.value = true
     return
   }
 
-  await saveCacheNote(encodeUTF8ToBase64(rawContent.value), {
-    editedSha: newSha
-  })
-  initialRawContent.value = rawContent.value
+  await performSave()
 })
+
+const onConflictDiscard = async () => {
+  const newRaw = await pullLatest()
+  if (newRaw !== null) {
+    rawContent.value = newRaw
+    initialRawContent.value = newRaw
+  }
+}
+
+const onConflictOverwrite = async () => {
+  if (latestSha.value) {
+    await performSave(latestSha.value)
+  }
+}
+
+const onConflictCancel = () => {
+  if (mode.value === "read") toggleMode()
+}
 </script>
 
 <template>
@@ -190,13 +266,19 @@ watch(mode, async (newMode) => {
       </div>
     </a>
     <section class="text-content">
-      <button
-        v-if="isMarkdown"
-        class="action button is-text is-light"
-        :class="{ 'is-link': mode === 'edit' }"
-        :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
-        @click="toggleMode"
-      >
+      <div class="action-bar">
+        <note-freshness-badge
+          :status="freshnessStatus"
+          :last-checked-at="lastCheckedAt"
+          @click="checkFreshness"
+        />
+        <button
+          v-if="isMarkdown"
+          class="action button is-text is-light"
+          :class="{ 'is-link': mode === 'edit' }"
+          :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
+          @click="toggleMode"
+        >
         <svg
           v-if="mode === 'read'"
           xmlns="http://www.w3.org/2000/svg"
@@ -240,6 +322,7 @@ watch(mode, async (newMode) => {
           <path d="M14 4l0 4l-6 0l0 -4" />
         </svg>
       </button>
+      </div>
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
         <edit-note v-model="rawContent" />
       </div>
@@ -250,6 +333,12 @@ watch(mode, async (newMode) => {
       ></div>
     </section>
     <linked-notes v-if="hasBacklinks && content" :sha="sha" />
+    <note-conflict-modal
+      v-model:open="conflictOpen"
+      @discard="onConflictDiscard"
+      @overwrite="onConflictOverwrite"
+      @cancel="onConflictCancel"
+    />
   </div>
 </template>
 
@@ -296,14 +385,22 @@ $border-color: rgba(18, 19, 58, 0.2);
   flex: 1;
   scrollbar-width: none;
 
-  div {
+  > .edit,
+  > .note-content {
     height: 100%;
   }
 }
 
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin: 0.2rem 0;
+}
+
 .action {
-  float: right;
-  margin: 0.2rem;
+  margin: 0;
 
   img {
     vertical-align: bottom;
