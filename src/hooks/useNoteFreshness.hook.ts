@@ -1,4 +1,4 @@
-import { computed, Ref, ref } from "vue"
+import { Ref, ref } from "vue"
 
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
@@ -10,11 +10,8 @@ export type FreshnessStatus =
   | "unknown"
   | "checking"
   | "verified"
-  | "stale-known"
   | "outdated"
   | "offline"
-
-const STALE_AFTER_MS = 2 * 60 * 1000
 
 export const useNoteFreshness = ({
   user,
@@ -32,54 +29,36 @@ export const useNoteFreshness = ({
   const store = useUserRepoStore()
   const { fetchLatestSha } = useGitHubContent({ user, repo })
 
-  const rawStatus = ref<FreshnessStatus>("unknown")
+  const status = ref<FreshnessStatus>("unknown")
   const lastCheckedAt = ref<Date | null>(null)
   const latestSha = ref<string | null>(null)
-  const tick = ref(0)
-  let staleTimer: ReturnType<typeof setTimeout> | null = null
-
-  const status = computed<FreshnessStatus>(() => {
-    void tick.value
-    if (rawStatus.value !== "verified") return rawStatus.value
-    if (!lastCheckedAt.value) return rawStatus.value
-    const age = Date.now() - lastCheckedAt.value.getTime()
-    return age > STALE_AFTER_MS ? "stale-known" : "verified"
-  })
-
-  const armStaleTimer = () => {
-    if (staleTimer) clearTimeout(staleTimer)
-    staleTimer = setTimeout(() => {
-      tick.value++
-    }, STALE_AFTER_MS + 100)
-  }
 
   const expectedSha = async () => (await getEditedSha()) ?? sha.value
 
   const check = async () => {
     if (!path.value) return
-    rawStatus.value = "checking"
+    status.value = "checking"
     const remoteSha = await fetchLatestSha(path.value)
     if (remoteSha === null) {
-      rawStatus.value = "offline"
+      status.value = "offline"
       return
     }
     latestSha.value = remoteSha
     lastCheckedAt.value = new Date()
     const local = await expectedSha()
-    rawStatus.value = remoteSha === local ? "verified" : "outdated"
-    armStaleTimer()
+    status.value = remoteSha === local ? "verified" : "outdated"
   }
 
   const pullLatest = async (): Promise<string | null> => {
     if (!path.value) return null
     const remoteSha = latestSha.value ?? (await fetchLatestSha(path.value))
     if (!remoteSha) {
-      rawStatus.value = "offline"
+      status.value = "offline"
       return null
     }
     const fileContent = await queryFileContent(user, repo, remoteSha)
     if (!fileContent) {
-      rawStatus.value = "offline"
+      status.value = "offline"
       return null
     }
     const { saveCacheNote } = prepareNoteCache(sha.value, path.value)
@@ -90,8 +69,7 @@ export const useNoteFreshness = ({
     store.addFile({ path: path.value, sha: remoteSha })
     latestSha.value = remoteSha
     lastCheckedAt.value = new Date()
-    rawStatus.value = "verified"
-    armStaleTimer()
+    status.value = "verified"
     const { getRawContent } = markdownBuilder(sha.value)
     return getRawContent(fileContent)
   }

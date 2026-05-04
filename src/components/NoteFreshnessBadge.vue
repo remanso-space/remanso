@@ -13,9 +13,6 @@ defineEmits<{ (e: "click"): void }>()
 const formatTime = (d: Date) =>
   d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
 
-const minutesAgo = (d: Date) =>
-  Math.max(1, Math.round((Date.now() - d.getTime()) / 60000))
-
 const label = computed(() => {
   switch (props.status) {
     case "verified":
@@ -24,10 +21,6 @@ const label = computed(() => {
       return "Checking…"
     case "outdated":
       return "Outdated"
-    case "stale-known":
-      return props.lastCheckedAt
-        ? `Checked ${minutesAgo(props.lastCheckedAt)}m ago`
-        : "Not checked"
     case "offline":
       return "Can’t reach GitHub"
     case "unknown":
@@ -44,8 +37,6 @@ const tooltip = computed(() => {
         : "Click to re-check."
     case "outdated":
       return "GitHub has a newer version. Click to pull latest."
-    case "stale-known":
-      return "Click to verify against GitHub."
     case "offline":
       return "Could not reach GitHub. Click to retry."
     case "checking":
@@ -88,14 +79,9 @@ const isBusy = computed(() => props.status === "checking")
       <path d="M15 19l2 2l4 -4" />
     </svg>
     <svg
-      v-else-if="status === 'unknown' || status === 'stale-known'"
+      v-else-if="status === 'unknown'"
       xmlns="http://www.w3.org/2000/svg"
-      class="icon icon-tabler"
-      :class="
-        status === 'stale-known'
-          ? 'icon-tabler-clock'
-          : 'icon-tabler-cloud-question'
-      "
+      class="icon icon-tabler icon-tabler-cloud-question"
       width="20"
       height="20"
       viewBox="0 0 24 24"
@@ -105,19 +91,13 @@ const isBusy = computed(() => props.status === "checking")
       stroke-linecap="round"
       stroke-linejoin="round"
     >
-      <template v-if="status === 'stale-known'">
-        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-        <path d="M12 7v5l3 3" />
-      </template>
-      <template v-else>
-        <path
-          d="M14.5 18.004h-7.843c-2.572 -.004 -4.657 -2.011 -4.657 -4.487c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99"
-        />
-        <path d="M19 22v.01" />
-        <path
-          d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483"
-        />
-      </template>
+      <path
+        d="M14.5 18.004h-7.843c-2.572 -.004 -4.657 -2.011 -4.657 -4.487c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99"
+      />
+      <path d="M19 22v.01" />
+      <path
+        d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483"
+      />
     </svg>
     <svg
       v-else-if="status === 'outdated'"
@@ -212,7 +192,6 @@ const isBusy = computed(() => props.status === "checking")
 }
 
 .state-unknown,
-.state-stale-known,
 .state-checking {
   color: var(--color-base-content);
   opacity: 0.6;
