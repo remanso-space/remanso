@@ -114,6 +114,10 @@ export const useRouteQueryStackedNotes = () => {
     selector?: string,
     hash?: string
   ) => {
+    const mainAppEl = document.getElementById("main-app")
+    ;(window as unknown as { __scrollAtClick?: number }).__scrollAtClick =
+      mainAppEl?.scrollTop ?? 0
+
     if (stackedNotes.value.includes(sha)) {
       scrollToFocusedNote({
         noteId: selector ?? sha,

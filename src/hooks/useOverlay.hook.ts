@@ -41,13 +41,21 @@ export const useOverlay = (listen = true) => {
   }
 
   const scrollToElement = (element: HTMLElement) => {
+    const mainApp = document.getElementById("main-app")
+    const clickTop = (window as unknown as { __scrollAtClick?: number })
+      .__scrollAtClick
+
+    if (mainApp && clickTop !== undefined) {
+      mainApp.scrollTop = clickTop
+    }
+
     requestAnimationFrame(() => {
-      const mainApp = document.getElementById("main-app")
       const debug = document.getElementById("scroll-debug")
       if (debug && mainApp) {
         const er = element.getBoundingClientRect()
         const cr = mainApp.getBoundingClientRect()
         const lines = [
+          `clickTop: ${clickTop ?? "n/a"}`,
           `before scrollTop: ${mainApp.scrollTop}`,
           `mainApp scrollH: ${mainApp.scrollHeight} clientH: ${mainApp.clientHeight}`,
           `body scrollY: ${window.scrollY} innerH: ${window.innerHeight}`,
