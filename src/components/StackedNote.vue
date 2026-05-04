@@ -429,7 +429,7 @@ $border-color: rgba(18, 19, 58, 0.2);
 @media screen and (max-width: 768px) {
   .stacked-note {
     padding: 0 0.75rem 1rem;
-    height: 100dvh;
+    height: 100svh;
 
     section {
       padding: 1rem 0;
