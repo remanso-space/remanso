@@ -1,5 +1,5 @@
-import { toRaw } from "vue"
 import { defineStore } from "pinia"
+import { toRaw } from "vue"
 
 import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
