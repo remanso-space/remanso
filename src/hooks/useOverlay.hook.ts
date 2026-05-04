@@ -40,10 +40,24 @@ export const useOverlay = (listen = true) => {
     }, 80)
   }
 
+  const scrollToElement = (element: HTMLElement) => {
+    const mainApp = document.getElementById("main-app")
+    if (!mainApp) return
+
+    requestAnimationFrame(() => {
+      const top =
+        element.getBoundingClientRect().top -
+        mainApp.getBoundingClientRect().top +
+        mainApp.scrollTop
+      mainApp.scrollTo({ top, behavior: "smooth" })
+    })
+  }
+
   return {
     x,
     y,
     isMobile,
-    scrollToNote
+    scrollToNote,
+    scrollToElement
   }
 }

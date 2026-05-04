@@ -18,7 +18,7 @@ export const useRouteQueryStackedNotes = () => {
   })
   const { height } = useWindowSize()
 
-  const { scrollToNote, isMobile } = useOverlay(false)
+  const { scrollToNote, scrollToElement, isMobile } = useOverlay(false)
 
   const scrollToHashInNote = (
     cleanSha: string,
@@ -57,7 +57,7 @@ export const useRouteQueryStackedNotes = () => {
     ) as HTMLElement | null
 
     if (element) {
-      scrollToNote((index + 1) * element.clientHeight)
+      scrollToElement(element)
       return
     }
 
