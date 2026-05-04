@@ -95,8 +95,9 @@ export const router = createRouter({
   routes
 })
 
-router.beforeEach(() => {
+router.beforeEach((to, from) => {
   if (!("startViewTransition" in document)) return
+  if (to.path === from.path) return
   return new Promise<void>((resolve) => {
     ;(
       document as Document & {
