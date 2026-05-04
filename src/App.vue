@@ -13,6 +13,7 @@ const { isATProtoReady } = useATProtoLogin()
 
     <new-version />
   </div>
+  <pre id="scroll-debug"></pre>
 </template>
 
 <style lang="scss">
@@ -44,5 +45,24 @@ const { isATProtoReady } = useATProtoLogin()
 ::view-transition-old(remanso-logo),
 ::view-transition-new(remanso-logo) {
   object-fit: contain;
+}
+
+#scroll-debug {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 9999;
+  margin: 0;
+  padding: 4px 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font: 10px/1.3 ui-monospace, monospace;
+  white-space: pre;
+  pointer-events: none;
+  max-width: 100vw;
+}
+
+#scroll-debug:empty {
+  display: none;
 }
 </style>
