@@ -144,7 +144,6 @@ $border-color: rgba(18, 19, 58, 0.2);
   background-color: var(--color-base-100);
   color: var(--color-base-content);
   font-size: 0.8em;
-  overflow: hidden;
 
   ul,
   li {

@@ -171,7 +171,6 @@ const isBusy = computed(() => props.status === "checking")
       />
       <path d="M3 3l18 18" />
     </svg>
-    <span class="freshness-label">{{ label }}</span>
   </button>
 </template>
 

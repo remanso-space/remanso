@@ -269,27 +269,13 @@ const onBadgeClick = async () => {
       [`note-${sha}`]: true
     }"
   >
-    <a
-      class="title-stacked-note-link"
-      @click.prevent="scrollToFocusedNote({ noteId: props.sha })"
-    >
-      <div
-        class="title-stacked-note breadcrumbs text-sm"
-        :class="titleClassName"
-      >
-        <ul>
-          <li v-for="(part, i) in breadcrumbs" :key="i">
-            {{ part }}
-          </li>
-        </ul>
-      </div>
-    </a>
-    <section class="text-content">
+    <div class="title-stacked-note breadcrumbs text-sm" :class="titleClassName">
       <div class="action-bar">
         <note-freshness-badge
           :status="freshnessStatus"
           :last-checked-at="lastCheckedAt"
           @click="onBadgeClick"
+          class="action"
         />
         <button
           v-if="isMarkdown"
@@ -298,50 +284,62 @@ const onBadgeClick = async () => {
           :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
           @click="toggleMode"
         >
-        <svg
-          v-if="mode === 'read'"
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon icon-tabler icon-tabler-edit"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"
-          />
-          <path
-            d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"
-          />
-          <path d="M16 5l3 3" />
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon icon-tabler icon-tabler-device-floppy"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"
-          />
-          <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-          <path d="M14 4l0 4l-6 0l0 -4" />
-        </svg>
-      </button>
+          <svg
+            v-if="mode === 'read'"
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-edit"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"
+            />
+            <path
+              d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"
+            />
+            <path d="M16 5l3 3" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-device-floppy"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"
+            />
+            <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+            <path d="M14 4l0 4l-6 0l0 -4" />
+          </svg>
+        </button>
       </div>
+      <a
+        class="title-stacked-note-link"
+        @click.prevent="scrollToFocusedNote({ noteId: props.sha })"
+      >
+        <ul>
+          <li v-for="(part, i) in breadcrumbs" :key="i">
+            {{ part }}
+          </li>
+        </ul>
+      </a>
+    </div>
+    <section class="text-content">
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
         <edit-note v-model="rawContent" />
       </div>
@@ -389,7 +387,6 @@ $border-color: rgba(18, 19, 58, 0.2);
   background-color: var(--color-base-100);
   color: var(--color-base-content);
   font-size: 0.8em;
-  overflow: hidden;
 
   ul,
   li {
@@ -415,11 +412,14 @@ $border-color: rgba(18, 19, 58, 0.2);
   align-items: center;
   justify-content: flex-end;
   gap: 0.25rem;
-  margin: 0.2rem 0;
 }
 
 .action {
   margin: 0;
+
+  &:hover {
+    cursor: pointer;
+  }
 
   img {
     vertical-align: bottom;
@@ -452,13 +452,19 @@ $border-color: rgba(18, 19, 58, 0.2);
   }
 
   .title-stacked-note {
-    padding: 0 1rem;
+    padding: 0;
     transform-origin: 0 0;
     transform: rotate(90deg);
   }
 
   a {
     white-space: nowrap;
+  }
+
+  .action-bar {
+    .action {
+      transform: rotate(-90deg);
+    }
   }
 }
 
