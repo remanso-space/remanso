@@ -50,6 +50,7 @@ export const useRouteQueryStackedNotes = () => {
   const scrollToNoteElement = (
     cleanNoteId: string,
     index: number,
+    anchorTop?: number,
     attempts = 30
   ) => {
     const element = document.querySelector(
@@ -57,7 +58,7 @@ export const useRouteQueryStackedNotes = () => {
     ) as HTMLElement | null
 
     if (element) {
-      scrollToElement(element)
+      scrollToElement(element, anchorTop)
       return
     }
 
@@ -67,7 +68,7 @@ export const useRouteQueryStackedNotes = () => {
     }
 
     requestAnimationFrame(() => {
-      scrollToNoteElement(cleanNoteId, index, attempts - 1)
+      scrollToNoteElement(cleanNoteId, index, anchorTop, attempts - 1)
     })
   }
 
@@ -76,20 +77,22 @@ export const useRouteQueryStackedNotes = () => {
     notes?: string[]
     hash?: string
     smoothHash?: boolean
+    anchorTop?: number
   }
 
   const scrollToFocusedNote = ({
     noteId = null,
     notes = stackedNotes.value,
     hash,
-    smoothHash = false
+    smoothHash = false,
+    anchorTop
   }: ScrollToFocusedNoteOptions = {}) => {
     nextTick(() => {
       const index = noteId ? notes.findIndex((nid) => nid === noteId) : 0
 
       if (isMobile.value) {
         if (noteId) {
-          scrollToNoteElement(noteId.replaceAll(":", "-"), index)
+          scrollToNoteElement(noteId.replaceAll(":", "-"), index, anchorTop)
         } else {
           scrollToNote(0)
         }
@@ -114,15 +117,15 @@ export const useRouteQueryStackedNotes = () => {
     selector?: string,
     hash?: string
   ) => {
-    const mainAppEl = document.getElementById("main-app")
-    ;(window as unknown as { __scrollAtClick?: number }).__scrollAtClick =
-      mainAppEl?.scrollTop ?? 0
+    const anchorTop =
+      document.getElementById("main-app")?.scrollTop ?? undefined
 
     if (stackedNotes.value.includes(sha)) {
       scrollToFocusedNote({
         noteId: selector ?? sha,
         hash,
-        smoothHash: true
+        smoothHash: true,
+        anchorTop
       })
       return
     }
@@ -143,7 +146,7 @@ export const useRouteQueryStackedNotes = () => {
       stackedNotes.value = newStackedNotes
     }
 
-    scrollToFocusedNote({ noteId: selector ?? sha, hash })
+    scrollToFocusedNote({ noteId: selector ?? sha, hash, anchorTop })
   }
 
   return {

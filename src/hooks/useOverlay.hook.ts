@@ -40,42 +40,14 @@ export const useOverlay = (listen = true) => {
     }, 80)
   }
 
-  const scrollToElement = (element: HTMLElement) => {
+  const scrollToElement = (element: HTMLElement, anchorTop?: number) => {
     const mainApp = document.getElementById("main-app")
-    const clickTop = (window as unknown as { __scrollAtClick?: number })
-      .__scrollAtClick
-
-    if (mainApp && clickTop !== undefined) {
-      mainApp.scrollTop = clickTop
+    if (mainApp && anchorTop !== undefined) {
+      mainApp.scrollTop = anchorTop
     }
 
     requestAnimationFrame(() => {
-      const debug = document.getElementById("scroll-debug")
-      if (debug && mainApp) {
-        const er = element.getBoundingClientRect()
-        const cr = mainApp.getBoundingClientRect()
-        const lines = [
-          `clickTop: ${clickTop ?? "n/a"}`,
-          `before scrollTop: ${mainApp.scrollTop}`,
-          `mainApp scrollH: ${mainApp.scrollHeight} clientH: ${mainApp.clientHeight}`,
-          `body scrollY: ${window.scrollY} innerH: ${window.innerHeight}`,
-          `el.rect.top: ${er.top.toFixed(1)}`,
-          `mainApp.rect.top: ${cr.top.toFixed(1)}`,
-          `target: ${(er.top - cr.top + mainApp.scrollTop).toFixed(1)}`
-        ]
-        debug.textContent = lines.join("\n")
-
-        element.scrollIntoView({ behavior: "smooth", block: "start" })
-
-        requestAnimationFrame(() => {
-          debug.textContent += `\nafter1f scrollTop: ${mainApp.scrollTop}`
-          setTimeout(() => {
-            debug.textContent += `\nafter500ms scrollTop: ${mainApp.scrollTop}`
-          }, 500)
-        })
-      } else {
-        element.scrollIntoView({ behavior: "smooth", block: "start" })
-      }
+      element.scrollIntoView({ behavior: "smooth", block: "start" })
     })
   }
 
