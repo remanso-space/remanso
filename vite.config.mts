@@ -22,7 +22,7 @@ export default defineConfig(({ command }) => {
           "pwa-512x512.png",
           "masked-icon.png",
           "maskable-icon-512x512.png",
-          "monochrome-icon.png",
+          "monochromeicon.png",
           "assets/*.svg"
         ],
         manifest: {
@@ -54,7 +54,7 @@ export default defineConfig(({ command }) => {
               purpose: "maskable"
             },
             {
-              src: "monochrome-icon.png",
+              src: "monochromeicon.png",
               sizes: "1024x1024",
               type: "image/png",
               purpose: "monochrome"
