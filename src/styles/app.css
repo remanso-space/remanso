@@ -31,7 +31,7 @@
 
 @plugin 'daisyui' {
   themes:
-    emerald --default,
+    retro --default,
     forest --prefersdark;
 }
 
