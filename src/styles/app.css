@@ -31,7 +31,7 @@
 
 @plugin 'daisyui' {
   themes:
-    lemonade --default,
+    caramellatte --default,
     dracula --prefersdark;
 }
 
