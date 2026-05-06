@@ -3,5 +3,5 @@
 
 export const themeConfig = {
   light: 'cupcake',
-  dark: "forest"
+  dark: 'dracula'
 }

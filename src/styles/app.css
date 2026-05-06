@@ -32,7 +32,7 @@
 @plugin 'daisyui' {
   themes:
     cupcake --default,
-    forest --prefersdark;
+    dracula --prefersdark;
 }
 
 @config '../../tailwind.config.js';
