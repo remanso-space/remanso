@@ -121,20 +121,23 @@ export const queryFileContent = async (
   repo: string,
   sha: string
 ) => {
-  const octokit = await getOctokit()
-
   if (!user || !repo) {
-    null
+    return null
   }
 
-  const file = await octokit.request(
-    "GET /repos/{owner}/{repo}/git/blobs/{file_sha}",
-    {
-      owner: user,
-      repo: repo,
-      file_sha: sha
-    }
-  )
-
-  return file?.data.content ?? null
+  try {
+    const octokit = await getOctokit()
+    const file = await octokit.request(
+      "GET /repos/{owner}/{repo}/git/blobs/{file_sha}",
+      {
+        owner: user,
+        repo: repo,
+        file_sha: sha
+      }
+    )
+    return file?.data.content ?? null
+  } catch (error) {
+    console.warn("queryFileContent failed", { user, repo, sha, error })
+    return null
+  }
 }

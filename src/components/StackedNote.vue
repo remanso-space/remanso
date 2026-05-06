@@ -26,6 +26,7 @@ import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
+import { errorMessage } from "@/utils/notif"
 
 const LinkedNotes = defineAsyncComponent(
   () => import("@/components/LinkedNotes.vue")
@@ -241,21 +242,26 @@ const onConflictCancel = () => {
 }
 
 const onBadgeClick = async () => {
-  if (freshnessStatus.value !== "outdated") {
-    await checkFreshness()
-    return
-  }
+  try {
+    if (freshnessStatus.value !== "outdated") {
+      await checkFreshness()
+      return
+    }
 
-  const hasUnsavedEdits = rawContent.value !== initialRawContent.value
-  if (hasUnsavedEdits) {
-    conflictOpen.value = true
-    return
-  }
+    const hasUnsavedEdits = rawContent.value !== initialRawContent.value
+    if (hasUnsavedEdits) {
+      conflictOpen.value = true
+      return
+    }
 
-  const newRaw = await pullLatest()
-  if (newRaw !== null) {
-    rawContent.value = newRaw
-    initialRawContent.value = newRaw
+    const newRaw = await pullLatest()
+    if (newRaw !== null) {
+      rawContent.value = newRaw
+      initialRawContent.value = newRaw
+    }
+  } catch (error) {
+    console.error("freshness badge click failed", error)
+    errorMessage("❌ Couldn't pull latest from GitHub")
   }
 }
 </script>

@@ -51,13 +51,22 @@ export const useNoteFreshness = ({
 
   const pullLatest = async (): Promise<string | null> => {
     if (!path.value) return null
+    const usedCachedSha = latestSha.value !== null
     const remoteSha = latestSha.value ?? (await fetchLatestSha(path.value))
     if (!remoteSha) {
+      console.warn("pullLatest: could not resolve remote sha", { path: path.value })
       status.value = "offline"
       return null
     }
     const fileContent = await queryFileContent(user, repo, remoteSha)
     if (!fileContent) {
+      console.warn("pullLatest: failed to fetch blob content", {
+        path: path.value,
+        remoteSha,
+        usedCachedSha
+      })
+      // Cached SHA may be stale — clear so the next click re-resolves it.
+      if (usedCachedSha) latestSha.value = null
       status.value = "offline"
       return null
     }
