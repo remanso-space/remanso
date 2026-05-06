@@ -166,8 +166,10 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
 
       getCachedMainReadme(user, repo).then(async (cachedReadme) => {
         if (requestId !== this._requestId) return
-        this.readme = cachedReadme
-        this.readme = await getMainReadme(user, repo)
+        if (cachedReadme) this.readme = cachedReadme
+        const fetched = await getMainReadme(user, repo)
+        if (requestId !== this._requestId) return
+        this.readme = fetched
       })
     },
     addFile(file: RepoFile) {

@@ -5,6 +5,7 @@ import HeaderNote from "@/components/HeaderNote.vue"
 import SignInGithub from "@/components/SignInGithub.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedNote from "@/components/StackedNote.vue"
+import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useNoteView } from "@/hooks/useNoteView.hook"
@@ -44,6 +45,7 @@ const { listenToClick } = useLinks("note-display")
 const { stackedNotes, scrollToFocusedNote } = useRouteQueryStackedNotes()
 
 const { titles } = useNoteView()
+const { isLogged } = useGitHubLogin()
 useResizeContainer("note-container", stackedNotes)
 
 const renderedContent = computed(() =>
@@ -104,8 +106,13 @@ onUnmounted(() => {
       <slot />
       <skeleton-loader v-if="isLoading" />
       <div v-else-if="withContent && !hasContent" class="repo-not-found">
-        <p>This repository is not accessible.</p>
-        <sign-in-github />
+        <template v-if="isLogged">
+          <p>This repository is not accessible.</p>
+        </template>
+        <template v-else>
+          <p>This repository is private. Sign in to view it.</p>
+          <sign-in-github />
+        </template>
       </div>
       <p
         v-else-if="withContent && hasContent"
