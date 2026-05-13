@@ -1,8 +1,7 @@
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - esbuild
-  - fsevents
-  - sharp
-  - vue-demi
-ignoredBuiltDependencies:
-  - core-js
+allowBuilds:
+  '@parcel/watcher': true
+  core-js: true
+  esbuild: true
+  fsevents: true
+  sharp: true
+  vue-demi: true
