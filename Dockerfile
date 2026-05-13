@@ -1,7 +1,7 @@
 # ---- Stage 1: deps (only invalidated when lockfile changes) ----
 FROM node:22-alpine AS deps
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN pnpm install --frozen-lockfile
 # ---- Stage 2: build (invalidated on any source change) ----
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
 WORKDIR /app
 
