@@ -109,6 +109,10 @@ a {
 a.title-stacked-note-link {
   display: block;
   overflow: visible;
+  &:hover {
+    cursor: pointer;
+    text-decoration: none;
+  }
 }
 
 .title-stacked-note ul,
