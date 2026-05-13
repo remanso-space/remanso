@@ -2,6 +2,6 @@
 // Update these values to change the light and dark themes
 
 export const themeConfig = {
-  light: 'caramellatte',
+  light: 'light',
   dark: 'dracula'
 }
