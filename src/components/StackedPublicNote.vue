@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { computedAsync } from "@vueuse/core"
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder, runTikz } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
@@ -76,15 +77,10 @@ const content = computed(() =>
     : ""
 )
 
-watch(
-  content,
-  async () => {
-    await nextTick()
-    listenToClick()
-    void runTikz(`.note-${classNameId.value} .tikz`)
-  },
-  { immediate: true }
-)
+useMarkdownPostRender(content, () => `.note-${classNameId.value}`, {
+  onReady: () => listenToClick(),
+  tikz: true
+})
 </script>
 
 <template>

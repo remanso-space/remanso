@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computedAsync } from "@vueuse/core"
 import { useTitle } from "@vueuse/core"
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
@@ -9,7 +9,8 @@ import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder, runTikz } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
@@ -115,15 +116,10 @@ const { stackedNotes, scrollToFocusedNote } = useRouteQueryStackedNotes()
 const { listenToClick } = useATProtoLinks("note-display", { mainNoteId })
 useResizeContainer("note-container", stackedNotes)
 
-watch(
-  content,
-  async () => {
-    await nextTick()
-    listenToClick()
-    void runTikz(".public-note-view .note-display .tikz")
-  },
-  { immediate: true }
-)
+useMarkdownPostRender(content, () => ".public-note-view .note-display", {
+  onReady: () => listenToClick(),
+  tikz: true
+})
 </script>
 
 <template>

@@ -2,7 +2,6 @@
 import {
   computed,
   defineAsyncComponent,
-  nextTick,
   onMounted,
   ref,
   watch
@@ -11,14 +10,9 @@ import {
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
-import { useImages } from "@/hooks/useImages.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
-import {
-  renderCodeFile,
-  runMermaid,
-  runTikz,
-  useShikiji
-} from "@/hooks/useMarkdown.hook"
+import { renderCodeFile } from "@/hooks/useMarkdown.hook"
+import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteFreshness } from "@/hooks/useNoteFreshness.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
@@ -145,30 +139,14 @@ watch(
 
 const { mode, toggleMode } = useEditionMode()
 
-watch([content, mode], () => {
-  if (!content.value) {
-    return
-  }
-
-  nextTick(() => {
-    listenToClick()
-
-    if (/\!\[.*?\]\(.*?\)/.test(rawContent.value)) {
-      useImages(props.sha)
-    }
-
-    if (rawContent.value.includes("```mermaid")) {
-      runMermaid(`.note-${sha.value} .mermaid`)
-    }
-
-    if (rawContent.value.includes("```tikz")) {
-      void runTikz(`.note-${sha.value} .tikz`)
-    }
-
-    if (isMarkdown.value && rawContent.value.includes("```")) {
-      useShikiji()
-    }
-  })
+useMarkdownPostRender(content, () => `.note-${sha.value}`, {
+  onReady: () => listenToClick(),
+  tikz: true,
+  mermaid: () => rawContent.value.includes("```mermaid"),
+  shikiji: () => isMarkdown.value && rawContent.value.includes("```"),
+  images: () =>
+    /\!\[.*?\]\(.*?\)/.test(rawContent.value) ? props.sha : null,
+  triggers: [mode]
 })
 
 const performSave = async (overrideSha?: string) => {

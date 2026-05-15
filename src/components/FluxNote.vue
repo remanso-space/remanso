@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, onUnmounted, toRefs, watch } from "vue"
+import { computed, onMounted, onUnmounted, toRefs, watch } from "vue"
 
 import HeaderNote from "@/components/HeaderNote.vue"
 import SignInGithub from "@/components/SignInGithub.vue"
@@ -7,7 +7,8 @@ import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedNote from "@/components/StackedNote.vue"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
-import { markdownBuilder, runTikz } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteView } from "@/hooks/useNoteView.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
@@ -59,15 +60,10 @@ const renderedContent = computed(() =>
 const isLoading = computed(() => renderedContent.value === undefined)
 const hasContent = computed(() => !!renderedContent.value)
 
-watch(
-  renderedContent,
-  async () => {
-    await nextTick()
-    listenToClick()
-    void runTikz(".note-display .tikz")
-  },
-  { immediate: true }
-)
+useMarkdownPostRender(renderedContent, () => ".note-display", {
+  onReady: () => listenToClick(),
+  tikz: true
+})
 
 watch(
   [refProps.user, refProps.repo],
