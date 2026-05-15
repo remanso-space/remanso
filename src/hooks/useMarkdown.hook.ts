@@ -28,6 +28,8 @@ import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons
 
 const TIKZ_BUNDLE_URL =
   "https://cdn.jsdelivr.net/gh/artisticat1/obsidian-tikzjax@0.5.2/tikzjax.js"
+const TIKZ_STYLES_URL =
+  "https://cdn.jsdelivr.net/gh/artisticat1/obsidian-tikzjax@0.5.2/styles.css"
 const TIKZ_RENDER_TIMEOUT_MS = 30000
 
 const markdownItMermaidExtractor = (md: MarkdownIt) => {
@@ -188,6 +190,7 @@ export const runMermaid = (querySelector: string) => {
 }
 
 let tikzBundlePromise: Promise<void> | null = null
+let tikzStylesPromise: Promise<void> | null = null
 let domPurifyPromise: Promise<typeof import("dompurify")> | null = null
 
 const ensureTikzBundle = (): Promise<void> => {
@@ -213,6 +216,31 @@ const ensureTikzBundle = (): Promise<void> => {
   })
 
   return tikzBundlePromise
+}
+
+const ensureTikzStyles = (): Promise<void> => {
+  if (tikzStylesPromise) return tikzStylesPromise
+
+  tikzStylesPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.getElementById("tikzjax-styles")
+    if (existing) {
+      resolve()
+      return
+    }
+    const link = document.createElement("link")
+    link.id = "tikzjax-styles"
+    link.rel = "stylesheet"
+    link.href = TIKZ_STYLES_URL
+    link.crossOrigin = "anonymous"
+    link.addEventListener("load", () => resolve())
+    link.addEventListener("error", () => {
+      tikzStylesPromise = null
+      reject(new Error("Failed to load TikZ font styles"))
+    })
+    document.head.appendChild(link)
+  })
+
+  return tikzStylesPromise
 }
 
 const ensureDomPurify = (): Promise<typeof import("dompurify")> => {
@@ -296,6 +324,8 @@ export const runTikz = async (querySelector: string): Promise<void> => {
     document.querySelectorAll<HTMLElement>(querySelector)
   )
   if (elements.length === 0) return
+
+  void ensureTikzStyles().catch(() => undefined)
 
   await Promise.all(
     elements.map(async (el) => {
