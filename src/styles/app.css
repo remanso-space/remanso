@@ -111,6 +111,7 @@ a.title-stacked-note-link {
   overflow: visible;
   &:hover {
     cursor: pointer;
+    text-decoration: none;
   }
 }
 

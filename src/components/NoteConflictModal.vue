@@ -51,7 +51,7 @@ onMounted(() => {
         started editing. If you save now, their changes will be overwritten.
       </p>
 
-      <div class="modal-action flex-col gap-2 sm:flex-row sm:justify-end">
+      <div class="modal-action flex-col gap-2">
         <button
           type="button"
           class="btn btn-ghost"

@@ -19,8 +19,7 @@ onBeforeMount(async () => {
     if ("error" in token) {
       hasError.value = true
     } else {
-      token.access_token
-      saveCredentials(token)
+      await saveCredentials(token)
     }
 
     router.replace({ name: "Home" })
