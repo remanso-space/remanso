@@ -16,6 +16,7 @@ import { useLinks } from "@/hooks/useLinks.hook"
 import {
   renderCodeFile,
   runMermaid,
+  runTikz,
   useShikiji
 } from "@/hooks/useMarkdown.hook"
 import { useNoteFreshness } from "@/hooks/useNoteFreshness.hook"
@@ -158,6 +159,10 @@ watch([content, mode], () => {
 
     if (rawContent.value.includes("```mermaid")) {
       runMermaid(`.note-${sha.value} .mermaid`)
+    }
+
+    if (rawContent.value.includes("```tikz")) {
+      void runTikz(`.note-${sha.value} .tikz`)
     }
 
     if (isMarkdown.value && rawContent.value.includes("```")) {

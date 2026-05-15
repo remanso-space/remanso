@@ -15,10 +15,20 @@ import mermaid from "mermaid"
 import type { LanguageRegistration } from "shikiji-core"
 import { Ref, toValue } from "vue"
 
+import { data } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
+import type { TikzCache } from "@/data/models/TikzCache"
 import alloyGrammar from "@/utils/alloy.tmLanguage.json"
-import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
+import {
+  decodeBase64ToUTF8,
+  encodeUTF8ToBase64
+} from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
+
+const TIKZ_BUNDLE_URL =
+  "https://cdn.jsdelivr.net/gh/artisticat1/obsidian-tikzjax@0.5.2/tikzjax.js"
+const TIKZ_RENDER_TIMEOUT_MS = 30000
 
 const markdownItMermaidExtractor = (md: MarkdownIt) => {
   const defaultFence =
@@ -51,6 +61,37 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
   }
 }
 
+const markdownItTikzExtractor = (md: MarkdownIt) => {
+  const defaultFence =
+    md.renderer.rules.fence ||
+    function (
+      tokens: Array<Token>,
+      index: number,
+      options: Options,
+      _: unknown,
+      self: Renderer
+    ) {
+      return self.renderToken(tokens, index, options)
+    }
+
+  md.renderer.rules.fence = function (
+    tokens: Array<Token>,
+    index: number,
+    options: Options,
+    env: unknown,
+    self: Renderer
+  ) {
+    const token = tokens[index]
+
+    if (token.info.trim() === "tikz") {
+      const encoded = encodeUTF8ToBase64(token.content)
+      return `<pre class="tikz" data-tikz-source="${encoded}"><span class="tikz-loading">Rendering TikZ…</span></pre>\n`
+    }
+
+    return defaultFence(tokens, index, options, env, self)
+  }
+}
+
 const slugger = new GithubSlugger()
 
 let tabGroupCounter = 0
@@ -62,6 +103,7 @@ const md = new MarkdownIt({
   quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"]
 })
   .use(markdownItMermaidExtractor)
+  .use(markdownItTikzExtractor)
   .use(html5Media)
   .use(blockEmbedPlugin, {
     youtube: {
@@ -143,6 +185,165 @@ export const runMermaid = (querySelector: string) => {
   mermaid.run({
     querySelector
   })
+}
+
+let tikzBundlePromise: Promise<void> | null = null
+let domPurifyPromise: Promise<typeof import("dompurify")> | null = null
+
+const ensureTikzBundle = (): Promise<void> => {
+  if (tikzBundlePromise) return tikzBundlePromise
+
+  tikzBundlePromise = new Promise<void>((resolve, reject) => {
+    const existing = document.getElementById("tikzjax-bundle")
+    if (existing) {
+      resolve()
+      return
+    }
+    const script = document.createElement("script")
+    script.id = "tikzjax-bundle"
+    script.src = TIKZ_BUNDLE_URL
+    script.async = true
+    script.crossOrigin = "anonymous"
+    script.addEventListener("load", () => resolve())
+    script.addEventListener("error", () => {
+      tikzBundlePromise = null
+      reject(new Error("Failed to load TikZ engine"))
+    })
+    document.head.appendChild(script)
+  })
+
+  return tikzBundlePromise
+}
+
+const ensureDomPurify = (): Promise<typeof import("dompurify")> => {
+  if (!domPurifyPromise) domPurifyPromise = import("dompurify")
+  return domPurifyPromise
+}
+
+const sha256Hex = async (text: string): Promise<string> => {
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  )
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+}
+
+const sanitizeSvg = async (svg: string): Promise<string> => {
+  const DOMPurify = (await ensureDomPurify()).default
+  return DOMPurify.sanitize(svg, {
+    USE_PROFILES: { svg: true, svgFilters: true }
+  })
+}
+
+const tidyTikzSource = (s: string): string =>
+  s
+    .replaceAll("&nbsp;", "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line)
+    .join("\n")
+
+const renderTikzError = (err: unknown, source: string): string => {
+  const msg = err instanceof Error ? err.message : String(err)
+  return (
+    `<div class="tikz-error"><strong>TikZ error</strong>` +
+    `<pre>${md.utils.escapeHtml(msg)}</pre>` +
+    `<details><summary>source</summary>` +
+    `<pre>${md.utils.escapeHtml(source)}</pre></details></div>`
+  )
+}
+
+const renderOneTikzBlock = (
+  el: HTMLElement,
+  source: string
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    let settled = false
+    const timer = window.setTimeout(() => {
+      if (settled) return
+      settled = true
+      el.removeEventListener("tikzjax-load-finished", handler)
+      reject(new Error("TikZ render timed out"))
+    }, TIKZ_RENDER_TIMEOUT_MS)
+
+    const handler = (e: Event) => {
+      if (settled) return
+      settled = true
+      window.clearTimeout(timer)
+      el.removeEventListener("tikzjax-load-finished", handler)
+      const target = e.target as Element | null
+      if (!target) {
+        reject(new Error("TikZ produced no output"))
+        return
+      }
+      resolve(target.outerHTML)
+    }
+
+    el.addEventListener("tikzjax-load-finished", handler)
+
+    while (el.firstChild) el.removeChild(el.firstChild)
+    const script = document.createElement("script")
+    script.type = "text/tikz"
+    script.textContent = source
+    el.appendChild(script)
+  })
+}
+
+export const runTikz = async (querySelector: string): Promise<void> => {
+  const elements = Array.from(
+    document.querySelectorAll<HTMLElement>(querySelector)
+  )
+  if (elements.length === 0) return
+
+  await Promise.all(
+    elements.map(async (el) => {
+      if (el.dataset.tikzRendered) return
+      el.dataset.tikzRendered = "pending"
+
+      const encoded = el.dataset.tikzSource
+      if (!encoded) {
+        el.dataset.tikzRendered = "error"
+        return
+      }
+
+      const source = tidyTikzSource(decodeBase64ToUTF8(encoded))
+
+      let hash: string
+      try {
+        hash = await sha256Hex(source)
+      } catch (err) {
+        el.innerHTML = renderTikzError(err, source)
+        el.dataset.tikzRendered = "error"
+        return
+      }
+
+      const cacheId = `${DataType.TikzCache}-${hash}`
+      const cached = await data.get<DataType.TikzCache, TikzCache>(cacheId)
+      if (cached?.svg) {
+        el.innerHTML = cached.svg
+        el.dataset.tikzRendered = "true"
+        return
+      }
+
+      try {
+        await ensureTikzBundle()
+        const rawSvg = await renderOneTikzBlock(el, source)
+        const sanitized = await sanitizeSvg(rawSvg)
+        el.innerHTML = sanitized
+        el.dataset.tikzRendered = "true"
+        void data.add<DataType.TikzCache>({
+          _id: cacheId,
+          $type: DataType.TikzCache,
+          svg: sanitized
+        } as TikzCache)
+      } catch (err) {
+        el.innerHTML = renderTikzError(err, source)
+        el.dataset.tikzRendered = "error"
+      }
+    })
+  )
 }
 
 const rules: RenderRuleRecord = {

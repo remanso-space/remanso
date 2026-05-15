@@ -9,7 +9,7 @@ import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder, runTikz } from "@/hooks/useMarkdown.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
@@ -120,6 +120,7 @@ watch(
   async () => {
     await nextTick()
     listenToClick()
+    void runTikz(".public-note-view .note-display .tikz")
   },
   { immediate: true }
 )

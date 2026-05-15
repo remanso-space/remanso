@@ -7,5 +7,6 @@ export enum DataType {
   RepetitionCard = "RepetitionCard",
   History = "History",
   UserSettings = "UserSettings",
-  AtprotoSession = "AtprotoSession"
+  AtprotoSession = "AtprotoSession",
+  TikzCache = "TikzCache"
 }

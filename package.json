@@ -37,6 +37,7 @@
     "arktype": "^2.1.29",
     "comlink": "^4.4.2",
     "date-fns": "^4.1.0",
+    "dompurify": "^3.4.3",
     "events": "^3.3.0",
     "font-color-contrast": "^11.1.0",
     "fontfaceobserver": "^2.3.0",

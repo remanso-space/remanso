@@ -5,7 +5,7 @@ import { useRoute } from "vue-router"
 
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder, runTikz } from "@/hooks/useMarkdown.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
@@ -81,6 +81,7 @@ watch(
   async () => {
     await nextTick()
     listenToClick()
+    void runTikz(`.note-${classNameId.value} .tikz`)
   },
   { immediate: true }
 )

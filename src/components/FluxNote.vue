@@ -7,7 +7,7 @@ import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedNote from "@/components/StackedNote.vue"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder, runTikz } from "@/hooks/useMarkdown.hook"
 import { useNoteView } from "@/hooks/useNoteView.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
@@ -64,6 +64,7 @@ watch(
   async () => {
     await nextTick()
     listenToClick()
+    void runTikz(".note-display .tikz")
   },
   { immediate: true }
 )

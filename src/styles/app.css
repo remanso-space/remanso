@@ -188,6 +188,36 @@ pre.mermaid {
   background-color: var(--color-base-content);
 }
 
+pre.tikz {
+  display: block;
+  overflow-x: auto;
+  text-align: center;
+  padding: 0.5rem;
+  background: transparent;
+}
+
+pre.tikz svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.tikz-loading {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.tikz-error {
+  border-left: 3px solid var(--color-error);
+  padding: 0.5rem 0.75rem;
+  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  text-align: left;
+}
+
+.tikz-error pre {
+  white-space: pre-wrap;
+  font-size: 0.85em;
+}
+
 .markdown-alert {
   padding: 1rem;
   background-color: #ecf0f1;
