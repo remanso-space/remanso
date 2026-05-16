@@ -15,7 +15,6 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "preserveSymlinks": true,
     "lib": ["esnext", "dom", "dom.iterable", "scripthost", "ES2015"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
