@@ -30,7 +30,8 @@ export const getFiles = async (
       owner,
       repo,
       tree_sha: lastCommit.commit.tree.sha,
-      recursive: "true"
+      recursive: "true",
+      request: { signal: AbortSignal.timeout(20_000) }
     }
   )
 
@@ -82,6 +83,10 @@ export const getMainReadme = async (owner: string, repo: string) => {
     if (cachedReadme) {
       return render(cachedReadme.content)
     }
+
+    // No cached fallback — surface the error so the caller can classify
+    // network/timeout failures vs auth/404 and tailor the UI accordingly.
+    throw error
   }
 
   return null

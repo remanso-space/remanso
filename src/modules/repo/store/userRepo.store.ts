@@ -14,6 +14,8 @@ import {
 } from "@/modules/repo/services/repo"
 import { refreshToken } from "@/modules/user/service/signIn"
 
+export type RepoLoadError = "auth" | "network" | null
+
 interface State {
   user: string
   repo: string
@@ -21,7 +23,18 @@ interface State {
   readme?: string | null
   userSettings?: UserSettings | null
   needToLogin: boolean
+  loadError: RepoLoadError
   _requestId: number
+}
+
+const classifyLoadError = (error: unknown): "auth" | "network" => {
+  if (error && typeof error === "object") {
+    const e = error as { name?: string; status?: number }
+    if (e.name === "TimeoutError" || e.name === "AbortError") return "network"
+    if (e.status === 401 || e.status === 403 || e.status === 404) return "auth"
+    if (typeof e.status === "number" && e.status >= 500) return "network"
+  }
+  return "network"
 }
 
 export const useUserRepoStore = defineStore("USER_REPO_STATE", {
@@ -32,6 +45,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     readme: undefined,
     userSettings: undefined,
     needToLogin: false,
+    loadError: null,
     _requestId: 0
   }),
   actions: {
@@ -63,6 +77,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       const requestId = ++this._requestId
       this.user = user
       this.repo = repo
+      this.loadError = null
 
       let lsLayout: Partial<UserSettings> = {}
       try {
@@ -163,14 +178,29 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             _id: userSettingsId
           })
         })
+        .catch((error) => {
+          if (requestId !== this._requestId) return
+          console.warn("getFiles failed", error)
+          this.loadError = classifyLoadError(error)
+        })
 
-      getCachedMainReadme(user, repo).then(async (cachedReadme) => {
-        if (requestId !== this._requestId) return
-        if (cachedReadme) this.readme = cachedReadme
-        const fetched = await getMainReadme(user, repo)
-        if (requestId !== this._requestId) return
-        this.readme = fetched
-      })
+      getCachedMainReadme(user, repo)
+        .then(async (cachedReadme) => {
+          if (requestId !== this._requestId) return
+          if (cachedReadme) this.readme = cachedReadme
+          const fetched = await getMainReadme(user, repo)
+          if (requestId !== this._requestId) return
+          this.readme = fetched
+        })
+        .catch((error) => {
+          if (requestId !== this._requestId) return
+          console.warn("getMainReadme failed", error)
+          // Only surface the error UI if we have nothing cached to display.
+          if (!this.readme) {
+            this.readme = null
+            this.loadError = classifyLoadError(error)
+          }
+        })
     },
     addFile(file: RepoFile) {
       if (!file.sha) {

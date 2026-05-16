@@ -73,6 +73,10 @@ watch(
   { immediate: true }
 )
 
+const retryLoad = () => {
+  store.setUserRepo(props.user, props.repo)
+}
+
 onMounted(() => visitRepo())
 
 onUnmounted(() => {
@@ -102,6 +106,13 @@ onUnmounted(() => {
       </div>
       <slot />
       <skeleton-loader v-if="isLoading" />
+      <div
+        v-else-if="withContent && !hasContent && store.loadError === 'network'"
+        class="repo-network-error"
+      >
+        <p>Couldn't reach GitHub. Check your connection.</p>
+        <button class="btn btn-primary" @click="retryLoad">Retry</button>
+      </div>
       <div v-else-if="withContent && !hasContent" class="repo-not-found">
         <template v-if="isLogged">
           <p>This repository is not accessible.</p>
@@ -198,7 +209,8 @@ $header-height: 40px;
     }
   }
 
-  .repo-not-found {
+  .repo-not-found,
+  .repo-network-error {
     display: flex;
     flex-direction: column;
     align-items: center;
