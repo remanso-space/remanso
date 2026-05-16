@@ -15,12 +15,12 @@ export const useGitHubContent = ({
     try {
       const octokit = await getOctokit()
       const response = await octokit.request(
-        "GET /repos/{owner}/{repo}/contents/{path}",
+        "GET /repos/{owner}/{repo}/contents/{+path}",
         {
           owner: user,
           repo,
           path,
-          headers: { "X-GitHub-Api-Version": "2022-11-28" }
+          headers: { "X-GitHub-Api-Version": "2026-03-10" }
         }
       )
       const data = response?.data
@@ -44,7 +44,7 @@ export const useGitHubContent = ({
       const octokit = await getOctokit()
 
       const response = await octokit.request(
-        `PUT /repos/{owner}/{repo}/contents/{path}`,
+        "PUT /repos/{owner}/{repo}/contents/{+path}",
         {
           owner: user,
           repo,
