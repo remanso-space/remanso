@@ -12,7 +12,7 @@ const isReady = ref(false)
 const isLoading = ref(false)
 const hasCredentialError = ref(false)
 const currentPage = ref(0)
-const totalCount = ref(0)
+const hasMore = ref(true)
 let lastFetchedAt = 0
 
 const { username, accessToken } = useGitHubLogin()
@@ -20,7 +20,7 @@ const { username, accessToken } = useGitHubLogin()
 const resetState = () => {
   repos.value = []
   currentPage.value = 0
-  totalCount.value = 0
+  hasMore.value = true
   isReady.value = false
   isLoading.value = false
   hasCredentialError.value = false
@@ -32,26 +32,26 @@ const loadMore = async () => {
     isReady.value = true
     return
   }
-  if (isLoading.value) return
+  if (isLoading.value || !hasMore.value) return
   isLoading.value = true
   try {
     const octokit = await getOctokit()
     const nextPage = currentPage.value + 1
-    const repoList = await octokit.request("GET /search/repositories", {
-      q: `user:${username.value}`,
+    const repoList = await octokit.request("GET /user/repos", {
+      sort: "full_name",
+      direction: "asc",
+      affiliation: "owner",
       per_page: PER_PAGE,
       page: nextPage
     })
     currentPage.value = nextPage
-    totalCount.value = repoList.data.total_count
-    const newItems = repoList.data.items.map((item) => ({
+    hasMore.value = repoList.data.length === PER_PAGE
+    const newItems = repoList.data.map((item) => ({
       id: `${item.id}`,
       name: item.name,
-      isPrivate: item.private
+      isPrivate: item.private ?? false
     }))
-    repos.value = [...repos.value, ...newItems].sort((a, b) =>
-      a.name < b.name ? -1 : 1
-    )
+    repos.value = [...repos.value, ...newItems]
   } catch (err: unknown) {
     if (
       typeof err === "object" &&
@@ -79,9 +79,7 @@ watch(accessToken, (next, prev) => {
 })
 
 export const useRepos = () => {
-  const canLoadMore = computed(
-    () => !isLoading.value && repos.value.length < totalCount.value
-  )
+  const canLoadMore = computed(() => !isLoading.value && hasMore.value)
 
   const isStale = Date.now() - lastFetchedAt > STALE_TIME_MS
   if (!isReady.value || isStale) {
