@@ -11,6 +11,26 @@ import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 const CONCURRENCY = 8
 const BULK_FLUSH_SIZE = 50
 
+export type CacheFailureKind =
+  | "fetch"
+  | "build"
+  | "save"
+  | "readme"
+  | "unknown"
+
+export type CacheFailure = {
+  kind: CacheFailureKind
+  path?: string
+  sha?: string
+  message?: string
+  docIds?: string[]
+}
+
+const describeError = (error: unknown): string => {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
 const runWithConcurrency = async <T>(
   items: T[],
   limit: number,
@@ -33,7 +53,13 @@ export const useOfflineNotes = () => {
   const totalOfNotes = computed(() => store.files.length)
 
   const noteCompleted = ref(0)
-  const failedNotes = ref(0)
+  const failures = ref<CacheFailure[]>([])
+  const failedNotes = computed(() => failures.value.length)
+
+  const recordFailure = (failure: CacheFailure) => {
+    failures.value.push(failure)
+    console.warn("[offline-cache] failure", failure)
+  }
 
   const cacheAllNotes = async () => {
     const isInitialized = store.user && store.repo && totalOfNotes.value > 0
@@ -56,13 +82,23 @@ export const useOfflineNotes = () => {
     )
 
     noteCompleted.value = store.files.length - filesToFetch.length
-    failedNotes.value = 0
+    failures.value = []
 
     const pendingDocs: Note[] = []
     const flush = async () => {
       if (!pendingDocs.length) return
       const batch = pendingDocs.splice(0, pendingDocs.length)
-      await data.bulkUpdate(batch)
+      try {
+        await data.bulkUpdate(batch)
+      } catch (error) {
+        recordFailure({
+          kind: "save",
+          message: describeError(error),
+          docIds: batch
+            .map((doc) => doc._id)
+            .filter((id): id is string => Boolean(id))
+        })
+      }
     }
 
     const fetchWork = runWithConcurrency(
@@ -75,22 +111,45 @@ export const useOfflineNotes = () => {
             store.repo,
             file.sha!
           )
-          if (!content) {
-            failedNotes.value++
+          if (content === null) {
+            recordFailure({
+              kind: "fetch",
+              path: file.path,
+              sha: file.sha!
+            })
             return
           }
-          pendingDocs.push(...buildNoteDocs(file.sha!, file.path, content))
+          let docs: Note[]
+          try {
+            docs = buildNoteDocs(file.sha!, file.path, content)
+          } catch (error) {
+            recordFailure({
+              kind: "build",
+              path: file.path,
+              sha: file.sha!,
+              message: describeError(error)
+            })
+            return
+          }
+          pendingDocs.push(...docs)
           if (pendingDocs.length >= BULK_FLUSH_SIZE) {
             await flush()
           }
+        } catch (error) {
+          recordFailure({
+            kind: "unknown",
+            path: file.path,
+            sha: file.sha,
+            message: describeError(error)
+          })
         } finally {
           noteCompleted.value++
         }
       }
     )
 
-    const readmeWork = getMainReadme(store.user, store.repo).catch(() => {
-      failedNotes.value++
+    const readmeWork = getMainReadme(store.user, store.repo).catch((error) => {
+      recordFailure({ kind: "readme", message: describeError(error) })
     })
 
     await Promise.all([fetchWork, readmeWork])
@@ -105,6 +164,7 @@ export const useOfflineNotes = () => {
     isLoading,
     totalOfNotes,
     noteCompleted,
-    failedNotes
+    failedNotes,
+    failures
   }
 }
