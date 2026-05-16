@@ -13,6 +13,7 @@ export const useOfflineNotes = () => {
   const totalOfNotes = computed(() => store.files.length)
 
   const noteCompleted = ref(0)
+  const failedNotes = ref(0)
 
   const cacheAllNotes = async () => {
     const isInitialized = store.user && store.repo && totalOfNotes.value > 0
@@ -30,6 +31,7 @@ export const useOfflineNotes = () => {
     const cachedNotesSet = new Set(cachedNotesFromSha.map((note) => note._id))
 
     noteCompleted.value = 0
+    failedNotes.value = 0
 
     for (const file of store.files) {
       noteCompleted.value++
@@ -50,7 +52,8 @@ export const useOfflineNotes = () => {
       )
 
       if (!contentFile) {
-        return null
+        failedNotes.value++
+        continue
       }
 
       saveCacheNote(contentFile)
@@ -64,6 +67,7 @@ export const useOfflineNotes = () => {
     cacheAllNotes: execute,
     isLoading,
     totalOfNotes,
-    noteCompleted
+    noteCompleted,
+    failedNotes
   }
 }
