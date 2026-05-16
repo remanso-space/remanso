@@ -197,8 +197,8 @@ export const attachSvgDownloads = (scope: ParentNode | null | undefined): void =
       )
     )
     toolbar.appendChild(
-      makeButton("PNG ×2", "Download PNG (2×)", () => {
-        void downloadAsPng(svg, `${baseName}.png`, 2)
+      makeButton("PNG ×3", "Download PNG (3×)", () => {
+        void downloadAsPng(svg, `${baseName}.png`, 3)
       })
     )
     host.appendChild(toolbar)
