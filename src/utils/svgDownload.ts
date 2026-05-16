@@ -169,12 +169,13 @@ const makeButton = (label: string, title: string, onClick: () => void): HTMLButt
   return btn
 }
 
+const RENDERED_DIAGRAM_SELECTOR = ".tikz svg, .mermaid svg"
+
 export const attachSvgDownloads = (scope: ParentNode | null | undefined): void => {
   if (!scope) return
-  const svgs = scope.querySelectorAll<SVGSVGElement>("svg")
+  const svgs = scope.querySelectorAll<SVGSVGElement>(RENDERED_DIAGRAM_SELECTOR)
   let index = 0
   svgs.forEach((svg) => {
-    if (svg.closest(".svg-download-button")) return
     if (svg.closest(".svg-download-host")) return
 
     const host = document.createElement("span")
