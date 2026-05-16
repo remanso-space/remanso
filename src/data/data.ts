@@ -7,6 +7,9 @@ import { Model } from "./models/Model"
 export interface DataApi {
   add<DT extends DataType>(model: Model<DT>): Promise<boolean>
   update<DT extends DataType, T extends Model<DT>>(model: T): Promise<boolean>
+  bulkUpdate<DT extends DataType, T extends Model<DT>>(
+    models: T[]
+  ): Promise<boolean>
   remove(id: string): Promise<boolean>
   get<DT extends DataType, T extends Model<DT>>(id: string): Promise<T | null>
   getOrCreate<DT extends DataType, T extends Model<DT>>(

@@ -67,6 +67,19 @@ class Data {
     }
   }
 
+  public async bulkUpdate<DT extends DataType, T extends Model<DT>>(
+    models: T[]
+  ): Promise<boolean> {
+    if (!this.locale || !models.length) return false
+    try {
+      const result = await this.locale.bulkDocs(models)
+      return result.every((r) => "ok" in r && r.ok)
+    } catch (error) {
+      console.warn(error)
+      return false
+    }
+  }
+
   public async remove(id: string): Promise<boolean> {
     try {
       const doc = await this.get(id)
