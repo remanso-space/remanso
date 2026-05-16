@@ -2,13 +2,20 @@
 import { useOfflineNotes } from "@/hooks/useOfflineNotes.hook"
 import { confirmMessage, errorMessage } from "@/utils/notif"
 
-const { cacheAllNotes, isLoading, totalOfNotes, noteCompleted, failedNotes } =
-  useOfflineNotes()
+const {
+  cacheAllNotes,
+  isLoading,
+  totalOfNotes,
+  noteCompleted,
+  failedNotes,
+  failures
+} = useOfflineNotes()
 
 const confirmBeforeCachingAllNotes = async () => {
   confirm("Do you want to cache all notes?")
   await cacheAllNotes()
   if (failedNotes.value > 0) {
+    console.table(failures.value)
     errorMessage(
       `${failedNotes.value} of ${totalOfNotes.value} note(s) could not be cached — try again`
     )
