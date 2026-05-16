@@ -174,7 +174,7 @@ export const useShikiji = (): Promise<void> => {
 
 let mermaidInitialized = false
 
-export const runMermaid = (querySelector: string) => {
+export const runMermaid = (querySelector: string): Promise<void> => {
   if (!mermaidInitialized) {
     mermaidInitialized = true
     mermaid.initialize({
@@ -184,7 +184,7 @@ export const runMermaid = (querySelector: string) => {
     })
   }
 
-  mermaid.run({
+  return mermaid.run({
     querySelector
   })
 }

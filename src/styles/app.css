@@ -219,6 +219,47 @@ pre.tikz svg {
   font-style: italic;
 }
 
+.svg-download-host {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.svg-download-buttons {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.svg-download-host:hover .svg-download-buttons,
+.svg-download-host:focus-within .svg-download-buttons {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.svg-download-button {
+  font-size: 0.7rem;
+  padding-inline: 0.4rem;
+  height: 1.5rem;
+  min-height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.svg-download-button .icon-tabler-download {
+  width: 0.9rem;
+  height: 0.9rem;
+  max-width: none;
+  filter: none;
+}
+
 .tikz-error {
   border-left: 3px solid var(--color-error);
   padding: 0.5rem 0.75rem;

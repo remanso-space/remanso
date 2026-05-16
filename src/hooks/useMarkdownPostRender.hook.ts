@@ -6,6 +6,7 @@ import {
   runTikz,
   useShikiji
 } from "@/hooks/useMarkdown.hook"
+import { attachSvgDownloads } from "@/utils/svgDownload"
 
 interface MarkdownPostRenderOptions {
   onReady?: () => void
@@ -31,13 +32,16 @@ export const useMarkdownPostRender = (
       options.onReady?.()
 
       const scope = scopeSelector()
+      const wantsTikz = !!options.tikz
+      const wantsMermaid = !!options.mermaid?.()
 
-      if (options.tikz) {
-        void runTikz(`${scope} .tikz`)
+      const renderJobs: Promise<unknown>[] = []
+      if (wantsTikz) {
+        renderJobs.push(runTikz(`${scope} .tikz`))
       }
 
-      if (options.mermaid?.()) {
-        runMermaid(`${scope} .mermaid`)
+      if (wantsMermaid) {
+        renderJobs.push(runMermaid(`${scope} .mermaid`))
       }
 
       if (options.shikiji?.()) {
@@ -47,6 +51,12 @@ export const useMarkdownPostRender = (
       const imagesSha = options.images?.()
       if (imagesSha) {
         useImages(imagesSha)
+      }
+
+      if (wantsTikz || wantsMermaid) {
+        await Promise.allSettled(renderJobs)
+        await nextTick()
+        attachSvgDownloads(document.querySelector(scope))
       }
     },
     { immediate: true }
