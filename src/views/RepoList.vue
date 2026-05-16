@@ -514,6 +514,8 @@ main {
   display: block;
   object-fit: contain;
   view-transition-name: remanso-logo;
+  border: 0;
+  box-shadow: none;
 }
 
 .brand-word {
