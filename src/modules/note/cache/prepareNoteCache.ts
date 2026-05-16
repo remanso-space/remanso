@@ -11,6 +11,23 @@ type NoteCacheResult =
   | { note: Note; from: "path" }
   | { note: null; from: null }
 
+export const buildNoteDocs = (
+  sha: string,
+  path: string | undefined,
+  content: string,
+  editedSha?: string
+): Note[] => {
+  const base: Note = {
+    _id: generateId(DataType.Note, sha),
+    $type: DataType.Note,
+    content,
+    editedSha
+  }
+  return path
+    ? [base, { ...base, _id: generateId(DataType.Note, path) }]
+    : [base]
+}
+
 export const prepareNoteCache = (sha: string, path?: string) => {
   const store = useUserRepoStore()
 
