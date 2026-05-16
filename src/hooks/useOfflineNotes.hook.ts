@@ -5,7 +5,7 @@ import { data, generateId } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { prepareNoteCache } from "@/modules/note/cache/prepareNoteCache"
 import { Note } from "@/modules/note/models/Note"
-import { queryFileContent } from "@/modules/repo/services/repo"
+import { getMainReadme, queryFileContent } from "@/modules/repo/services/repo"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 
 export const useOfflineNotes = () => {
@@ -57,6 +57,12 @@ export const useOfflineNotes = () => {
       }
 
       saveCacheNote(contentFile)
+    }
+
+    try {
+      await getMainReadme(store.user, store.repo)
+    } catch {
+      failedNotes.value++
     }
   }
   const { execute, isLoading } = useAsyncState(cacheAllNotes, null, {
