@@ -14,9 +14,15 @@ export const useFavoriteRepos = () => {
     })
   }
 
-  const savedFavoriteRepos = computed(() =>
-    savedRepos.value.filter((repo) => repo.isFavorite)
-  )
+  const savedFavoriteRepos = computed(() => {
+    const seen = new Map<string, FavoriteRepo>()
+    for (const repo of savedRepos.value) {
+      if (repo.isFavorite && !seen.has(repo.name)) {
+        seen.set(repo.name, repo)
+      }
+    }
+    return [...seen.values()]
+  })
 
   onMounted(() => {
     getFavorites()
