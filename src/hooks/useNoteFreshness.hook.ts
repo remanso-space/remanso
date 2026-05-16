@@ -13,6 +13,8 @@ export type FreshnessStatus =
   | "outdated"
   | "offline"
 
+const MIN_SPINNER_MS = 400
+
 export const useNoteFreshness = ({
   user,
   repo,
@@ -38,15 +40,24 @@ export const useNoteFreshness = ({
   const check = async () => {
     if (!path.value) return
     status.value = "checking"
+    const startedAt = performance.now()
+
+    let next: FreshnessStatus
     const remoteSha = await fetchLatestSha(path.value)
     if (remoteSha === null) {
-      status.value = "offline"
-      return
+      next = "offline"
+    } else {
+      latestSha.value = remoteSha
+      lastCheckedAt.value = new Date()
+      const local = await expectedSha()
+      next = remoteSha === local ? "verified" : "outdated"
     }
-    latestSha.value = remoteSha
-    lastCheckedAt.value = new Date()
-    const local = await expectedSha()
-    status.value = remoteSha === local ? "verified" : "outdated"
+
+    const elapsed = performance.now() - startedAt
+    if (elapsed < MIN_SPINNER_MS) {
+      await new Promise((r) => setTimeout(r, MIN_SPINNER_MS - elapsed))
+    }
+    status.value = next
   }
 
   const pullLatest = async (): Promise<string | null> => {
