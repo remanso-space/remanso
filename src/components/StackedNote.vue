@@ -228,6 +228,9 @@ const onBadgeClick = async () => {
   try {
     if (freshnessStatus.value !== "outdated") {
       await checkFreshness()
+      if (freshnessStatus.value === "unauthorized") {
+        errorMessage("🔐 GitHub auth expired — please sign in again")
+      }
       return
     }
 
@@ -241,6 +244,10 @@ const onBadgeClick = async () => {
     if (newRaw !== null) {
       rawContent.value = newRaw
       initialRawContent.value = newRaw
+      return
+    }
+    if (freshnessStatus.value === "unauthorized") {
+      errorMessage("🔐 GitHub auth expired — please sign in again")
     }
   } catch (error) {
     console.error("freshness badge click failed", error)

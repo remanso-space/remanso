@@ -23,6 +23,8 @@ const label = computed(() => {
       return "Outdated"
     case "offline":
       return "Can’t reach GitHub"
+    case "unauthorized":
+      return "Sign in to GitHub"
     case "unknown":
     default:
       return "Not checked"
@@ -39,6 +41,8 @@ const tooltip = computed(() => {
       return "GitHub has a newer version. Click to pull latest."
     case "offline":
       return "Could not reach GitHub. Click to retry."
+    case "unauthorized":
+      return "GitHub auth expired. Sign in again, then click to retry."
     case "checking":
       return "Checking against GitHub…"
     case "unknown":
@@ -134,6 +138,25 @@ const isBusy = computed(() => props.status === "checking")
       <path d="M12 3a9 9 0 1 0 9 9" />
     </svg>
     <svg
+      v-else-if="status === 'unauthorized'"
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon icon-tabler icon-tabler-cloud-lock"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        d="M11 18.004h-4.343c-2.572 -.004 -4.657 -2.011 -4.657 -4.487c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.18 0 2.227 .593 2.85 1.5"
+      />
+      <path d="M15 16m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+      <path d="M18 14a2 2 0 0 1 2 2v0h-4v0a2 2 0 0 1 2 -2z" />
+    </svg>
+    <svg
       v-else
       xmlns="http://www.w3.org/2000/svg"
       class="icon icon-tabler icon-tabler-cloud-off"
@@ -189,6 +212,10 @@ const isBusy = computed(() => props.status === "checking")
 
 .state-offline {
   color: var(--color-error, hsl(0, 70%, 45%));
+}
+
+.state-unauthorized {
+  color: var(--color-warning, hsl(35, 90%, 45%));
 }
 
 .state-unknown,
