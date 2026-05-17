@@ -2,7 +2,7 @@ import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { prepareNoteCache } from "@/modules/note/cache/prepareNoteCache"
 import { RepoFile } from "@/modules/repo/interfaces/RepoFile"
 import { UserSettings } from "@/modules/repo/interfaces/UserSettings"
-import { getOctokit } from "@/modules/repo/services/octo"
+import { getOctokit, runWithAuthRetry } from "@/modules/repo/services/octo"
 
 export const getFiles = async (
   owner: string,
@@ -131,14 +131,12 @@ export const queryFileContent = async (
   }
 
   try {
-    const octokit = await getOctokit()
-    const file = await octokit.request(
-      "GET /repos/{owner}/{repo}/git/blobs/{file_sha}",
-      {
+    const file = await runWithAuthRetry((octokit) =>
+      octokit.request("GET /repos/{owner}/{repo}/git/blobs/{file_sha}", {
         owner: user,
         repo: repo,
         file_sha: sha
-      }
+      })
     )
     return file?.data.content ?? null
   } catch (error) {

@@ -12,6 +12,7 @@ export type FreshnessStatus =
   | "verified"
   | "outdated"
   | "offline"
+  | "unauthorized"
 
 const MIN_SPINNER_MS = 400
 
@@ -43,14 +44,16 @@ export const useNoteFreshness = ({
     const startedAt = performance.now()
 
     let next: FreshnessStatus
-    const remoteSha = await fetchLatestSha(path.value)
-    if (remoteSha === null) {
+    const result = await fetchLatestSha(path.value)
+    if (result.kind === "unauthorized") {
+      next = "unauthorized"
+    } else if (result.kind === "offline" || result.sha === null) {
       next = "offline"
     } else {
-      latestSha.value = remoteSha
+      latestSha.value = result.sha
       lastCheckedAt.value = new Date()
       const local = await expectedSha()
-      next = remoteSha === local ? "verified" : "outdated"
+      next = result.sha === local ? "verified" : "outdated"
     }
 
     const elapsed = performance.now() - startedAt
@@ -60,13 +63,27 @@ export const useNoteFreshness = ({
     status.value = next
   }
 
+  const resolveRemoteSha = async (
+    path: string
+  ): Promise<{ sha: string | null; failureStatus: FreshnessStatus | null }> => {
+    if (latestSha.value) return { sha: latestSha.value, failureStatus: null }
+    const result = await fetchLatestSha(path)
+    if (result.kind === "unauthorized") {
+      return { sha: null, failureStatus: "unauthorized" }
+    }
+    if (result.kind === "offline" || result.sha === null) {
+      return { sha: null, failureStatus: "offline" }
+    }
+    return { sha: result.sha, failureStatus: null }
+  }
+
   const pullLatest = async (): Promise<string | null> => {
     if (!path.value) return null
     const usedCachedSha = latestSha.value !== null
-    const remoteSha = latestSha.value ?? (await fetchLatestSha(path.value))
+    const { sha: remoteSha, failureStatus } = await resolveRemoteSha(path.value)
     if (!remoteSha) {
       console.warn("pullLatest: could not resolve remote sha", { path: path.value })
-      status.value = "offline"
+      if (failureStatus) status.value = failureStatus
       return null
     }
     const fileContent = await queryFileContent(user, repo, remoteSha)
