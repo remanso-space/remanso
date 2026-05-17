@@ -4,9 +4,9 @@ import { getHex } from "pastel-color"
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 
-import SignInAtproto from "@/components/SignInAtproto.vue"
-import SignInGithub from "@/components/SignInGithub.vue"
+import ProfileModal from "@/components/ProfileModal.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
+import UserPill from "@/components/UserPill.vue"
 import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useForm } from "@/hooks/useForm.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
@@ -18,7 +18,7 @@ import { useFavoriteRepos } from "@/modules/repo/hooks/useFavoriteRepos.hook"
 import { slugify } from "@/utils/slugify"
 
 const { username, accessToken } = useGitHubLogin()
-const { isLoggedIn: isATProtoLoggedIn, handle, avatarUrl } = useATProtoLogin()
+const { isLoggedIn: isATProtoLoggedIn, handle } = useATProtoLogin()
 const { userInput, repoInput, submit } = useForm()
 const { savedFavoriteRepos } = useFavoriteRepos()
 const { lastVisitedRepos } = useLastVisitedRepos()
@@ -29,10 +29,11 @@ const isGitHubLoggedIn = computed(() => !!accessToken.value)
 const isAnyUserLoggedIn = computed(
   () => isGitHubLoggedIn.value || isATProtoLoggedIn.value
 )
-const displayUsername = computed(() => username.value || handle.value || "")
-const displayInitial = computed(() =>
-  (displayUsername.value[0] || "?").toUpperCase()
-)
+const displayUsername = computed(() => handle.value || username.value || "")
+
+const openProfile = () => {
+  ;(document.getElementById("profile_modal") as HTMLDialogElement)?.showModal()
+}
 
 const tileStyle = (seed: string) => {
   const bg = getHex(seed)
@@ -150,29 +151,7 @@ onMounted(() => {
           class="navlink"
           >Getting&nbsp;started</router-link
         >
-        <button
-          v-if="isAnyUserLoggedIn"
-          class="profile-chip"
-          onclick="profile_modal.showModal()"
-        >
-          <img
-            v-if="isATProtoLoggedIn && avatarUrl"
-            :src="avatarUrl"
-            class="profile-avatar-small"
-            alt="Profile"
-          />
-          <span v-else class="profile-avatar-small profile-avatar-initial">
-            {{ displayInitial }}
-          </span>
-          <span class="profile-name">{{ displayUsername }}</span>
-        </button>
-        <button
-          v-else
-          class="hw-btn hw-btn-ghost"
-          onclick="profile_modal.showModal()"
-        >
-          Sign in
-        </button>
+        <UserPill @click="openProfile" />
       </div>
     </nav>
 
@@ -846,35 +825,7 @@ onMounted(() => {
       </div>
     </footer>
 
-    <!-- ── Profile modal ──────────────────────────────────── -->
-    <dialog id="profile_modal" class="modal hw-modal">
-      <div class="modal-box hw-modal-box">
-        <div class="hw-modal-head">
-          <h3>Profile</h3>
-          <form method="dialog">
-            <button class="hw-modal-x" aria-label="close">×</button>
-          </form>
-        </div>
-        <div class="hw-modal-section">
-          <div class="hw-ms-label mono">Bluesky / ATProto</div>
-          <sign-in-atproto :with-sign-out="true" />
-        </div>
-        <hr class="hw-rule" />
-        <div class="hw-modal-section">
-          <div class="hw-ms-label mono">GitHub</div>
-          <sign-in-github />
-          <router-link
-            v-if="isGitHubLoggedIn"
-            :to="{ name: 'RepoList' }"
-            class="hw-btn hw-btn-ghost"
-            >Manage your repos</router-link
-          >
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button></button>
-      </form>
-    </dialog>
+    <ProfileModal />
   </div>
 </template>
 
@@ -999,17 +950,6 @@ main {
   }
 }
 
-.hw-btn-ghost {
-  border-color: var(--hw-rule);
-  color: var(--hw-ink-soft);
-
-  &:hover {
-    background: var(--hw-pink-wash);
-    border-color: var(--hw-pink);
-    color: var(--hw-pink-deep);
-  }
-}
-
 /* ── Utility classes ────────────────────────────────────────── */
 .mono {
   font-family: var(--hw-mono);
@@ -1027,12 +967,6 @@ main {
   font-weight: 600;
   margin: 0.1em 0.1em 0 0;
   color: var(--hw-pink-deep);
-}
-
-.hw-rule {
-  border: 0;
-  border-top: 1px solid var(--hw-rule);
-  margin: 1.25rem 0;
 }
 
 /* ── Top nav ────────────────────────────────────────────────── */
@@ -1084,50 +1018,6 @@ main {
   &:hover {
     color: var(--hw-pink-deep);
   }
-}
-
-.profile-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
-  border-radius: 999px;
-  border: 1px solid var(--hw-rule);
-  background: transparent;
-  cursor: pointer;
-  font-family: var(--hw-serif);
-  color: var(--hw-ink);
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-
-  &:hover {
-    border-color: var(--hw-pink);
-    background: var(--hw-pink-wash);
-  }
-}
-
-.profile-avatar-small {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-.profile-avatar-initial {
-  background: var(--hw-pink);
-  color: white;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--hw-serif);
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.profile-name {
-  font-size: 0.95rem;
 }
 
 /* ── GitHub form ────────────────────────────────────────────── */
@@ -2280,62 +2170,6 @@ img {
 
 .footer-dot {
   color: var(--hw-ink-faint);
-}
-
-/* ── Profile modal ──────────────────────────────────────────── */
-.hw-modal .hw-modal-box {
-  background: var(--hw-paper);
-  border: 1px solid var(--hw-rule);
-  border-radius: 6px;
-  padding: 1.5rem;
-  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.3);
-  color: var(--hw-ink);
-  font-family: var(--hw-serif);
-}
-
-.hw-modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-
-  h3 {
-    font-family: var(--hw-serif);
-    font-size: 1.3rem;
-    margin: 0;
-    font-weight: 600;
-  }
-}
-
-.hw-modal-x {
-  border: 0;
-  background: transparent;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--hw-ink-soft);
-  line-height: 1;
-  padding: 0.25rem 0.5rem;
-
-  &:hover {
-    color: var(--hw-pink-deep);
-  }
-}
-
-.hw-modal-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.hw-ms-label {
-  display: block;
-  width: 100%;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  color: var(--hw-ink-faint);
-  margin-bottom: 0.25rem;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
