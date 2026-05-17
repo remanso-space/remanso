@@ -3,8 +3,9 @@ import { computed } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
+import ProfileModal from "@/components/ProfileModal.vue"
 import PublicNoteList from "@/components/PublicNoteList.vue"
-import SignInAtproto from "@/components/SignInAtproto.vue"
+import UserPill from "@/components/UserPill.vue"
 import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useFollowingNoteList } from "@/hooks/useFollowingNoteList.hook"
 import { useFollows } from "@/hooks/useFollows.hook"
@@ -29,13 +30,18 @@ const followingEnabled = computed(() => tab.value === "following")
 
 const all = usePublicNoteList()
 const following = useFollowingNoteList(follows, followingEnabled)
+
+const openProfile = () => {
+  ;(document.getElementById("profile_modal") as HTMLDialogElement)?.showModal()
+}
 </script>
 
 <template>
   <main class="public-note-list-view">
-    <div class="header">
-      <home-button class="home-button" />
-    </div>
+    <header class="header">
+      <home-button />
+      <user-pill @click="openProfile" />
+    </header>
 
     <div v-if="isLoggedIn" role="tablist" class="tabs tabs-border">
       <a
@@ -52,7 +58,6 @@ const following = useFollowingNoteList(follows, followingEnabled)
         @click="tab = 'following'"
         >Following</a
       >
-      <sign-in-atproto class="handle" />
     </div>
 
     <PublicNoteList
@@ -104,20 +109,12 @@ const following = useFollowingNoteList(follows, followingEnabled)
         <div v-else class="skeleton h-4 w-20"></div>
       </template>
     </PublicNoteList>
+
+    <profile-modal />
   </main>
 </template>
 
 <style scoped lang="scss">
-.tabs {
-  position: relative;
-}
-
-.handle {
-  position: absolute;
-  right: 0;
-  align-self: center;
-}
-
 .public-note-list-view {
   display: flex;
   flex: 1;
@@ -126,10 +123,11 @@ const following = useFollowingNoteList(follows, followingEnabled)
   padding-right: 1rem;
 
   .header {
-    margin: 0.5rem auto 0;
+    margin-top: 0.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
   }
 
   h1 {
