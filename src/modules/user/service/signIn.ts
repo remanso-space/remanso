@@ -38,7 +38,13 @@ export const needToRefreshToken = async () => {
   return isBefore(expirationDate, minimumViableDate)
 }
 
-export const refreshToken = async () => {
+let inFlightRefresh: Promise<GithubAccessToken | null> | null = null
+
+const performRefresh = async ({
+  force
+}: {
+  force: boolean
+}): Promise<GithubAccessToken | null> => {
   const accessToken = await data.get<
     DataType.GithubAccessToken,
     GithubAccessToken
@@ -48,7 +54,7 @@ export const refreshToken = async () => {
     return null
   }
 
-  const needRefresh = await needToRefreshToken()
+  const needRefresh = force || (await needToRefreshToken())
 
   if (needRefresh) {
     const authenticationServerURL = new URL(AUTHENTICATION_SERVER)
@@ -68,6 +74,18 @@ export const refreshToken = async () => {
   }
 
   return accessToken
+}
+
+// GitHub refresh tokens are single-use, so concurrent refreshes race and the
+// loser ends up with a revoked refresh token. Dedupe in-flight calls.
+export const refreshToken = async ({
+  force = false
+}: { force?: boolean } = {}): Promise<GithubAccessToken | null> => {
+  if (inFlightRefresh) return inFlightRefresh
+  inFlightRefresh = performRefresh({ force }).finally(() => {
+    inFlightRefresh = null
+  })
+  return inFlightRefresh
 }
 
 export const getAccessToken = async () => {
