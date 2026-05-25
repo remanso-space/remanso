@@ -129,8 +129,9 @@ const onImagePicked = async (e: Event) => {
   try {
     const result = await uploadImage(file)
     if (!result) return
-    const suffix = rawContent.value.endsWith("\n") ? "" : "\n\n"
-    rawContent.value = `${rawContent.value}${suffix}![](${result.filename})\n`
+    const trimmed = rawContent.value.replace(/\n+$/, "")
+    const prefix = trimmed ? `${trimmed}\n\n` : ""
+    rawContent.value = `${prefix}![](${result.filename})\n`
     editKey.value++
   } finally {
     isUploading.value = false
