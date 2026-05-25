@@ -85,12 +85,12 @@ export const useImageUpload = ({
         return null
       }
 
-      if (!store.files.some((f) => f.path === targetPath)) {
-        store.files = [
-          ...store.files,
-          { path: targetPath, sha, type: "blob", size: file.size }
-        ]
-      }
+      store.registerUploadedFile({
+        path: targetPath,
+        sha,
+        type: "blob",
+        size: file.size
+      })
 
       return { filename }
     } catch (error) {

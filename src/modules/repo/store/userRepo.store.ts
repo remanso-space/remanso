@@ -230,6 +230,28 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       })
       this.files = newFiles
     },
+    registerUploadedFile(file: RepoFile) {
+      if (!file.path) {
+        return
+      }
+
+      const savedRepoId = generateId(
+        DataType.SavedRepo,
+        `${this.user}-${this.repo}`
+      )
+      const newFiles = [
+        ...toRaw(this.files).filter((f) => f.path !== file.path),
+        toRaw(file)
+      ]
+      data.update<DataType.SavedRepo, SavedRepo>({
+        _id: savedRepoId,
+        $type: DataType.SavedRepo,
+        repo: this.repo,
+        user: this.user,
+        files: newFiles
+      })
+      this.files = newFiles
+    },
     resetUserRepo() {
       this.user = ""
       this.repo = ""
