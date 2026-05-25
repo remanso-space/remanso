@@ -77,14 +77,17 @@ export const useNoteFreshness = ({
     return { sha: result.sha, failureStatus: null }
   }
 
-  const pullLatest = async (): Promise<string | null> => {
-    if (!path.value) return null
+  const pullLatest = async (): Promise<{
+    raw: string | null
+    failureStatus: FreshnessStatus | null
+  }> => {
+    if (!path.value) return { raw: null, failureStatus: null }
     const usedCachedSha = latestSha.value !== null
     const { sha: remoteSha, failureStatus } = await resolveRemoteSha(path.value)
     if (!remoteSha) {
       console.warn("pullLatest: could not resolve remote sha", { path: path.value })
       if (failureStatus) status.value = failureStatus
-      return null
+      return { raw: null, failureStatus }
     }
     const fileContent = await queryFileContent(user, repo, remoteSha)
     if (!fileContent) {
@@ -96,7 +99,7 @@ export const useNoteFreshness = ({
       // Cached SHA may be stale — clear so the next click re-resolves it.
       if (usedCachedSha) latestSha.value = null
       status.value = "offline"
-      return null
+      return { raw: null, failureStatus: "offline" }
     }
     const { saveCacheNote } = prepareNoteCache(sha.value, path.value)
     await saveCacheNote(fileContent, {
@@ -108,7 +111,7 @@ export const useNoteFreshness = ({
     lastCheckedAt.value = new Date()
     status.value = "verified"
     const { getRawContent } = markdownBuilder(sha.value)
-    return getRawContent(fileContent)
+    return { raw: getRawContent(fileContent), failureStatus: null }
   }
 
   return {

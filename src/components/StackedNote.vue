@@ -236,10 +236,10 @@ watch(mode, async (newMode) => {
 })
 
 const onConflictDiscard = async () => {
-  const newRaw = await pullLatest()
-  if (newRaw !== null) {
-    rawContent.value = newRaw
-    initialRawContent.value = newRaw
+  const { raw } = await pullLatest()
+  if (raw !== null) {
+    rawContent.value = raw
+    initialRawContent.value = raw
   }
 }
 
@@ -269,13 +269,13 @@ const onBadgeClick = async () => {
       return
     }
 
-    const newRaw = await pullLatest()
-    if (newRaw !== null) {
-      rawContent.value = newRaw
-      initialRawContent.value = newRaw
+    const { raw, failureStatus } = await pullLatest()
+    if (raw !== null) {
+      rawContent.value = raw
+      initialRawContent.value = raw
       return
     }
-    if (freshnessStatus.value === "unauthorized") {
+    if (failureStatus === "unauthorized") {
       errorMessage("🔐 GitHub auth expired — please sign in again")
     }
   } catch (error) {
