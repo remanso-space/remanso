@@ -4,10 +4,10 @@ import { onMounted, ref, watch } from "vue"
 const props = defineProps<{ open: boolean }>()
 
 const emit = defineEmits<{
-  (e: "discard"): void
-  (e: "overwrite"): void
-  (e: "cancel"): void
-  (e: "update:open", value: boolean): void
+  discard: []
+  overwrite: []
+  cancel: []
+  "update:open": [value: boolean]
 }>()
 
 const dialogRef = ref<HTMLDialogElement | null>(null)
@@ -17,8 +17,16 @@ const close = () => {
   emit("update:open", false)
 }
 
-const choose = (action: "discard" | "overwrite" | "cancel") => {
-  emit(action)
+const onDiscard = () => {
+  emit("discard")
+  close()
+}
+const onOverwrite = () => {
+  emit("overwrite")
+  close()
+}
+const onCancel = () => {
+  emit("cancel")
   close()
 }
 
@@ -42,7 +50,7 @@ onMounted(() => {
     ref="dialogRef"
     class="modal"
     @close="emit('update:open', false)"
-    @cancel.prevent="choose('cancel')"
+    @cancel.prevent="onCancel()"
   >
     <div class="modal-box">
       <h3 class="text-lg font-bold">GitHub has a newer version of this note</h3>
@@ -55,28 +63,28 @@ onMounted(() => {
         <button
           type="button"
           class="btn btn-ghost"
-          @click="choose('cancel')"
+          @click="onCancel()"
         >
           Cancel
         </button>
         <button
           type="button"
           class="btn btn-warning"
-          @click="choose('overwrite')"
+          @click="onOverwrite()"
         >
           Save anyway (overwrite)
         </button>
         <button
           type="button"
           class="btn btn-primary"
-          @click="choose('discard')"
+          @click="onDiscard()"
         >
           Discard my edits, pull latest
         </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
-      <button type="submit" @click="choose('cancel')">close</button>
+      <button type="submit" @click="onCancel()">close</button>
     </form>
   </dialog>
 </template>
