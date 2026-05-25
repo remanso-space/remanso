@@ -37,14 +37,22 @@ export const useGitHubContent = ({
     }
   }
 
-  const putFile = async ({
-    content,
+  const putRaw = async ({
+    contentBase64,
     path,
-    sha
+    sha,
+    message,
+    successMessage,
+    conflictMessage,
+    failureMessage
   }: {
-    content: string
+    contentBase64: string
     path: string
     sha?: string
+    message: string
+    successMessage: string
+    conflictMessage: string
+    failureMessage: string
   }): Promise<{ sha: string | null; conflict: boolean }> => {
     try {
       const octokit = await getOctokit()
@@ -55,27 +63,62 @@ export const useGitHubContent = ({
           owner: user,
           repo,
           path,
-          message: `Updating ${path} from Remanso`,
-          content: encodeUTF8ToBase64(content),
+          message,
+          content: contentBase64,
           sha
         }
       )
 
-      confirmMessage("✅ Note saved")
+      confirmMessage(successMessage)
 
       return { sha: response?.data.content?.sha ?? null, conflict: false }
     } catch (error) {
       const status = (error as { status?: number })?.status
       if (status && isConflictStatus(status)) {
-        errorMessage("⚠ Conflict: this note changed on GitHub")
+        errorMessage(conflictMessage)
         console.warn(error)
         return { sha: null, conflict: true }
       }
-      errorMessage("❌ Note could not be saved")
+      errorMessage(failureMessage)
       console.warn(error)
       return { sha: null, conflict: false }
     }
   }
+
+  const putFile = async ({
+    content,
+    path,
+    sha
+  }: {
+    content: string
+    path: string
+    sha?: string
+  }): Promise<{ sha: string | null; conflict: boolean }> =>
+    putRaw({
+      contentBase64: encodeUTF8ToBase64(content),
+      path,
+      sha,
+      message: `Updating ${path} from Remanso`,
+      successMessage: "✅ Note saved",
+      conflictMessage: "⚠ Conflict: this note changed on GitHub",
+      failureMessage: "❌ Note could not be saved"
+    })
+
+  const uploadBinaryFile = async ({
+    base64,
+    path
+  }: {
+    base64: string
+    path: string
+  }): Promise<{ sha: string | null; conflict: boolean }> =>
+    putRaw({
+      contentBase64: base64,
+      path,
+      message: `Uploading ${path} from Remanso`,
+      successMessage: "✅ Image uploaded",
+      conflictMessage: "⚠ A file already exists at this path on GitHub",
+      failureMessage: "❌ Image could not be uploaded"
+    })
 
   return {
     fetchLatestSha,
@@ -85,6 +128,7 @@ export const useGitHubContent = ({
       sha: string
     }) => putFile(props),
     createFile: async (props: { content: string; path: string }) =>
-      putFile(props)
+      putFile(props),
+    uploadBinaryFile
   }
 }
