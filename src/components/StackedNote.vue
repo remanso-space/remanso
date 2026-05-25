@@ -118,17 +118,23 @@ const { uploadImage } = useImageUpload({
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const editKey = ref(0)
+const isUploading = ref(false)
 
 const onImagePicked = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   input.value = ""
   if (!file || !path.value) return
-  const result = await uploadImage(file)
-  if (!result) return
-  const suffix = rawContent.value.endsWith("\n") ? "" : "\n\n"
-  rawContent.value = `${rawContent.value}${suffix}![](${result.filename})\n`
-  editKey.value++
+  isUploading.value = true
+  try {
+    const result = await uploadImage(file)
+    if (!result) return
+    const suffix = rawContent.value.endsWith("\n") ? "" : "\n\n"
+    rawContent.value = `${rawContent.value}${suffix}![](${result.filename})\n`
+    editKey.value++
+  } finally {
+    isUploading.value = false
+  }
 }
 
 const {
@@ -298,10 +304,16 @@ const onBadgeClick = async () => {
         <button
           v-if="isMarkdown && mode === 'edit'"
           class="action button is-text is-light"
-          title="Upload image"
+          :title="isUploading ? 'Uploading…' : 'Upload image'"
+          :disabled="isUploading"
           @click="fileInput?.click()"
         >
+          <span
+            v-if="isUploading"
+            class="loading loading-spinner loading-sm"
+          ></span>
           <svg
+            v-else
             xmlns="http://www.w3.org/2000/svg"
             class="icon icon-tabler icon-tabler-photo-plus"
             width="24"
