@@ -10,6 +10,7 @@ import {
   getCachedMainReadme,
   getFiles,
   getMainReadme,
+  getRepoPermission,
   getUserSettingsContent
 } from "@/modules/repo/services/repo"
 import { refreshToken } from "@/modules/user/service/signIn"
@@ -24,6 +25,7 @@ interface State {
   userSettings?: UserSettings | null
   needToLogin: boolean
   loadError: RepoLoadError
+  canPush: boolean
   _requestId: number
 }
 
@@ -46,6 +48,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     userSettings: undefined,
     needToLogin: false,
     loadError: null,
+    canPush: false,
     _requestId: 0
   }),
   actions: {
@@ -78,6 +81,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       this.user = user
       this.repo = repo
       this.loadError = null
+      this.canPush = false
 
       let lsLayout: Partial<UserSettings> = {}
       try {
@@ -119,6 +123,17 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       }
 
       if (requestId !== this._requestId) return
+
+      getRepoPermission(user, repo)
+        .then((canPush) => {
+          if (requestId !== this._requestId) return
+          this.canPush = canPush
+        })
+        .catch((error) => {
+          if (requestId !== this._requestId) return
+          console.warn("getRepoPermission failed", error)
+          this.canPush = false
+        })
 
       getFiles(user, repo)
         .then(async (files) => {
@@ -261,6 +276,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
     resetFiles() {
       this.files = []
       this.readme = null
+      this.canPush = false
     },
     setFontFamily(fontFamily: string) {
       if (!this.userSettings) {

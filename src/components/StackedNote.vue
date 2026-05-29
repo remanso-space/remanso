@@ -100,6 +100,7 @@ useTitleNotes(repo)
 
 const store = useUserRepoStore()
 const hasBacklinks = computed(() => store.userSettings?.backlink)
+const canPush = computed(() => store.canPush)
 
 const { displayNoteOverlay } = useNoteOverlay(className.value, index)
 const displayedTitle = computed(() => filenameToNoteTitle(props.title ?? ""))
@@ -303,7 +304,7 @@ const onBadgeClick = async () => {
           class="action"
         />
         <button
-          v-if="isMarkdown"
+          v-if="isMarkdown && canPush"
           class="action button is-text is-light"
           :class="{ 'is-link': mode === 'edit' }"
           :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
@@ -353,7 +354,7 @@ const onBadgeClick = async () => {
           </svg>
         </button>
         <button
-          v-if="isMarkdown && mode === 'edit'"
+          v-if="isMarkdown && mode === 'edit' && canPush"
           class="action button is-text is-light"
           :title="isUploading ? 'Uploading…' : 'Upload image'"
           :disabled="isUploading"

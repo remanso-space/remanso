@@ -26,9 +26,10 @@ const todoNote = computed(() =>
 const sha = computed(() => todoNote.value?.sha ?? "")
 const path = computed(() => todoNote.value?.path)
 
+const canPush = computed(() => store.canPush)
+
 const { toHTML } = markdownBuilder(repo)
 
-// Setup checkbox commit handler
 const { pendingContent, syncContent, listenToCheckboxes, hasPendingChanges } =
   useCheckboxCommit({
     user: props.user,
@@ -37,7 +38,8 @@ const { pendingContent, syncContent, listenToCheckboxes, hasPendingChanges } =
     initialContent: "",
     initialSha: sha,
     containerSelector: ".todo-notes .note-display",
-    debounceMs: 1000
+    debounceMs: 1000,
+    enabled: canPush
   })
 
 // Render pending content to HTML for display
@@ -64,9 +66,9 @@ watch(
   { immediate: true }
 )
 
-// Setup checkbox listeners when content renders
+// Setup checkbox listeners when content renders or canPush changes
 watch(
-  renderedContent,
+  [renderedContent, canPush],
   async () => {
     await nextTick()
     listenToCheckboxes()
