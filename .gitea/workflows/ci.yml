@@ -21,11 +21,15 @@ jobs:
         with:
           version: 11.0.9
 
+      # NOTE: `cache: pnpm` is intentionally omitted. The Gitea cache server
+      # at 10.0.23.3:42951 is unreachable from the runner container, and each
+      # cache restore/save hangs ~4m40s on TCP timeout before failing. With
+      # caching off, total CI time is ~45s. Re-enable once the act_runner
+      # cache backend is reachable from inside the job container.
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
