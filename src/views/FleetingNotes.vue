@@ -9,6 +9,7 @@ import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hoo
 import { prepareNoteCache } from "@/modules/note/cache/prepareNoteCache"
 import EditNote from "@/modules/note/components/EditNote.vue"
 import { useFolderNotes } from "@/modules/note/hooks/useFolderNotes"
+import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { confirmMessage, errorMessage } from "@/utils/notif"
 import { extractYouTubeId } from "@/utils/youtube"
@@ -76,6 +77,9 @@ const { createFile } = useGitHubContent({
 
 const hasTodayNote = computed(() => content.value.includes(today))
 
+const store = useUserRepoStore()
+const canPush = computed(() => store.canPush)
+
 watch(mode, async (newMode) => {
   if (newMode === "read" && newContent.value.trim() !== initialContent) {
     const content = `# ${new Date().toLocaleDateString()}\n\n${
@@ -114,13 +118,15 @@ watch(mode, async (newMode) => {
       <h3 class="subtitle">Inbox</h3>
       <div class="actions">
         <button
-          v-if="!hasTodayNote"
+          v-if="!hasTodayNote && canPush"
           class="btn btn-secondary"
           @click="toggleMode"
         >
           new fleeting note
         </button>
-        <button class="btn btn-outline" @click="handleYouTube">YouTube</button>
+        <button v-if="canPush" class="btn btn-outline" @click="handleYouTube">
+          YouTube
+        </button>
       </div>
 
       <div v-if="mode === 'edit'">

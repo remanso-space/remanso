@@ -3,6 +3,7 @@ import { onBeforeMount, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
+import { consumeGithubOAuthReturnPath } from "@/modules/user/service/oauthReturnPath"
 import { signIn } from "@/modules/user/service/signIn"
 
 const route = useRoute()
@@ -22,7 +23,13 @@ onBeforeMount(async () => {
       await saveCredentials(token)
     }
 
-    router.replace({ name: "Home" })
+    const returnPath = consumeGithubOAuthReturnPath()
+
+    if (!hasError.value && returnPath) {
+      router.replace(returnPath)
+    } else {
+      router.replace({ name: "Home" })
+    }
   }
 })
 </script>

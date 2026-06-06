@@ -35,7 +35,8 @@ export const useCheckboxCommit = ({
   initialContent,
   initialSha,
   containerSelector,
-  debounceMs = 1000
+  debounceMs = 1000,
+  enabled = true
 }: {
   user: string
   repo: string
@@ -44,6 +45,7 @@ export const useCheckboxCommit = ({
   initialSha: Ref<string> | string
   containerSelector: string
   debounceMs?: number
+  enabled?: Ref<boolean> | boolean
 }) => {
   const { updateFile } = useGitHubContent({ user, repo })
 
@@ -91,6 +93,8 @@ export const useCheckboxCommit = ({
   const debouncedCommit = useDebounceFn(commitChanges, debounceMs)
 
   const handleCheckboxChange = (event: Event) => {
+    if (!toValue(enabled)) return
+
     const target = event.target as HTMLInputElement
 
     if (target.tagName !== "INPUT" || target.type !== "checkbox") {
@@ -128,8 +132,16 @@ export const useCheckboxCommit = ({
   const listenToCheckboxes = () => {
     removeListeners()
     const container = document.querySelector(containerSelector)
-    if (container) {
+    if (!container) return
+
+    if (toValue(enabled)) {
       container.addEventListener("change", handleCheckboxChange)
+    } else {
+      container
+        .querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+        .forEach((checkbox) => {
+          checkbox.disabled = true
+        })
     }
   }
 

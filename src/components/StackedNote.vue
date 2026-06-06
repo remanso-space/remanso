@@ -10,6 +10,7 @@ import {
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
+import { useImageUpload } from "@/hooks/useImageUpload.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
 import { renderCodeFile } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
@@ -99,6 +100,7 @@ useTitleNotes(repo)
 
 const store = useUserRepoStore()
 const hasBacklinks = computed(() => store.userSettings?.backlink)
+const canPush = computed(() => store.canPush)
 
 const { displayNoteOverlay } = useNoteOverlay(className.value, index)
 const displayedTitle = computed(() => filenameToNoteTitle(props.title ?? ""))
@@ -108,6 +110,34 @@ const { updateFile } = useGitHubContent({
   user: user.value,
   repo: repo.value
 })
+
+const { uploadImage } = useImageUpload({
+  user: user.value,
+  repo: repo.value,
+  notePath: path
+})
+
+const fileInput = ref<HTMLInputElement | null>(null)
+const editKey = ref(0)
+const isUploading = ref(false)
+
+const onImagePicked = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ""
+  if (!file || !path.value) return
+  isUploading.value = true
+  try {
+    const result = await uploadImage(file)
+    if (!result) return
+    const trimmed = rawContent.value.replace(/\n+$/, "")
+    const prefix = trimmed ? `${trimmed}\n\n` : ""
+    rawContent.value = `${prefix}![](${result.filename})\n`
+    editKey.value++
+  } finally {
+    isUploading.value = false
+  }
+}
 
 const {
   status: freshnessStatus,
@@ -207,10 +237,10 @@ watch(mode, async (newMode) => {
 })
 
 const onConflictDiscard = async () => {
-  const newRaw = await pullLatest()
-  if (newRaw !== null) {
-    rawContent.value = newRaw
-    initialRawContent.value = newRaw
+  const { raw } = await pullLatest()
+  if (raw !== null) {
+    rawContent.value = raw
+    initialRawContent.value = raw
   }
 }
 
@@ -240,13 +270,13 @@ const onBadgeClick = async () => {
       return
     }
 
-    const newRaw = await pullLatest()
-    if (newRaw !== null) {
-      rawContent.value = newRaw
-      initialRawContent.value = newRaw
+    const { raw, failureStatus } = await pullLatest()
+    if (raw !== null) {
+      rawContent.value = raw
+      initialRawContent.value = raw
       return
     }
-    if (freshnessStatus.value === "unauthorized") {
+    if (failureStatus === "unauthorized") {
       errorMessage("🔐 GitHub auth expired — please sign in again")
     }
   } catch (error) {
@@ -274,7 +304,7 @@ const onBadgeClick = async () => {
           class="action"
         />
         <button
-          v-if="isMarkdown"
+          v-if="isMarkdown && canPush"
           class="action button is-text is-light"
           :class="{ 'is-link': mode === 'edit' }"
           :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
@@ -323,6 +353,48 @@ const onBadgeClick = async () => {
             <path d="M14 4l0 4l-6 0l0 -4" />
           </svg>
         </button>
+        <button
+          v-if="isMarkdown && mode === 'edit' && canPush"
+          class="action button is-text is-light"
+          :title="isUploading ? 'Uploading…' : 'Upload image'"
+          :disabled="isUploading"
+          @click="fileInput?.click()"
+        >
+          <span
+            v-if="isUploading"
+            class="loading loading-spinner loading-sm"
+          ></span>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-photo-plus"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 8h.01" />
+            <path
+              d="M12.5 21h-6.5a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v6.5"
+            />
+            <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l4 4" />
+            <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l2 2" />
+            <path d="M16 19h6" />
+            <path d="M19 16v6" />
+          </svg>
+        </button>
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/*"
+          class="hidden-input"
+          @change="onImagePicked"
+        />
       </div>
       <a
         class="title-stacked-note-link"
@@ -337,7 +409,7 @@ const onBadgeClick = async () => {
     </div>
     <section class="text-content">
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
-        <edit-note v-model="rawContent" />
+        <edit-note :key="editKey" v-model="rawContent" />
       </div>
       <div
         v-if="mode === 'read'"
@@ -408,6 +480,10 @@ $border-color: rgba(18, 19, 58, 0.2);
   align-items: center;
   justify-content: flex-end;
   gap: 0.25rem;
+}
+
+.hidden-input {
+  display: none;
 }
 
 .action {

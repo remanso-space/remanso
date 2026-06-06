@@ -4,6 +4,18 @@ import { RepoFile } from "@/modules/repo/interfaces/RepoFile"
 import { UserSettings } from "@/modules/repo/interfaces/UserSettings"
 import { getOctokit, runWithAuthRetry } from "@/modules/repo/services/octo"
 
+export const getRepoPermission = async (
+  owner: string,
+  repo: string
+): Promise<boolean> => {
+  if (!owner || !repo) {
+    return false
+  }
+  const octokit = await getOctokit()
+  const { data } = await octokit.repos.get({ owner, repo })
+  return data.permissions?.push ?? false
+}
+
 export const getFiles = async (
   owner: string,
   repo: string

@@ -14,7 +14,8 @@ vi.mock("@/modules/repo/services/repo", () => ({
   getFiles: vi.fn().mockResolvedValue([]),
   getMainReadme: vi.fn().mockResolvedValue(null),
   getCachedMainReadme: vi.fn().mockResolvedValue(null),
-  getUserSettingsContent: vi.fn().mockResolvedValue(null)
+  getUserSettingsContent: vi.fn().mockResolvedValue(null),
+  getRepoPermission: vi.fn().mockResolvedValue(false)
 }))
 
 vi.mock("@/modules/user/service/signIn", () => ({
@@ -26,6 +27,7 @@ import {
   getCachedMainReadme,
   getFiles,
   getMainReadme,
+  getRepoPermission,
   getUserSettingsContent
 } from "@/modules/repo/services/repo"
 
@@ -145,6 +147,7 @@ describe("userRepo store — setUserRepo", () => {
     vi.mocked(getMainReadme).mockResolvedValue(null)
     vi.mocked(getCachedMainReadme).mockResolvedValue(null)
     vi.mocked(getUserSettingsContent).mockResolvedValue(null)
+    vi.mocked(getRepoPermission).mockResolvedValue(false)
   })
 
   it("sets user and repo immediately and clears loadError", async () => {

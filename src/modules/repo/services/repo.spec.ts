@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+const { reposGet } = vi.hoisted(() => ({ reposGet: vi.fn() }))
+
 vi.mock("./octo", () => ({
-  getOctokit: vi.fn(),
+  getOctokit: vi.fn().mockResolvedValue({
+    repos: { get: reposGet }
+  }),
   runWithAuthRetry: vi.fn()
 }))
 
@@ -18,10 +22,50 @@ vi.mock("@/modules/note/cache/prepareNoteCache", () => ({
 }))
 
 import { getOctokit, runWithAuthRetry } from "./octo"
-import { getFiles, queryFileContent } from "./repo"
+import {
+  getFiles,
+  getRepoPermission,
+  queryFileContent
+} from "./repo"
 
 const makeOctokitWithRequest = (impl: (route: string, params: unknown) => unknown) => ({
   request: vi.fn(impl)
+})
+
+describe("getRepoPermission", () => {
+  beforeEach(() => {
+    reposGet.mockReset()
+    vi.mocked(getOctokit).mockResolvedValue({
+      repos: { get: reposGet }
+    } as never)
+  })
+
+  it("returns true when permissions.push is true", async () => {
+    reposGet.mockResolvedValue({
+      data: { permissions: { push: true } }
+    })
+    await expect(getRepoPermission("owner", "repo")).resolves.toBe(true)
+  })
+
+  it("returns false when permissions.push is false", async () => {
+    reposGet.mockResolvedValue({
+      data: { permissions: { push: false } }
+    })
+    await expect(getRepoPermission("owner", "repo")).resolves.toBe(false)
+  })
+
+  it("returns false when permissions is missing (anonymous request)", async () => {
+    reposGet.mockResolvedValue({
+      data: {}
+    })
+    await expect(getRepoPermission("owner", "repo")).resolves.toBe(false)
+  })
+
+  it("returns false when owner or repo is empty", async () => {
+    await expect(getRepoPermission("", "repo")).resolves.toBe(false)
+    await expect(getRepoPermission("owner", "")).resolves.toBe(false)
+    expect(reposGet).not.toHaveBeenCalled()
+  })
 })
 
 describe("getFiles", () => {
