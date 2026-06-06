@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import vue from "@vitejs/plugin-vue"
 import path from "path"
 import { defineConfig, type UserConfigExport } from "vite"
@@ -7,6 +8,11 @@ export default defineConfig(({ command }) => {
   const config: UserConfigExport = {
     build: {
       minify: "esbuild"
+    },
+    test: {
+      environment: "jsdom",
+      setupFiles: ["./src/test/setup.ts"],
+      globals: false
     },
     plugins: [
       vue(),
