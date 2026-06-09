@@ -13,7 +13,7 @@ import markdownItIframe from "markdown-it-iframe"
 import Shikiji from "markdown-it-shikiji"
 import mermaid from "mermaid"
 import type { LanguageRegistration } from "shikiji-core"
-import { Ref, toValue } from "vue"
+import { Ref, ref, toValue } from "vue"
 
 import { data } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
@@ -142,6 +142,7 @@ const md = new MarkdownIt({
   })
 
 let shikijiPromise: Promise<void> | null = null
+const shikijiReady = ref(false)
 
 export const useShikiji = (): Promise<void> => {
   if (!shikijiPromise) {
@@ -168,6 +169,7 @@ export const useShikiji = (): Promise<void> => {
       ]
     }).then((plugin) => {
       md.use(plugin)
+      shikijiReady.value = true
     })
   }
   return shikijiPromise
@@ -391,6 +393,11 @@ const stripFrontmatter = (content: string): string => {
 }
 
 const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
+  // Track Shikiji readiness so reactive consumers (e.g. the `content`
+  // computed in useFile) re-render once `useShikiji()` mutates the
+  // singleton `md` — otherwise the first render on page load stays
+  // unhighlighted because nothing else invalidates the computed.
+  if (content.includes("```")) void shikijiReady.value
   slugger.reset()
   return env ? md.render(content, env) : md.render(content)
 }
