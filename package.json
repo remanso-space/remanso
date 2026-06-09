@@ -2,7 +2,7 @@
   "name": "remanso",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@11.0.9",
+  "packageManager": "pnpm@11.5.2",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
