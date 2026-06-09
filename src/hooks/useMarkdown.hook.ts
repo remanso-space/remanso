@@ -154,6 +154,7 @@ export const useShikiji = (): Promise<void> => {
         "bash",
         "javascript",
         "typescript",
+        "tsx",
         "markdown",
         "mermaid",
         "html",
