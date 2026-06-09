@@ -182,6 +182,10 @@ pre {
   }
 }
 
+:not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
 pre.mermaid {
   display: flex;
   justify-content: center;
