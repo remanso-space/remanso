@@ -25,7 +25,7 @@ Run a single test file: `pnpm test src/modules/repo/services/resolvePath.spec.ts
 - **Vue 3** (3.5) with Composition API, **Pinia** for state, **Vue Router**
 - **Vite 7** build tool, **TypeScript** strict mode
 - **Tailwind CSS v4** + **DaisyUI v5** for styling (PostCSS plugin approach, not tailwind.config.js)
-- **TanStack Vue Query** + **ts-rest** + **arktype** for typed API contracts
+- **arktype** for runtime type validation (used by the ATProto module)
 - **PouchDB** (IndexedDB) for local persistence
 - **Octokit** for GitHub API integration
 - **markdown-it** with plugins (KaTeX, Shikiji, Mermaid, checkboxes, GitHub alerts)
@@ -50,8 +50,7 @@ src/
 │   ├── user/        # Authentication, user settings
 │   ├── card/        # Spaced repetition
 │   ├── history/     # Edit history tracking
-│   ├── atproto/     # ATProto/Bluesky integration (DID resolution, blob URLs)
-│   └── post/        # ts-rest API client for public note publishing (api.remanso.space)
+│   └── atproto/     # ATProto/Bluesky integration (DID resolution, blob URLs)
 ├── hooks/           # Composition hooks (useMarkdown, useBacklinks, useGitHubContent, etc.)
 ├── data/            # PouchDB wrapper and data models
 ├── utils/           # Utilities including custom markdown-it plugins
@@ -73,7 +72,6 @@ src/
 - `src/modules/repo/store/userRepo.store.ts` - Central Pinia store for repo/file state
 - `src/modules/repo/services/octo.ts` - Octokit wrapper for GitHub API
 - `src/hooks/useMarkdown.hook.ts` - Markdown rendering with all plugins
-- `src/modules/post/data/client.ts` - ts-rest API contract definitions with arktype validation
 - `src/data/data.ts` - PouchDB database wrapper
 
 ### Patterns
@@ -81,5 +79,4 @@ src/
 - All components use Composition API (`<script setup lang="ts">`)
 - Custom hooks encapsulate feature logic (`use*.hook.ts` or `use*.ts`)
 - Event buses (`noteEventBus`, `backlinkEventBus`) for cross-component communication
-- ts-rest contracts use arktype schemas for request/response validation
 - Path alias: `@` maps to `src/`

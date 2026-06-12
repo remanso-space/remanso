@@ -35,18 +35,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.1.16
         version: 4.1.16
-      '@tanstack/vue-query':
-        specifier: ^5.92.9
-        version: 5.92.9(vue@3.5.18(typescript@5.9.3))
       '@toycode/markdown-it-class':
         specifier: ^1.2.4
         version: 1.2.4
-      '@ts-rest/core':
-        specifier: ^3.52.1
-        version: 3.52.1(@types/node@22.15.24)(zod@3.25.76)
-      '@ts-rest/vue-query':
-        specifier: ^3.52.1
-        version: 3.52.1(@tanstack/vue-query@5.92.9(vue@3.5.18(typescript@5.9.3)))(@ts-rest/core@3.52.1(@types/node@22.15.24)(zod@3.25.76))(zod@3.25.76)
       '@vscode/markdown-it-katex':
         specifier: ^1.1.2
         version: 1.1.2
@@ -2218,45 +2209,8 @@ packages:
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders || >=4.0.0-alpha.20 || >=4.0.0-beta.1'
 
-  '@tanstack/match-sorter-utils@8.19.4':
-    resolution: {integrity: sha512-Wo1iKt2b9OT7d+YGhvEPD3DXvPv2etTusIMhMUoG7fbhmxcXCtIjJDEygy91Y2JFlwGyjqiBPRozme7UD8hoqg==}
-    engines: {node: '>=12'}
-
-  '@tanstack/query-core@5.90.20':
-    resolution: {integrity: sha512-OMD2HLpNouXEfZJWcKeVKUgQ5n+n3A2JFmBaScpNDUqSrQSjiveC7dKMe53uJUg1nDG16ttFPz2xfilz6i2uVg==}
-
-  '@tanstack/vue-query@5.92.9':
-    resolution: {integrity: sha512-jjAZcqKveyX0C4w/6zUqbnqk/XzuxNWaFsWjGTJWULVFizUNeLGME2gf9vVSDclIyiBhR13oZJPPs6fJgfpIJQ==}
-    peerDependencies:
-      '@vue/composition-api': ^1.1.2
-      vue: ^2.6.0 || ^3.3.0
-    peerDependenciesMeta:
-      '@vue/composition-api':
-        optional: true
-
   '@toycode/markdown-it-class@1.2.4':
     resolution: {integrity: sha512-hA4gHBK8moObkOYdWTjhy1wYcYy0MJeM3JjSKbsXHRpRMvIKhk6Jm+t3bXsSScTdz/byWqQbs8YIwVYjHp+SlQ==}
-
-  '@ts-rest/core@3.52.1':
-    resolution: {integrity: sha512-tAjz7Kxq/grJodcTA1Anop4AVRDlD40fkksEV5Mmal88VoZeRKAG8oMHsDwdwPZz+B/zgnz0q2sF+cm5M7Bc7g==}
-    peerDependencies:
-      '@types/node': ^18.18.7 || >=20.8.4
-      zod: ^3.22.3
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      zod:
-        optional: true
-
-  '@ts-rest/vue-query@3.52.1':
-    resolution: {integrity: sha512-89u7aS9LGDC7uNUC5CagWX1EB7vTwyXohYcizLi1D9v7MD/Cnu5OTQNf8SY3PuAK62RcFJXB2XZGsMAPC0svNw==}
-    peerDependencies:
-      '@tanstack/vue-query': ^4.0.0
-      '@ts-rest/core': ~3.52.0
-      zod: ^3.22.3
-    peerDependenciesMeta:
-      zod:
-        optional: true
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -4027,7 +3981,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   globals@13.20.0:
     resolution: {integrity: sha512-Qg5QtVkCy/kv3FUSlu4ukeZDVf9ee0iXLAUYX13gbR17bnejFTzr4iS9bY7kwCf1NztRNm1t91fjOiyx4CSwPQ==}
@@ -5032,7 +4986,7 @@ packages:
 
   markdown-it-shikiji@0.10.2:
     resolution: {integrity: sha512-Y2Zfp6GblTuGBlirnBms2xS6+C3iFiUzCsVp+nZaMWavBcS9ZFxEglWdSpfjt4gqWlQunWmIEX1OUt9WaqFNvw==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/markdown-it instead
 
   markdown-it@14.1.0:
     resolution: {integrity: sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==}
@@ -5704,9 +5658,6 @@ packages:
     resolution: {integrity: sha512-NZQZdC5wOE/H3UT28fVGL+ikOZcEzfMGk/c3iN9UGxzWHMa1op7274oyiUVrAG4B2EuFhus8SvkaYnhvW92p9Q==}
     hasBin: true
 
-  remove-accents@0.5.0:
-    resolution: {integrity: sha512-8g3/Otx1eJaVD12e31UbJj1YzdtVvzH85HV7t+9MJYk/u3XmkOUJ5Ys9wQrf9PCPK8+xn4ymzqYCiZl6QWKn+A==}
-
   remove-trailing-separator@1.1.0:
     resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
 
@@ -5932,10 +5883,11 @@ packages:
 
   shikiji-transformers@0.10.2:
     resolution: {integrity: sha512-7IVTwl1af205ywYEq5bOAYOTOFW4V1dVX1EablP0nWKErqZeD1o93VMytxmtJomqS+YwbB8doY8SE3MFMn0aPQ==}
+    deprecated: Deprecated, use @shikijs/transformers instead
 
   shikiji@0.10.2:
     resolution: {integrity: sha512-wtZg3T0vtYV2PnqusWQs3mDaJBdCPWxFDrBM/SE5LfrX92gjUvfEMlc+vJnoKY6Z/S44OWaCRzNIsdBRWcTAiw==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use shiki instead
 
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
@@ -6482,11 +6434,12 @@ packages:
 
   uuid@3.4.0:
     resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
-    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   validate-npm-package-license@3.0.4:
@@ -6661,6 +6614,7 @@ packages:
   vue-i18n@11.1.11:
     resolution: {integrity: sha512-LvyteQoXeQiuILbzqv13LbyBna/TEv2Ha+4ZWK2AwGHUzZ8+IBaZS0TJkCgn5izSPLcgZwXy9yyTrewCb2u/MA==}
     engines: {node: '>= 16'}
+    deprecated: This version is NOT deprecated. Previous deprecation was a mistake.
     peerDependencies:
       vue: ^3.0.0
 
@@ -8747,33 +8701,7 @@ snapshots:
       postcss-selector-parser: 6.0.10
       tailwindcss: 4.2.2
 
-  '@tanstack/match-sorter-utils@8.19.4':
-    dependencies:
-      remove-accents: 0.5.0
-
-  '@tanstack/query-core@5.90.20': {}
-
-  '@tanstack/vue-query@5.92.9(vue@3.5.18(typescript@5.9.3))':
-    dependencies:
-      '@tanstack/match-sorter-utils': 8.19.4
-      '@tanstack/query-core': 5.90.20
-      '@vue/devtools-api': 6.6.4
-      vue: 3.5.18(typescript@5.9.3)
-      vue-demi: 0.14.10(vue@3.5.18(typescript@5.9.3))
-
   '@toycode/markdown-it-class@1.2.4': {}
-
-  '@ts-rest/core@3.52.1(@types/node@22.15.24)(zod@3.25.76)':
-    optionalDependencies:
-      '@types/node': 22.15.24
-      zod: 3.25.76
-
-  '@ts-rest/vue-query@3.52.1(@tanstack/vue-query@5.92.9(vue@3.5.18(typescript@5.9.3)))(@ts-rest/core@3.52.1(@types/node@22.15.24)(zod@3.25.76))(zod@3.25.76)':
-    dependencies:
-      '@tanstack/vue-query': 5.92.9(vue@3.5.18(typescript@5.9.3))
-      '@ts-rest/core': 3.52.1(@types/node@22.15.24)(zod@3.25.76)
-    optionalDependencies:
-      zod: 3.25.76
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
@@ -12703,8 +12631,6 @@ snapshots:
   regjsparser@0.13.0:
     dependencies:
       jsesc: 3.1.0
-
-  remove-accents@0.5.0: {}
 
   remove-trailing-separator@1.1.0: {}
 

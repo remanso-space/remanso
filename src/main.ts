@@ -2,7 +2,6 @@ import "notyf/notyf.min.css"
 import "./styles/app.css"
 import "@/analytics/openpanel"
 
-import { VueQueryPlugin } from "@tanstack/vue-query"
 import { createPinia } from "pinia"
 import { createApp } from "vue"
 import { createI18n } from "vue-i18n"
@@ -19,7 +18,6 @@ const i18n = createI18n({
 
 createApp(App)
   .use(router)
-  .use(VueQueryPlugin)
   .use(i18n)
   .use(createPinia())
   .mount("#app")
