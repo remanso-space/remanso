@@ -337,7 +337,7 @@ const createTodoFile = async () => {
           </div>
           <button
             type="button"
-            class="btn btn-ghost btn-xs w-fit self-start"
+            class="btn btn-ghost btn-sm self-start"
             :class="{ invisible: !hasFilters }"
             :aria-hidden="!hasFilters"
             :tabindex="hasFilters ? 0 : -1"
