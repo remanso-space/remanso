@@ -268,7 +268,24 @@ watch(
             class="todo-chip badge badge-soft badge-primary mx-0.5"
             @click.stop
           >
-            +{{ seg.value }}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon icon-tabler icon-tabler-plus"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+            {{ seg.value }}
             <button
               v-if="canEdit"
               class="todo-chip-close"
@@ -300,7 +317,28 @@ watch(
             class="todo-chip badge badge-soft badge-secondary mx-0.5"
             @click.stop
           >
-            @{{ seg.value }}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon icon-tabler icon-tabler-at"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              stroke-width="1.75"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"
+              />
+              <path
+                d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28"
+              />
+            </svg>
+            {{ seg.value }}
             <button
               v-if="canEdit"
               class="todo-chip-close"
