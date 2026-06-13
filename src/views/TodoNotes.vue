@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, watch } from "vue"
+import { computed, defineAsyncComponent, Ref, ref, watch } from "vue"
 
 import TodoTxtItem from "@/components/TodoTxtItem.vue"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
@@ -69,7 +69,9 @@ const taskEntries = computed(() => {
     if (!isBlank(line)) out.push({ line, index })
   })
   // Stable sort: equal priorities preserve file order.
-  out.sort((a, b) => priorityRank(a.line.priority) - priorityRank(b.line.priority))
+  out.sort(
+    (a, b) => priorityRank(a.line.priority) - priorityRank(b.line.priority)
+  )
   return out
 })
 
@@ -113,6 +115,23 @@ const statusFilter = ref<StatusFilter>("all")
 const setStatusFilter = (next: Exclude<StatusFilter, "all">) => {
   statusFilter.value = statusFilter.value === next ? "all" : next
 }
+
+// Drop entries from `active` that no longer appear in `available`. Without
+// this, editing tasks until a selected project/context/priority disappears
+// leaves the filter "stuck on" — hasFilters stays true with no visible chip
+// to toggle off.
+const pruneActive = <T>(active: Ref<Set<T>>, available: ReadonlyArray<T>) => {
+  const valid = new Set(available)
+  const pruned = new Set<T>()
+  active.value.forEach((v) => {
+    if (valid.has(v)) pruned.add(v)
+  })
+  if (pruned.size !== active.value.size) active.value = pruned
+}
+
+watch(allProjects, (next) => pruneActive(activeProjects, next))
+watch(allContexts, (next) => pruneActive(activeContexts, next))
+watch(allPriorities, (next) => pruneActive(activePriorities, next))
 
 const toggleProject = (p: string) => {
   const next = new Set(activeProjects.value)
@@ -262,16 +281,12 @@ const createTodoFile = async () => {
       </div>
 
       <template v-else>
-        <form
-          v-if="canPush"
-          class="mb-4 join w-full"
-          @submit.prevent="addTask"
-        >
+        <form v-if="canPush" class="mb-4 join w-full" @submit.prevent="addTask">
           <input
             v-model="newTaskInput"
             type="text"
             class="input input-bordered input-sm join-item flex-1"
-            placeholder="Add a task ((A) priority +project @context)…"
+            placeholder="(A) task +project @context…"
           />
           <button
             type="submit"
@@ -310,10 +325,7 @@ const createTodoFile = async () => {
                 </button>
               </div>
             </section>
-            <section
-              v-if="allPriorities.length"
-              class="todo-filter-column"
-            >
+            <section v-if="allPriorities.length" class="todo-filter-column">
               <h4 class="todo-filter-label">Priorities</h4>
               <div class="todo-filter-chips">
                 <button
@@ -331,10 +343,7 @@ const createTodoFile = async () => {
                 </button>
               </div>
             </section>
-            <section
-              v-if="allProjects.length"
-              class="todo-filter-column"
-            >
+            <section v-if="allProjects.length" class="todo-filter-column">
               <h4 class="todo-filter-label">Projects</h4>
               <div class="todo-filter-chips">
                 <button
@@ -349,10 +358,7 @@ const createTodoFile = async () => {
                 </button>
               </div>
             </section>
-            <section
-              v-if="allContexts.length"
-              class="todo-filter-column"
-            >
+            <section v-if="allContexts.length" class="todo-filter-column">
               <h4 class="todo-filter-label">Contexts</h4>
               <div class="todo-filter-chips">
                 <button
@@ -502,6 +508,5 @@ const createTodoFile = async () => {
   .todo-filter-chip {
     cursor: pointer;
   }
-
 }
 </style>
