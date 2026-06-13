@@ -227,6 +227,22 @@ const addTask = () => {
 const { createFile } = useGitHubContent({ user: props.user, repo: props.repo })
 const isCreating = ref(false)
 
+// Pin a leaving row's box to its current coordinates before Vue makes it
+// position: absolute. Without this, browsers (notably Firefox) compute the
+// static position of an absolutely-positioned former-flex child to (0,0),
+// so multiple leaving rows stack on top of each other and the remaining
+// rows snap into place once the DOM nodes are removed.
+const lockLeavingPosition = (el: Element) => {
+  const li = el as HTMLElement
+  const parent = li.parentElement
+  if (!parent) return
+  const liRect = li.getBoundingClientRect()
+  const parentRect = parent.getBoundingClientRect()
+  li.style.top = `${liRect.top - parentRect.top}px`
+  li.style.left = `${liRect.left - parentRect.left}px`
+  li.style.width = `${liRect.width}px`
+}
+
 const createTodoFile = async () => {
   if (isCreating.value) return
   isCreating.value = true
@@ -386,7 +402,12 @@ const createTodoFile = async () => {
           </button>
         </div>
 
-        <TransitionGroup name="todo" tag="ul" class="todo-list">
+        <TransitionGroup
+          name="todo"
+          tag="ul"
+          class="todo-list"
+          @before-leave="lockLeavingPosition"
+        >
           <li v-for="entry in filteredEntries" :key="entry.index">
             <todo-txt-item
               :task="entry.line"
@@ -430,36 +451,38 @@ const createTodoFile = async () => {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    position: relative;
+    // No `gap` — gap can't transition, so it would snap closed when a row
+    // is removed at the end of the leave animation. Spacing lives on
+    // .todo-li-inner instead so it collapses with the row.
 
     li {
       list-style: none;
+      // Use grid-template-rows 1fr → 0fr so the row's height collapses
+      // smoothly during leave instead of snapping when the DOM is removed.
+      display: grid;
+      grid-template-rows: 1fr;
     }
+  }
+
+  .todo-li-inner {
+    overflow: hidden;
+    min-height: 0;
+    padding-bottom: 0.25rem;
   }
 
   .todo-enter-active,
   .todo-leave-active {
     transition:
       opacity 180ms ease,
-      transform 220ms ease;
+      transform 220ms ease,
+      grid-template-rows 220ms ease;
   }
 
-  .todo-enter-from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-
+  .todo-enter-from,
   .todo-leave-to {
     opacity: 0;
-    transform: translateX(12px);
-  }
-
-  // Take the leaving item out of layout flow so the rest of the list
-  // slides up smoothly via .todo-move instead of jumping.
-  .todo-leave-active {
-    position: absolute;
-    width: 100%;
+    transform: translateX(-12px);
+    grid-template-rows: 0fr;
   }
 
   .todo-move {
