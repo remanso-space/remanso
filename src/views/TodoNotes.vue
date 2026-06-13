@@ -89,8 +89,23 @@ const allContexts = computed(() => {
   return Array.from(set).sort()
 })
 
+// "none" represents tasks without a priority.
+const allPriorities = computed<Array<string | "none">>(() => {
+  const set = new Set<string | "none">()
+  items.value.forEach((line) => {
+    if (isBlank(line)) return
+    set.add(line.priority ?? "none")
+  })
+  return Array.from(set).sort((a, b) => {
+    if (a === "none") return 1
+    if (b === "none") return -1
+    return a.localeCompare(b)
+  })
+})
+
 const activeProjects = ref<Set<string>>(new Set())
 const activeContexts = ref<Set<string>>(new Set())
+const activePriorities = ref<Set<string | "none">>(new Set())
 
 const toggleProject = (p: string) => {
   const next = new Set(activeProjects.value)
@@ -106,14 +121,38 @@ const toggleContext = (c: string) => {
   activeContexts.value = next
 }
 
+const togglePriority = (p: string | "none") => {
+  const next = new Set(activePriorities.value)
+  if (next.has(p)) next.delete(p)
+  else next.add(p)
+  activePriorities.value = next
+}
+
 const clearFilters = () => {
   activeProjects.value = new Set()
   activeContexts.value = new Set()
+  activePriorities.value = new Set()
 }
 
 const hasFilters = computed(
-  () => activeProjects.value.size > 0 || activeContexts.value.size > 0
+  () =>
+    activeProjects.value.size > 0 ||
+    activeContexts.value.size > 0 ||
+    activePriorities.value.size > 0
 )
+
+const priorityBadgeFilterClass = (p: string | "none"): string => {
+  switch (p) {
+    case "A":
+      return "badge-error"
+    case "B":
+      return "badge-warning"
+    case "C":
+      return "badge-info"
+    default:
+      return "badge-ghost"
+  }
+}
 
 const filteredEntries = computed(() => {
   if (!hasFilters.value) return taskEntries.value
@@ -126,7 +165,10 @@ const filteredEntries = computed(() => {
     const contextsOk =
       activeContexts.value.size === 0 ||
       taskContexts.some((c) => activeContexts.value.has(c))
-    return projectsOk && contextsOk
+    const prioritiesOk =
+      activePriorities.value.size === 0 ||
+      activePriorities.value.has(line.priority ?? "none")
+    return projectsOk && contextsOk && prioritiesOk
   })
 })
 
@@ -229,10 +271,33 @@ const createTodoFile = async () => {
         </form>
 
         <div
-          v-if="allProjects.length || allContexts.length"
+          v-if="
+            allProjects.length || allContexts.length || allPriorities.length
+          "
           class="todo-filters"
         >
           <div class="todo-filter-columns">
+            <section
+              v-if="allPriorities.length"
+              class="todo-filter-column"
+            >
+              <h4 class="todo-filter-label">Priorities</h4>
+              <div class="todo-filter-chips">
+                <button
+                  v-for="p in allPriorities"
+                  :key="`pri:${p}`"
+                  type="button"
+                  class="todo-filter-chip badge"
+                  :class="[
+                    priorityBadgeFilterClass(p),
+                    { 'badge-soft': !activePriorities.has(p) }
+                  ]"
+                  @click="togglePriority(p)"
+                >
+                  {{ p === "none" ? "—" : `(${p})` }}
+                </button>
+              </div>
+            </section>
             <section
               v-if="allProjects.length"
               class="todo-filter-column"
@@ -370,41 +435,40 @@ const createTodoFile = async () => {
   }
 
   .todo-filter-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 
   .todo-filter-column {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
     min-width: 0;
-    text-align: center;
   }
 
   .todo-filter-label {
     font-size: 0.8rem;
     opacity: 0.7;
-    margin: 0 0 0.35rem;
+    margin: 0;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    text-align: center;
+    flex: 0 0 auto;
+    min-width: 5.5rem;
   }
 
   .todo-filter-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
-    justify-content: center;
+    flex: 1 1 auto;
   }
 
   .todo-filter-chip {
     cursor: pointer;
   }
 
-  @media (max-width: 480px) {
-    .todo-filter-columns {
-      grid-template-columns: 1fr;
-    }
-  }
 }
 </style>
