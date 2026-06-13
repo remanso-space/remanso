@@ -107,6 +107,13 @@ const activeProjects = ref<Set<string>>(new Set())
 const activeContexts = ref<Set<string>>(new Set())
 const activePriorities = ref<Set<string | "none">>(new Set())
 
+// XOR: either "open" only, "done" only, or "all" (no status filter).
+type StatusFilter = "all" | "open" | "done"
+const statusFilter = ref<StatusFilter>("all")
+const setStatusFilter = (next: Exclude<StatusFilter, "all">) => {
+  statusFilter.value = statusFilter.value === next ? "all" : next
+}
+
 const toggleProject = (p: string) => {
   const next = new Set(activeProjects.value)
   if (next.has(p)) next.delete(p)
@@ -132,13 +139,15 @@ const clearFilters = () => {
   activeProjects.value = new Set()
   activeContexts.value = new Set()
   activePriorities.value = new Set()
+  statusFilter.value = "all"
 }
 
 const hasFilters = computed(
   () =>
     activeProjects.value.size > 0 ||
     activeContexts.value.size > 0 ||
-    activePriorities.value.size > 0
+    activePriorities.value.size > 0 ||
+    statusFilter.value !== "all"
 )
 
 const priorityBadgeFilterClass = (p: string | "none"): string => {
@@ -168,7 +177,10 @@ const filteredEntries = computed(() => {
     const prioritiesOk =
       activePriorities.value.size === 0 ||
       activePriorities.value.has(line.priority ?? "none")
-    return projectsOk && contextsOk && prioritiesOk
+    const statusOk =
+      statusFilter.value === "all" ||
+      (statusFilter.value === "done" ? line.completed : !line.completed)
+    return projectsOk && contextsOk && prioritiesOk && statusOk
   })
 })
 
@@ -277,6 +289,27 @@ const createTodoFile = async () => {
           class="todo-filters"
         >
           <div class="todo-filter-columns">
+            <section class="todo-filter-column">
+              <h4 class="todo-filter-label">Status</h4>
+              <div class="todo-filter-chips">
+                <button
+                  type="button"
+                  class="todo-filter-chip badge badge-success"
+                  :class="{ 'badge-soft': statusFilter !== 'open' }"
+                  @click="setStatusFilter('open')"
+                >
+                  Open
+                </button>
+                <button
+                  type="button"
+                  class="todo-filter-chip badge badge-neutral"
+                  :class="{ 'badge-soft': statusFilter !== 'done' }"
+                  @click="setStatusFilter('done')"
+                >
+                  Done
+                </button>
+              </div>
+            </section>
             <section
               v-if="allPriorities.length"
               class="todo-filter-column"
