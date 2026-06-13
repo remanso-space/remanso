@@ -336,15 +336,6 @@ iframe {
   height: 400px;
 }
 
-/* TODO page */
-.todo-notes input[type="checkbox"] {
-  @apply checkbox checkbox-success;
-}
-
-.todo-notes li:has(> input[type="checkbox"]) {
-  list-style: none;
-}
-
 .tabs :where(pre):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   margin-top: 0;
   margin-bottom: 0;
