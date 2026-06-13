@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onClickOutside } from "@vueuse/core"
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue"
 
 import {
@@ -23,8 +24,8 @@ const segments = computed(() => segmentBody(props.task.body))
 
 const PRIORITIES = ["A", "B", "C", "D"] as const
 
-const priorityBadgeClass = computed(() => {
-  switch (props.task.priority) {
+const priorityBadgeClassFor = (priority?: string): string => {
+  switch (priority) {
     case "A":
       return "badge badge-soft badge-error"
     case "B":
@@ -34,17 +35,32 @@ const priorityBadgeClass = computed(() => {
     default:
       return "badge badge-soft badge-ghost"
   }
-})
+}
+
+const priorityBadgeClass = computed(() =>
+  priorityBadgeClassFor(props.task.priority)
+)
 
 const toggle = () => {
   if (!props.canEdit) return
   emit("update", toggleCompleted(props.task))
 }
 
+const priorityOpen = ref(false)
+const priorityDropdown = useTemplateRef<HTMLDivElement>("priorityDropdown")
+onClickOutside(priorityDropdown, () => {
+  priorityOpen.value = false
+})
+
+const togglePriorityMenu = () => {
+  if (!props.canEdit) return
+  priorityOpen.value = !priorityOpen.value
+}
+
 const setPriority = (priority: string | undefined) => {
   if (!props.canEdit) return
   emit("update", { ...props.task, priority })
-  closeDropdown()
+  priorityOpen.value = false
 }
 
 const removeToken = (kind: "project" | "context", value: string) => {
@@ -174,11 +190,6 @@ watch(
     if (editing.value) editing.value = false
   }
 )
-
-const dropdownRef = useTemplateRef<HTMLDetailsElement>("priorityDropdown")
-const closeDropdown = () => {
-  if (dropdownRef.value) dropdownRef.value.open = false
-}
 </script>
 
 <template>
@@ -194,26 +205,44 @@ const closeDropdown = () => {
       @change="toggle"
     />
 
-    <details ref="priorityDropdown" class="dropdown dropdown-bottom">
-      <summary
+    <div
+      ref="priorityDropdown"
+      class="todo-priority"
+      :class="{ 'todo-priority--open': priorityOpen }"
+    >
+      <button
+        type="button"
         :class="priorityBadgeClass"
-        class="cursor-pointer list-none w-7 justify-center mt-0.5"
-        :tabindex="canEdit ? 0 : -1"
+        class="todo-priority-trigger cursor-pointer w-7 justify-center mt-0.5"
+        :disabled="!canEdit"
+        @click="togglePriorityMenu"
       >
         {{ task.priority ?? "—" }}
-      </summary>
-      <ul
-        v-if="canEdit"
-        class="dropdown-content menu bg-base-200 rounded-box z-10 shadow p-1 mt-1"
+      </button>
+      <div
+        v-if="canEdit && priorityOpen"
+        class="todo-priority-menu bg-base-200 rounded-box shadow p-2"
       >
-        <li v-for="p in PRIORITIES" :key="p">
-          <a @click="setPriority(p)">({{ p }})</a>
-        </li>
-        <li>
-          <a @click="setPriority(undefined)">none</a>
-        </li>
-      </ul>
-    </details>
+        <button
+          v-for="p in PRIORITIES"
+          :key="p"
+          type="button"
+          :class="priorityBadgeClassFor(p)"
+          class="todo-priority-option w-10 justify-center cursor-pointer"
+          @click="setPriority(p)"
+        >
+          ({{ p }})
+        </button>
+        <button
+          type="button"
+          :class="priorityBadgeClassFor(undefined)"
+          class="todo-priority-option w-10 justify-center cursor-pointer"
+          @click="setPriority(undefined)"
+        >
+          —
+        </button>
+      </div>
+    </div>
 
     <div class="flex-1 min-w-0">
       <input
@@ -443,6 +472,51 @@ const closeDropdown = () => {
 <style scoped lang="scss">
 .body-display {
   word-break: break-word;
+}
+
+.todo-priority {
+  position: relative;
+  display: inline-flex;
+}
+
+// Lift the whole priority widget above sibling rows while its menu is open,
+// otherwise the absolutely-positioned menu paints behind row N+1's content.
+// 1 is enough: no other element in this view sets a non-auto z-index.
+.todo-priority--open {
+  z-index: 1;
+}
+
+.todo-priority-trigger {
+  border: 0;
+}
+
+.todo-priority-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: auto;
+}
+
+.todo-priority-option {
+  border: 0;
+  font: inherit;
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
+
+  &:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+  }
 }
 
 .todo-chip {
