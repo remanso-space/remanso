@@ -25,15 +25,17 @@ const segments = computed(() => segmentBody(props.task.body))
 const PRIORITIES = ["A", "B", "C", "D"] as const
 
 const priorityBadgeClassFor = (priority?: string): string => {
+  const preClass = "badge badge-soft"
+
   switch (priority) {
     case "A":
-      return "badge badge-soft badge-error"
+      return `${preClass} badge-error`
     case "B":
-      return "badge badge-soft badge-warning"
+      return `${preClass} badge-warning`
     case "C":
-      return "badge badge-soft badge-info"
+      return `${preClass} badge-info`
     default:
-      return "badge badge-soft badge-ghost"
+      return `${preClass} badge-ghost`
   }
 }
 
@@ -104,7 +106,9 @@ const MS_PER_DAY = 86_400_000
 const formatDueDate = (value: string): string => {
   const due = parseDueDate(value)
   if (!due) return value
-  const diff = Math.round((due.getTime() - startOfToday().getTime()) / MS_PER_DAY)
+  const diff = Math.round(
+    (due.getTime() - startOfToday().getTime()) / MS_PER_DAY
+  )
   if (diff === 0) return "Today"
   if (diff === 1) return "Tomorrow"
   if (diff === -1) return "Yesterday"
@@ -331,12 +335,8 @@ watch(
               aria-hidden="true"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path
-                d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"
-              />
-              <path
-                d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28"
-              />
+              <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+              <path d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28" />
             </svg>
             {{ seg.value }}
             <button
