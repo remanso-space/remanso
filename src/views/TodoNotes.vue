@@ -23,6 +23,7 @@ type Prop = {
 }
 
 const TODO_PATH = "todo.txt"
+const DONE_PATH = "done.txt"
 
 const FluxNote = defineAsyncComponent(() => import("@/components/FluxNote.vue"))
 
@@ -58,6 +59,34 @@ watch(
   { immediate: true }
 )
 
+const doneFile = computed(() => store.files.find((f) => f.path === DONE_PATH))
+const doneSha = computed(() => doneFile.value?.sha ?? "")
+const donePath = computed(() => doneFile.value?.path ?? DONE_PATH)
+
+// Reuse useTodoTxtCommit as a read-only loader. We never call its `mutate`,
+// so nothing is ever written to done.txt from this view — the file is
+// produced by an external tool.
+const { items: doneItems, syncContent: syncDoneContent } = useTodoTxtCommit({
+  user: props.user,
+  repo: props.repo,
+  path: donePath,
+  initialContent: "",
+  initialSha: doneSha,
+  debounceMs: 1000
+})
+
+watch(
+  doneSha,
+  async (newSha) => {
+    if (!newSha) return
+    const base64 = await queryFileContent(props.user, props.repo, newSha)
+    if (base64) {
+      syncDoneContent(decodeBase64ToUTF8(base64), newSha)
+    }
+  },
+  { immediate: true }
+)
+
 // Rank `A` = 65 .. `Z` = 90; absent priority is Infinity so it sorts last
 // regardless of locale collation quirks.
 const priorityRank = (p?: string): number =>
@@ -74,6 +103,10 @@ const taskEntries = computed(() => {
   )
   return out
 })
+
+const archivedTasks = computed(() =>
+  doneItems.value.filter((line): line is Task => !isBlank(line))
+)
 
 const allProjects = computed(() => {
   const set = new Set<string>()
@@ -431,6 +464,15 @@ const createTodoFile = async () => {
         >
           Your todo list is empty. Add a task above.
         </p>
+
+        <details v-if="doneFile" class="todo-archive">
+          <summary>Archived ({{ archivedTasks.length }})</summary>
+          <ul class="todo-archive-list">
+            <li v-for="(task, i) in archivedTasks" :key="i">
+              <todo-txt-item :task="task" :can-edit="false" />
+            </li>
+          </ul>
+        </details>
       </template>
     </flux-note>
   </div>
@@ -530,6 +572,38 @@ const createTodoFile = async () => {
 
   .todo-filter-chip {
     cursor: pointer;
+  }
+
+  .todo-archive {
+    margin-top: 1rem;
+
+    > summary {
+      cursor: pointer;
+      opacity: 0.7;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      list-style: none;
+    }
+
+    > summary::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  .todo-archive-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+
+    li {
+      list-style: none;
+      opacity: 0.7;
+      padding-bottom: 0.25rem;
+    }
   }
 }
 </style>
