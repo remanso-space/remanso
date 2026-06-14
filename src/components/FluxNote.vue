@@ -100,7 +100,7 @@ onUnmounted(() => {
           <h1 class="heading-1">
             {{ repo }}
           </h1>
-          {{ user }}
+          · {{ user }}
         </div>
         <cache-all-notes />
       </div>
@@ -147,6 +147,10 @@ $header-height: 40px;
 .flux-note {
   display: flex;
   flex: 1;
+
+  .heading-1 {
+    display: inline-block;
+  }
 
   &.content {
     .title,
