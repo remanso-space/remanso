@@ -111,7 +111,7 @@ const activePriorities = ref<Set<string | "none">>(new Set())
 
 // XOR: either "open" only, "done" only, or "all" (no status filter).
 type StatusFilter = "all" | "open" | "done"
-const statusFilter = ref<StatusFilter>("all")
+const statusFilter = ref<StatusFilter>("open")
 const setStatusFilter = (next: Exclude<StatusFilter, "all">) => {
   statusFilter.value = statusFilter.value === next ? "all" : next
 }
