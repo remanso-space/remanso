@@ -101,6 +101,9 @@ const buildExportableSvgString = (svg: SVGSVGElement): string => {
   return new XMLSerializer().serializeToString(clone)
 }
 
+export const svgToDataUrl = (svg: SVGSVGElement): string =>
+  `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildExportableSvgString(svg))}`
+
 const triggerBlobDownload = (blob: Blob, filename: string): void => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")

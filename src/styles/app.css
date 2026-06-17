@@ -344,3 +344,72 @@ iframe {
   padding-bottom: 0.2rem;
   padding-inline-start: 0.2rem;
 }
+
+/* Image lightbox — desktop click-to-fullscreen */
+
+/* Affordance: zoomable content images and diagrams (desktop only). */
+@media (min-width: 769px) {
+  .note-content img,
+  .note-display img,
+  .tikz svg,
+  .mermaid svg {
+    cursor: zoom-in;
+  }
+}
+
+/* DaisyUI hides the native ::backdrop and uses the .modal element's own
+   background-color for the dim, so the blurred overlay lives on the element. */
+.image-lightbox {
+  background-color: rgb(0 0 0 / 0);
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  transition:
+    visibility 0.3s allow-discrete,
+    background-color 0.3s ease-out,
+    -webkit-backdrop-filter 0.3s ease-out,
+    backdrop-filter 0.3s ease-out;
+}
+
+.image-lightbox[open] {
+  background-color: rgb(0 0 0 / 0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+@starting-style {
+  .image-lightbox[open] {
+    background-color: rgb(0 0 0 / 0);
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
+.image-lightbox img {
+  transition:
+    opacity 0.3s ease-out,
+    scale 0.3s ease-out;
+}
+
+.image-lightbox[open] img {
+  opacity: 1;
+  scale: 1;
+}
+
+.image-lightbox:not([open]) img {
+  opacity: 0;
+  scale: 0.95;
+}
+
+@starting-style {
+  .image-lightbox[open] img {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-lightbox,
+  .image-lightbox img {
+    transition: none;
+  }
+}
