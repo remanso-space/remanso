@@ -48,7 +48,7 @@ watch(isOpen, (value) => {
       v-if="src"
       :src="src"
       :alt="alt"
-      class="max-h-[100vh] max-w-[100vw] rounded-lg bg-white p-3 cursor-zoom-out"
+      class="max-h-[96vh] max-w-[96vw] rounded-lg bg-white p-3 cursor-zoom-out"
     />
   </dialog>
 </template>
