@@ -210,6 +210,74 @@ const todayIso = (now: Date): string => {
   return `${y}-${m}-${d}`
 }
 
+const parseDateStr = (s: string): Date | null => {
+  if (!DATE_RE.test(s)) return null
+  const [y, mo, d] = s.split("-").map(Number)
+  return new Date(y, mo - 1, d)
+}
+
+const addInterval = (base: Date, n: number, unit: string): Date => {
+  const d = new Date(base)
+  switch (unit.toLowerCase()) {
+    case "d":
+      d.setDate(d.getDate() + n)
+      break
+    case "w":
+      d.setDate(d.getDate() + n * 7)
+      break
+    case "m":
+      d.setMonth(d.getMonth() + n)
+      break
+    case "y":
+      d.setFullYear(d.getFullYear() + n)
+      break
+  }
+  return d
+}
+
+const REC_RE = /^\+?(\d+)([dwmyDWMY])$/
+
+// When a recurring task is completed, build a new open task with the next due date.
+// Strict mode (rec:+Nd): base date is the existing due: date (or today if absent).
+// Non-strict (rec:Nd): base date is today (completion date).
+// Returns null when the task has no valid rec: tag.
+export const applyRecurrence = (task: Task, now = new Date()): Task | null => {
+  const tags = tagsOf(task)
+  const rec = tags["rec"]
+  if (!rec) return null
+  const m = rec.match(REC_RE)
+  if (!m) return null
+
+  const strict = rec.startsWith("+")
+  const n = parseInt(m[1], 10)
+  const unit = m[2]
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let base = today
+  if (strict && tags["due"]) {
+    const parsed = parseDateStr(tags["due"])
+    if (parsed) base = parsed
+  }
+
+  const nextDate = addInterval(base, n, unit)
+  const nextDue = todayIso(nextDate)
+
+  let newBody = task.body
+  if (tags["due"]) {
+    newBody = removeTagFromBody(newBody, "due", tags["due"])
+  }
+  newBody = (newBody.trim() + ` due:${nextDue}`).trim()
+
+  return {
+    raw: "",
+    completed: false,
+    priority: task.priority,
+    creationDate: todayIso(now),
+    completionDate: undefined,
+    body: newBody
+  }
+}
+
 // Toggle the completed state of a task.
 // On complete: stamp today's completion date. Priority stays in place per spec.
 // On uncomplete: drop completion date but leave the rest of the line as-is —

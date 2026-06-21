@@ -9,6 +9,7 @@ import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 import { errorMessage } from "@/utils/notif"
 import {
+  applyRecurrence,
   contextsOf,
   FileLine,
   isBlank,
@@ -204,7 +205,15 @@ const filteredEntries = computed(() => {
 })
 
 const updateTask = (index: number, next: Task) => {
-  mutate((current) => current.map((line, i) => (i === index ? next : line)))
+  mutate((current) => {
+    const prev = current[index]
+    const updated = current.map((line, i) => (i === index ? next : line))
+    if (!isBlank(prev) && !prev.completed && next.completed) {
+      const recurring = applyRecurrence(next)
+      if (recurring) return [...updated, recurring]
+    }
+    return updated
+  })
 }
 
 const deleteTask = (index: number) => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  applyRecurrence,
   contextsOf,
   isBlank,
   parseFile,
@@ -213,6 +214,79 @@ Task two
   it("handles file with no trailing newline", () => {
     const parsed = parseFile("only line")
     expect(serializeFile(parsed, { trailingNewline: false })).toBe("only line")
+  })
+})
+
+describe("todotxt applyRecurrence", () => {
+  it("returns null when task has no rec tag", () => {
+    expect(applyRecurrence(parseLine("Buy milk"))).toBeNull()
+  })
+
+  it("returns null for an invalid rec value", () => {
+    expect(applyRecurrence(parseLine("Task rec:bad"))).toBeNull()
+  })
+
+  it("non-strict: bases next due on today, replacing existing due", () => {
+    const now = new Date(2026, 0, 15) // Jan 15
+    const task = parseLine("Pay rent due:2025-12-15 rec:1m")
+    const next = applyRecurrence(task, now)!
+    expect(next.completed).toBe(false)
+    expect(next.body).toContain("due:2026-02-15")
+    expect(next.body).toContain("rec:1m")
+    expect(next.body).not.toContain("due:2025-12-15")
+  })
+
+  it("strict: bases next due on existing due date", () => {
+    const now = new Date(2026, 0, 15) // Jan 15
+    const task = parseLine("Pay rent due:2025-12-15 rec:+1m")
+    const next = applyRecurrence(task, now)!
+    expect(next.body).toContain("due:2026-01-15")
+    expect(next.body).toContain("rec:+1m")
+  })
+
+  it("strict with no due: falls back to today", () => {
+    const now = new Date(2026, 0, 15)
+    const task = parseLine("Daily standup rec:+1d")
+    const next = applyRecurrence(task, now)!
+    expect(next.body).toContain("due:2026-01-16")
+  })
+
+  it("appends due tag when task has none", () => {
+    const now = new Date(2026, 0, 15)
+    const task = parseLine("Daily standup rec:1d")
+    const next = applyRecurrence(task, now)!
+    expect(next.body).toContain("due:2026-01-16")
+  })
+
+  it("preserves projects, contexts, and rec tag in new body", () => {
+    const now = new Date(2026, 0, 15)
+    const task = parseLine("Pay rent +finance @home due:2026-01-01 rec:1m")
+    const next = applyRecurrence(task, now)!
+    expect(next.body).toContain("+finance")
+    expect(next.body).toContain("@home")
+    expect(next.body).toContain("rec:1m")
+  })
+
+  it("preserves priority on the new task", () => {
+    const now = new Date(2026, 0, 15)
+    const task = parseLine("(A) Pay rent rec:1w")
+    const next = applyRecurrence(task, now)!
+    expect(next.priority).toBe("A")
+    expect(next.body).toContain("due:2026-01-22")
+  })
+
+  it("handles week interval", () => {
+    const now = new Date(2026, 0, 15)
+    expect(applyRecurrence(parseLine("Task rec:2w"), now)!.body).toContain(
+      "due:2026-01-29"
+    )
+  })
+
+  it("handles year interval", () => {
+    const now = new Date(2026, 0, 15)
+    expect(applyRecurrence(parseLine("Task rec:1y"), now)!.body).toContain(
+      "due:2027-01-15"
+    )
   })
 })
 
