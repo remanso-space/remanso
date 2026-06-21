@@ -7,15 +7,13 @@ import { computed, ref } from "vue"
 import ProfileModal from "@/components/ProfileModal.vue"
 import SignInGithub from "@/components/SignInGithub.vue"
 import UserPill from "@/components/UserPill.vue"
-import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useRepos } from "@/hooks/useRepos.hook"
 import { useRepoList } from "@/modules/repo/hooks/useRepoList.hook"
 import type { RepoBase } from "@/modules/repo/interfaces/RepoBase"
 
 const { username, accessToken } = useGitHubLogin()
-const { isLoggedIn: isATProtoLoggedIn } = useATProtoLogin()
-const { isReady, hasCredentialError } = useRepos()
+const { isReady, repos, hasCredentialError } = useRepos()
 const {
   favoriteRepos,
   otherRepos,
@@ -24,11 +22,6 @@ const {
   canLoadMore,
   loadMore
 } = useRepoList()
-
-const isGitHubLoggedIn = computed(() => !!accessToken.value)
-const isAnyUserLoggedIn = computed(
-  () => isGitHubLoggedIn.value || isATProtoLoggedIn.value
-)
 
 const openProfile = () => {
   ;(document.getElementById("profile_modal") as HTMLDialogElement)?.showModal()
@@ -44,7 +37,7 @@ const filteredFavoriteRepos = computed<RepoBase[]>(() =>
   favoriteRepos.value.filter((r) => matchesQuery(r.name))
 )
 const filteredOtherRepos = computed<RepoBase[]>(() =>
-  otherRepos.value.filter((r) => matchesQuery(r.name))
+  repos.value.filter((r) => matchesQuery(r.name))
 )
 
 const groupedOtherRepos = computed<
