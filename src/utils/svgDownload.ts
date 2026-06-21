@@ -71,17 +71,22 @@ const buildExportableSvgString = (svg: SVGSVGElement): string => {
     clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
 
   const { width, height } = getSvgPixelSize(svg)
+  const viewBox = svg.viewBox?.baseVal
+  const originX = viewBox && viewBox.width > 0 ? viewBox.x : 0
+  const originY = viewBox && viewBox.height > 0 ? viewBox.y : 0
   if (!clone.getAttribute("viewBox")) {
-    clone.setAttribute("viewBox", `0 0 ${width} ${height}`)
+    clone.setAttribute("viewBox", `${originX} ${originY} ${width} ${height}`)
   }
   clone.setAttribute("width", String(width))
   clone.setAttribute("height", String(height))
 
+  // Cover the full viewBox (its origin can be negative — e.g. a diagram whose
+  // content extends above y=0), otherwise that content falls outside the fill.
   const bg = document.createElementNS(SVG_NS, "rect")
-  bg.setAttribute("x", "0")
-  bg.setAttribute("y", "0")
-  bg.setAttribute("width", "100%")
-  bg.setAttribute("height", "100%")
+  bg.setAttribute("x", String(originX))
+  bg.setAttribute("y", String(originY))
+  bg.setAttribute("width", String(width))
+  bg.setAttribute("height", String(height))
   bg.setAttribute("fill", "#ffffff")
   clone.insertBefore(bg, clone.firstChild)
 
@@ -95,6 +100,9 @@ const buildExportableSvgString = (svg: SVGSVGElement): string => {
 
   return new XMLSerializer().serializeToString(clone)
 }
+
+export const svgToDataUrl = (svg: SVGSVGElement): string =>
+  `data:image/svg+xml;charset=utf-8,${encodeURIComponent(buildExportableSvgString(svg))}`
 
 const triggerBlobDownload = (blob: Blob, filename: string): void => {
   const url = URL.createObjectURL(blob)
