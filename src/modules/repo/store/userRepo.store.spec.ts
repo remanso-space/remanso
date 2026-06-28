@@ -105,6 +105,18 @@ describe("userRepo store — synchronous mutations", () => {
     expect(vi.mocked(data.update)).not.toHaveBeenCalled()
   })
 
+  it("addFile replaces the entry at the same path when content (sha) changed", () => {
+    const store = useUserRepoStore()
+    store.user = "alice"
+    store.repo = "notes"
+    store.files = [{ sha: "old", path: "a.md", type: "blob" }] as never
+
+    store.addFile({ sha: "new", path: "a.md", type: "blob" } as never)
+
+    expect(store.files).toEqual([{ sha: "new", path: "a.md", type: "blob" }])
+    expect(vi.mocked(data.update)).toHaveBeenCalled()
+  })
+
   it("setFontFamily initializes userSettings when absent and persists to localStorage", () => {
     const store = useUserRepoStore()
     store.user = "alice"

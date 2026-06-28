@@ -233,7 +233,9 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         `${this.user}-${this.repo}`
       )
       const newFiles = [
-        ...toRaw(this.files).filter((f) => f.sha !== file.sha),
+        ...toRaw(this.files).filter(
+          (f) => f.sha !== file.sha && f.path !== file.path
+        ),
         toRaw(file)
       ]
       data.update<DataType.SavedRepo, SavedRepo>({

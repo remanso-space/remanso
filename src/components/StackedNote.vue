@@ -205,7 +205,8 @@ const performSave = async (overrideSha?: string) => {
   }
 
   await saveCacheNote(encodeUTF8ToBase64(rawContent.value), {
-    editedSha: newSha
+    editedSha: newSha,
+    path: path.value
   })
   initialRawContent.value = rawContent.value
 }
