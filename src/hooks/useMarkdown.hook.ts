@@ -25,6 +25,7 @@ import {
 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
+import { renderFallback } from "@/utils/markdown/renderFallback"
 
 const TIKZ_BUNDLE_URL =
   "https://cdn.jsdelivr.net/gh/artisticat1/obsidian-tikzjax@0.5.2/tikzjax.js"
@@ -399,7 +400,14 @@ const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
   // unhighlighted because nothing else invalidates the computed.
   if (content.includes("```")) void shikijiReady.value
   slugger.reset()
-  return env ? md.render(content, env) : md.render(content)
+  try {
+    return env ? md.render(content, env) : md.render(content)
+  } catch (error) {
+    // Never let a plugin failure blank the note or dump a raw error —
+    // degrade to the note's raw text.
+    console.error("markdown render failed", error)
+    return renderFallback(content)
+  }
 }
 
 export const renderCodeFile = async ({
