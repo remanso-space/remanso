@@ -407,6 +407,7 @@ Cells: link strength (9/3/1/blank). Importance row = Σ(weight × strength).
 - **Asymmetric file index:** `addFile` deduped by SHA only, `registerUploadedFile` by PATH — so an edit (same path, new SHA) left a stale duplicate entry. **Fixed** — `addFile` now dedups by SHA *and* path (a path is unique), with a regression test in `userRepo.store.spec.ts`. (Full bidirectional index C3 still the longer-term direction.)
 - **ADR-0001 over-absolute:** it called SHA-keyed references "a fragility". **Refined** by ADR-0002 into two intentional modes (Live/Snapshot).
 - **`CLAUDE.md` "edit history tracking"** mislabels the visited-repos History; no edit-history feature exists. (Flagged in CONTEXT.md.)
+- **Snapshot cache not immutable:** editing writes new content under the *viewed* (old) SHA's cache key (`prepareNoteCache` keys by the viewed sha), so a re-opened old-SHA snapshot can serve new content from cache. **Decided fix (ADR-0002):** key the immutable store by the content's *own* SHA (write-once), keep the Path key as the latest pointer. *(Not yet implemented — the C3/C4 cache slice; unlocks the snapshot banner.)*
 - **Naming drift carried from the language session:** `Flux`→`Igarapé`, `HistoricNotes`→`Index`, `Repetition`→`Card`, `PublicNote*`→`PublishedNote*`, `useNotes()` returns Files not Notes. (Tracked in CONTEXT.md "Flagged ambiguities".)
 
 ---
