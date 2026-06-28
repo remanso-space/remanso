@@ -21,7 +21,8 @@ export const buildNoteDocs = (
     _id: generateId(DataType.Note, sha),
     $type: DataType.Note,
     content,
-    editedSha
+    editedSha,
+    path
   }
   return path
     ? [base, { ...base, _id: generateId(DataType.Note, path) }]
@@ -71,7 +72,8 @@ export const prepareNoteCache = (sha: string, path?: string) => {
       _id: contentId,
       $type: DataType.Note,
       content,
-      editedSha: params?.editedSha
+      editedSha: params?.editedSha,
+      path: params?.path ?? path
     }
 
     if (params && params.path) {

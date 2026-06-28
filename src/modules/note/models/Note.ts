@@ -4,6 +4,9 @@ import { Model } from "@/data/models/Model"
 export interface Note extends Model<DataType.Note> {
   content: string
   editedSha?: string
+  // The note's path, stored so a cached snapshot can find its latest version
+  // even when its (old) sha is no longer in the repo file list.
+  path?: string
 }
 
 export interface PublicNoteListItem {

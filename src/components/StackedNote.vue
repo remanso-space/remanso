@@ -68,12 +68,17 @@ const advanceStackTo = (newSha: string | null) => {
 
 const {
   path,
+  newerSha,
   content,
   rawContent,
   getRawContent,
   saveCacheNote,
   getEditedSha
 } = useFile(sha)
+
+// When this is an older snapshot of a still-existing note, jump the stack to
+// its current version (the exact snapshot is never swapped underneath you).
+const viewLatest = () => advanceStackTo(newerSha.value)
 const initialRawContent = ref<string | null>(null)
 const isMarkdown = computed(() =>
   path.value ? isMarkdownPath(path.value) : true
@@ -438,6 +443,16 @@ const onBadgeClick = async () => {
         <edit-note :key="editKey" v-model="rawContent" />
       </div>
       <template v-else-if="mode === 'read'">
+        <div v-if="newerSha" class="snapshot-banner">
+          <span>You're viewing an older shared version.</span>
+          <button
+            type="button"
+            class="snapshot-banner-action"
+            @click="viewLatest"
+          >
+            View latest
+          </button>
+        </div>
         <div
           v-if="displayedContent"
           class="note-content"
@@ -517,6 +532,28 @@ $border-color: rgba(18, 19, 58, 0.2);
 
 .hidden-input {
   display: none;
+}
+
+.snapshot-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid $border-color;
+  border-radius: 0.375rem;
+  font-size: 0.85em;
+}
+
+.snapshot-banner-action {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .action {
