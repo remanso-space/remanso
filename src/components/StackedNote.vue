@@ -40,6 +40,10 @@ const EditNote = defineAsyncComponent(
   () => import("@/modules/note/components/EditNote.vue")
 )
 
+const NoteState = defineAsyncComponent(
+  () => import("@/components/NoteState.vue")
+)
+
 const props = defineProps<{
   user: string
   repo: string
@@ -154,10 +158,21 @@ const {
 })
 
 const conflictOpen = ref(false)
+const loadStatus = ref<"loading" | "ready" | "failed">("loading")
 
-onMounted(async () => {
-  initialRawContent.value = await getRawContent()
-})
+const loadNote = async () => {
+  loadStatus.value = "loading"
+  const raw = await getRawContent()
+  if (raw === null) {
+    loadStatus.value = "failed"
+    return
+  }
+  rawContent.value = raw
+  initialRawContent.value = raw
+  loadStatus.value = "ready"
+}
+
+onMounted(loadNote)
 
 watch(
   path,
@@ -412,11 +427,18 @@ const onBadgeClick = async () => {
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
         <edit-note :key="editKey" v-model="rawContent" />
       </div>
-      <div
-        v-if="mode === 'read'"
-        class="note-content"
-        v-html="displayedContent"
-      ></div>
+      <template v-else-if="mode === 'read'">
+        <div
+          v-if="displayedContent"
+          class="note-content"
+          v-html="displayedContent"
+        ></div>
+        <note-state
+          v-else
+          :status="loadStatus === 'failed' ? 'failed' : 'loading'"
+          @retry="loadNote"
+        />
+      </template>
     </section>
     <linked-notes v-if="hasBacklinks && content" :sha="sha" />
     <note-conflict-modal
