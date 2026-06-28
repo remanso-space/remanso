@@ -57,7 +57,14 @@ const repo = computed(() => props.repo)
 const sha = computed(() => props.sha)
 const index = computed(() => props.index)
 
-const { scrollToFocusedNote } = useRouteQueryStackedNotes()
+const { scrollToFocusedNote, replaceStackedNote } = useRouteQueryStackedNotes()
+
+// When this note's content changes (edit / pull) its sha changes too; advance
+// the stack handle so the live view follows it, leaving the old sha as an
+// immutable snapshot for any link already shared.
+const advanceStackTo = (newSha: string | null) => {
+  if (newSha) replaceStackedNote(sha.value, newSha)
+}
 
 const {
   path,
@@ -224,6 +231,7 @@ const performSave = async (overrideSha?: string) => {
     path: path.value
   })
   initialRawContent.value = rawContent.value
+  advanceStackTo(newSha)
 }
 
 watch(mode, async (newMode) => {
@@ -257,6 +265,7 @@ const onConflictDiscard = async () => {
   if (raw !== null) {
     rawContent.value = raw
     initialRawContent.value = raw
+    advanceStackTo(latestSha.value)
   }
 }
 
@@ -290,6 +299,7 @@ const onBadgeClick = async () => {
     if (raw !== null) {
       rawContent.value = raw
       initialRawContent.value = raw
+      advanceStackTo(latestSha.value)
       return
     }
     if (failureStatus === "unauthorized") {

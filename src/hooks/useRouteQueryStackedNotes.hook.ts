@@ -149,9 +149,25 @@ export const useRouteQueryStackedNotes = () => {
     scrollToFocusedNote({ noteId: selector ?? sha, hash, anchorTop })
   }
 
+  // Advance a note's handle in place when its content changes (edit / pull):
+  // the live view follows to the new sha, while any previously-shared link
+  // keeps pointing at the old, now-immutable snapshot.
+  const replaceStackedNote = (oldSha: string, newSha: string) => {
+    if (!oldSha || !newSha || oldSha === newSha) {
+      return
+    }
+    if (!stackedNotes.value.includes(oldSha)) {
+      return
+    }
+    stackedNotes.value = stackedNotes.value.map((note) =>
+      note === oldSha ? newSha : note
+    )
+  }
+
   return {
     stackedNotes: readonly(stackedNotes),
     addStackedNote,
+    replaceStackedNote,
     scrollToFocusedNote
   }
 }

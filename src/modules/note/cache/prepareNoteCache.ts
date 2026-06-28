@@ -61,8 +61,14 @@ export const prepareNoteCache = (sha: string, path?: string) => {
     content: string,
     params?: { editedSha?: string; path?: string }
   ) => {
+    // Content is addressed by its OWN sha so snapshots stay immutable: an edit
+    // writes under the new sha and never overwrites the previously-viewed one.
+    // The path key (notePath) always holds the latest content (live pointer).
+    const contentId = params?.editedSha
+      ? generateId(DataType.Note, params.editedSha)
+      : noteId
     const newNote: Note = {
-      _id: noteId,
+      _id: contentId,
       $type: DataType.Note,
       content,
       editedSha: params?.editedSha
