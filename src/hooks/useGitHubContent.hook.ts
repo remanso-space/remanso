@@ -88,18 +88,20 @@ export const useGitHubContent = ({
   const putFile = async ({
     content,
     path,
-    sha
+    sha,
+    successMessage = "✅ Note saved"
   }: {
     content: string
     path: string
     sha?: string
+    successMessage?: string
   }): Promise<{ sha: string | null; conflict: boolean }> =>
     putRaw({
       contentBase64: encodeUTF8ToBase64(content),
       path,
       sha,
       message: `Updating ${path} from Remanso`,
-      successMessage: "✅ Note saved",
+      successMessage,
       conflictMessage: "⚠ Conflict: this note changed on GitHub",
       failureMessage: "❌ Note could not be saved"
     })
@@ -126,6 +128,7 @@ export const useGitHubContent = ({
       content: string
       path: string
       sha: string
+      successMessage?: string
     }) => putFile(props),
     createFile: async (props: { content: string; path: string }) =>
       putFile(props),

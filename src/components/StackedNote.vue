@@ -23,6 +23,7 @@ import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
 import { errorMessage } from "@/utils/notif"
+import { threeWayMerge } from "@/utils/threeWayMerge"
 
 const LinkedNotes = defineAsyncComponent(
   () => import("@/components/LinkedNotes.vue")
@@ -160,7 +161,8 @@ const {
   lastCheckedAt,
   latestSha,
   check: checkFreshness,
-  pullLatest
+  pullLatest,
+  resolveMergeSources
 } = useNoteFreshness({
   user: user.value,
   repo: repo.value,
@@ -220,9 +222,7 @@ const performSave = async (overrideSha?: string) => {
   })
 
   if (conflict) {
-    await checkFreshness()
-    conflictOpen.value = true
-    if (mode.value === "read") toggleMode()
+    await handleConflict()
     return
   }
 
@@ -237,6 +237,47 @@ const performSave = async (overrideSha?: string) => {
   })
   initialRawContent.value = rawContent.value
   advanceStackTo(newSha)
+}
+
+// On a save/freshness conflict, try a 3-way merge first: if our edits and the
+// remote ones don't overlap, commit the merge silently (just a toast) so the
+// user is never interrupted. Only genuinely overlapping edits open the modal.
+const handleConflict = async () => {
+  if (!path.value) return
+
+  const sources = await resolveMergeSources()
+  if (sources) {
+    const { clean, merged } = threeWayMerge(
+      sources.base,
+      rawContent.value,
+      sources.theirs
+    )
+    if (clean) {
+      const { sha: newSha, conflict } = await updateFile({
+        content: merged,
+        path: path.value,
+        sha: sources.remoteSha,
+        successMessage: "✅ Merged remote changes & saved"
+      })
+      if (!conflict && newSha) {
+        rawContent.value = merged
+        await saveCacheNote(encodeUTF8ToBase64(merged), {
+          editedSha: newSha,
+          path: path.value
+        })
+        initialRawContent.value = merged
+        advanceStackTo(newSha)
+        return
+      }
+      // Remote moved again between fetch and commit — fall back to the modal.
+    }
+  }
+
+  // Overlapping edits, or merge sources unavailable — let the user decide.
+  // Ensure latestSha is set so the modal's "overwrite" has a target.
+  if (!latestSha.value) await checkFreshness()
+  conflictOpen.value = true
+  if (mode.value === "read") toggleMode()
 }
 
 watch(mode, async (newMode) => {
@@ -258,7 +299,7 @@ watch(mode, async (newMode) => {
 
   await checkFreshness()
   if (freshnessStatus.value === "outdated") {
-    conflictOpen.value = true
+    await handleConflict()
     return
   }
 
@@ -296,7 +337,7 @@ const onBadgeClick = async () => {
 
     const hasUnsavedEdits = rawContent.value !== initialRawContent.value
     if (hasUnsavedEdits) {
-      conflictOpen.value = true
+      await handleConflict()
       return
     }
 
