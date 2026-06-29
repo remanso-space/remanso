@@ -131,20 +131,20 @@ describe("userRepo store — synchronous mutations", () => {
     expect(persisted.chosenFontFamily).toBe("Inter")
   })
 
-  it("setFontSize, setTitleFont, setBodyFont each persist their respective field", () => {
+  it("setFontSize, setHeadingFont, setBodyFont each persist their respective field", () => {
     const store = useUserRepoStore()
     store.user = "alice"
     store.repo = "notes"
 
     store.setFontSize("18px")
-    store.setTitleFont("Serif")
+    store.setHeadingFont("Serif")
     store.setBodyFont("Sans")
 
     const persisted = JSON.parse(
       localStorage.getItem("remanso:layout:alice:notes") as string
     )
     expect(persisted.chosenFontSize).toBe("18px")
-    expect(persisted.chosenTitleFont).toBe("Serif")
+    expect(persisted.chosenHeadingFont).toBe("Serif")
     expect(persisted.chosenBodyFont).toBe("Sans")
   })
 })
@@ -171,6 +171,25 @@ describe("userRepo store — setUserRepo", () => {
     expect(store.user).toBe("alice")
     expect(store.repo).toBe("notes")
     expect(store.loadError).toBeNull()
+  })
+
+  it("migrates the legacy chosenTitleFont localStorage key to chosenHeadingFont", async () => {
+    localStorage.setItem(
+      "remanso:layout:alice:notes",
+      JSON.stringify({ chosenTitleFont: "Lora" })
+    )
+
+    const store = useUserRepoStore()
+    await store.setUserRepo("alice", "notes")
+    await flushAsync()
+    await flushAsync()
+
+    expect(store.userSettings?.chosenHeadingFont).toBe("Lora")
+    const persisted = JSON.parse(
+      localStorage.getItem("remanso:layout:alice:notes") as string
+    )
+    expect(persisted.chosenHeadingFont).toBe("Lora")
+    expect(persisted.chosenTitleFont).toBeUndefined()
   })
 
   it("populates files from getFiles on success", async () => {

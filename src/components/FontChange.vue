@@ -25,16 +25,16 @@ const fontFamilies = computed(
 const sortedFontFamilies = computed(() => {
   const base = fontFamilies.value
   const extras = [
-    store.userSettings?.chosenTitleFont,
+    store.userSettings?.chosenHeadingFont,
     store.userSettings?.chosenBodyFont
   ].filter((f): f is string => !!f && !base.includes(f))
   return [...base, ...extras].sort((a, b) => a.localeCompare(b))
 })
 const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
 
-const titleFont = computed({
-  get: () => store.userSettings?.chosenTitleFont,
-  set: (value) => store.setTitleFont(value!)
+const headingFont = computed({
+  get: () => store.userSettings?.chosenHeadingFont,
+  set: (value) => store.setHeadingFont(value!)
 })
 const bodyFont = computed({
   get: () => store.userSettings?.chosenBodyFont,
@@ -49,8 +49,8 @@ const fontSize = computed({
 <template>
   <div class="font-change">
     <div>
-      <label for="title-font" class="font-label">t</label>
-      <select id="title-font" class="select" v-model="titleFont">
+      <label for="heading-font" class="font-label">h</label>
+      <select id="heading-font" class="select" v-model="headingFont">
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
         </option>

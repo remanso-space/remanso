@@ -25,6 +25,7 @@ import { getOctokit, runWithAuthRetry } from "./octo"
 import {
   getFiles,
   getRepoPermission,
+  getUserSettingsContent,
   queryFileContent
 } from "./repo"
 
@@ -163,5 +164,60 @@ describe("queryFileContent", () => {
 
     expect(await queryFileContent("owner", "repo", "SHA")).toBeNull()
     expect(warn).toHaveBeenCalled()
+  })
+})
+
+describe("getUserSettingsContent", () => {
+  beforeEach(() => {
+    vi.mocked(runWithAuthRetry).mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const configFiles = [
+    { path: ".remanso.json", type: "blob", sha: "CFG" }
+  ] as never
+
+  const withConfig = (json: object) => {
+    const base64 = btoa(JSON.stringify(json))
+    vi.mocked(runWithAuthRetry).mockImplementation(async (call) => {
+      const octokit = {
+        request: vi.fn().mockResolvedValue({ data: { content: base64 } })
+      }
+      return call(octokit as never)
+    })
+  }
+
+  it("maps the `h` key to chosenHeadingFont and `p` to chosenBodyFont", async () => {
+    withConfig({ h: "Lora", p: "Inter" })
+
+    const settings = await getUserSettingsContent("owner", "repo", configFiles)
+
+    expect(settings?.chosenHeadingFont).toBe("Lora")
+    expect(settings?.chosenBodyFont).toBe("Inter")
+  })
+
+  it("falls back to the legacy `t` key for chosenHeadingFont", async () => {
+    withConfig({ t: "Merriweather", p: "Inter" })
+
+    const settings = await getUserSettingsContent("owner", "repo", configFiles)
+
+    expect(settings?.chosenHeadingFont).toBe("Merriweather")
+  })
+
+  it("prefers `h` over the legacy `t` when both are present", async () => {
+    withConfig({ h: "Lora", t: "Merriweather" })
+
+    const settings = await getUserSettingsContent("owner", "repo", configFiles)
+
+    expect(settings?.chosenHeadingFont).toBe("Lora")
+  })
+
+  it("returns null when there is no .remanso.json", async () => {
+    expect(
+      await getUserSettingsContent("owner", "repo", [] as never)
+    ).toBeNull()
   })
 })

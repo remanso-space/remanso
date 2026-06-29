@@ -3,7 +3,7 @@ const dotenv = require("dotenv")
 
 dotenv.config()
 
-const defaultTitleStyles = Array.from(
+const defaultHeadingStyles = Array.from(
   { length: 6 },
   (_, k) => `h${k + 1}`
 ).reduce(
@@ -12,7 +12,7 @@ const defaultTitleStyles = Array.from(
     [heading]: {
       "margin-top": "0",
       "margin-bottom": "0.5em",
-      "font-family": "var(--title-font-family)"
+      "font-family": "var(--heading-font-family)"
     }
   }),
   {}
@@ -27,7 +27,7 @@ module.exports = {
       typography: () => ({
         DEFAULT: {
           css: {
-            ...defaultTitleStyles,
+            ...defaultHeadingStyles,
             "font-size": "13pt",
             "font-family": '"Libertinus Serif", serif',
             p: {

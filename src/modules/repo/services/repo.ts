@@ -123,12 +123,14 @@ export const getUserSettingsContent = async (
 
   const raw = JSON.parse(atob(content)) as UserSettings & {
     t?: string
+    h?: string
     p?: string
   }
-  const { t, p, ...rest } = raw
+  const { t, h, p, ...rest } = raw
   return {
     ...rest,
-    chosenTitleFont: t,
+    // `h` (heading) is the current key; `t` (title) is kept for back-compat.
+    chosenHeadingFont: h ?? t,
     chosenBodyFont: p
   }
 }

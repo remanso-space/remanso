@@ -56,7 +56,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       if (!this.userSettings) return
       try {
         const {
-          chosenTitleFont,
+          chosenHeadingFont,
           chosenBodyFont,
           chosenFontSize,
           chosenFontFamily,
@@ -65,7 +65,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         localStorage.setItem(
           `remanso:layout:${this.user}:${this.repo}`,
           JSON.stringify({
-            chosenTitleFont,
+            chosenHeadingFont,
             chosenBodyFont,
             chosenFontSize,
             chosenFontFamily,
@@ -86,7 +86,17 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       let lsLayout: Partial<UserSettings> = {}
       try {
         const lsRaw = localStorage.getItem(`remanso:layout:${user}:${repo}`)
-        if (lsRaw) lsLayout = JSON.parse(lsRaw)
+        if (lsRaw) {
+          const parsed = JSON.parse(lsRaw) as Partial<UserSettings> & {
+            chosenTitleFont?: string
+          }
+          // Migrate the pre-rename key so a saved heading font survives.
+          if (parsed.chosenTitleFont && !parsed.chosenHeadingFont) {
+            parsed.chosenHeadingFont = parsed.chosenTitleFont
+          }
+          delete parsed.chosenTitleFont
+          lsLayout = parsed
+        }
       } catch {
         // ignore
       }
@@ -157,9 +167,9 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             : userSettings?.fontFamily
           const chosenFontSize =
             this.userSettings?.chosenFontSize ?? userSettings?.fontSize
-          const chosenTitleFont =
-            this.userSettings?.chosenTitleFont ??
-            userSettings?.chosenTitleFont ??
+          const chosenHeadingFont =
+            this.userSettings?.chosenHeadingFont ??
+            userSettings?.chosenHeadingFont ??
             chosenFontFamily
           const chosenBodyFont =
             this.userSettings?.chosenBodyFont ??
@@ -175,14 +185,14 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
             chosenFontFamily ?? this.userSettings.fontFamily
           this.userSettings.chosenFontSize =
             chosenFontSize ?? this.userSettings.fontSize
-          this.userSettings.chosenTitleFont = chosenTitleFont
+          this.userSettings.chosenHeadingFont = chosenHeadingFont
           this.userSettings.chosenBodyFont = chosenBodyFont
 
           this._persistLayout()
 
           // Persist only repo config fields — chosen* are localStorage-only
           const {
-            chosenTitleFont: _t,
+            chosenHeadingFont: _h,
             chosenBodyFont: _b,
             chosenFontSize: _s,
             chosenFontFamily: _f,
@@ -294,11 +304,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       this.userSettings.chosenFontSize = fontSize
       this._persistLayout()
     },
-    setTitleFont(font: string) {
+    setHeadingFont(font: string) {
       if (!this.userSettings) {
         this.userSettings = { $type: DataType.UserSettings }
       }
-      this.userSettings.chosenTitleFont = font
+      this.userSettings.chosenHeadingFont = font
       this._persistLayout()
     },
     setBodyFont(font: string) {
