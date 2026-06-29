@@ -1,8 +1,11 @@
 import { Ref, ref } from "vue"
 
+import { data, generateId } from "@/data/data"
+import { DataType } from "@/data/DataType.enum"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { prepareNoteCache } from "@/modules/note/cache/prepareNoteCache"
+import { Note } from "@/modules/note/models/Note"
 import { queryFileContent } from "@/modules/repo/services/repo"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 
@@ -114,11 +117,52 @@ export const useNoteFreshness = ({
     return { raw: getRawContent(fileContent), failureStatus: null }
   }
 
+  // The base blob (common ancestor) must come from its own immutable snapshot,
+  // never from the path pointer — that holds the latest, which is "theirs".
+  const getCachedBlob = async (blobSha: string): Promise<string | null> => {
+    const note = await data.get<DataType.Note, Note>(
+      generateId(DataType.Note, blobSha)
+    )
+    return note?.content ?? null
+  }
+
+  // Resolves the decoded raw text needed for a 3-way merge: `base` is the
+  // version we edited from (the rejected sha), `theirs` is the current remote.
+  // Returns null when any piece can't be resolved (offline, missing base).
+  const resolveMergeSources = async (): Promise<{
+    base: string
+    theirs: string
+    remoteSha: string
+  } | null> => {
+    if (!path.value) return null
+
+    const { sha: remoteSha } = await resolveRemoteSha(path.value)
+    if (!remoteSha) return null
+    // Surface the resolved sha so a modal fallback's Overwrite can use it.
+    latestSha.value = remoteSha
+    const theirsBlob = await queryFileContent(user, repo, remoteSha)
+    if (!theirsBlob) return null
+
+    const baseSha = (await getEditedSha()) ?? sha.value
+    const baseBlob =
+      (await getCachedBlob(baseSha)) ??
+      (await queryFileContent(user, repo, baseSha))
+    if (!baseBlob) return null
+
+    const { getRawContent } = markdownBuilder(sha.value)
+    return {
+      base: getRawContent(baseBlob),
+      theirs: getRawContent(theirsBlob),
+      remoteSha
+    }
+  }
+
   return {
     status,
     lastCheckedAt,
     latestSha,
     check,
-    pullLatest
+    pullLatest,
+    resolveMergeSources
   }
 }

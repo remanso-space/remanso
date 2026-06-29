@@ -2,18 +2,27 @@ import { createPinia, setActivePinia } from "pinia"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { ref } from "vue"
 
+import { DataType } from "@/data/DataType.enum"
+
 const {
   fetchLatestSha,
   addFile,
   getRawContent,
   saveCacheNote,
-  queryFileContent
+  queryFileContent,
+  dataGet
 } = vi.hoisted(() => ({
   fetchLatestSha: vi.fn(),
   addFile: vi.fn(),
   getRawContent: vi.fn((s: string) => s),
   saveCacheNote: vi.fn(),
-  queryFileContent: vi.fn()
+  queryFileContent: vi.fn(),
+  dataGet: vi.fn()
+}))
+
+vi.mock("@/data/data", () => ({
+  data: { get: dataGet },
+  generateId: (type: string, id: string) => `${type}-${id}`
 }))
 
 vi.mock("@/hooks/useGitHubContent.hook", () => ({
@@ -230,5 +239,89 @@ describe("useNoteFreshness.pullLatest", () => {
 
     expect(fetchLatestSha).not.toHaveBeenCalled()
     expect(queryFileContent).toHaveBeenCalledWith("alice", "notes", "cached-sha")
+  })
+})
+
+describe("useNoteFreshness.resolveMergeSources", () => {
+  beforeEach(() => {
+    fetchLatestSha.mockReset()
+    queryFileContent.mockReset()
+    dataGet.mockReset()
+    getRawContent.mockReset()
+    getRawContent.mockImplementation((s: string) => s)
+    skipSpinnerWait()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("returns null when path is empty", async () => {
+    const { resolveMergeSources } = setup({ path: "" })
+    expect(await resolveMergeSources()).toBeNull()
+  })
+
+  it("resolves base (from cache snapshot) + theirs + remoteSha", async () => {
+    fetchLatestSha.mockResolvedValue({ kind: "ok", sha: "remote-sha" })
+    queryFileContent.mockResolvedValue("THEIRS_B64") // theirs blob
+    dataGet.mockResolvedValue({ content: "BASE_B64" }) // base snapshot in cache
+
+    const { resolveMergeSources, latestSha } = setup({
+      sha: "live",
+      edited: "base-sha"
+    })
+    const result = await resolveMergeSources()
+
+    expect(result).toEqual({
+      base: "BASE_B64",
+      theirs: "THEIRS_B64",
+      remoteSha: "remote-sha"
+    })
+    // base must be read from its own immutable snapshot, never the path pointer
+    expect(dataGet).toHaveBeenCalledWith(`${DataType.Note}-base-sha`)
+    expect(queryFileContent).toHaveBeenCalledWith("alice", "notes", "remote-sha")
+    expect(latestSha.value).toBe("remote-sha")
+  })
+
+  it("falls back to fetching the base blob when not cached", async () => {
+    fetchLatestSha.mockResolvedValue({ kind: "ok", sha: "remote-sha" })
+    dataGet.mockResolvedValue(null) // cache miss for base
+    queryFileContent.mockImplementation((_u, _r, s: string) =>
+      Promise.resolve(s === "remote-sha" ? "THEIRS_B64" : "BASE_FROM_BLOB")
+    )
+
+    const { resolveMergeSources } = setup({ sha: "base-sha" })
+    const result = await resolveMergeSources()
+
+    expect(result?.base).toBe("BASE_FROM_BLOB")
+    expect(queryFileContent).toHaveBeenCalledWith("alice", "notes", "base-sha")
+  })
+
+  it("returns null when the remote sha cannot be resolved", async () => {
+    fetchLatestSha.mockResolvedValue({ kind: "offline" })
+
+    const { resolveMergeSources } = setup()
+    expect(await resolveMergeSources()).toBeNull()
+  })
+
+  it("returns null when the remote (theirs) blob fetch fails", async () => {
+    fetchLatestSha.mockResolvedValue({ kind: "ok", sha: "remote-sha" })
+    queryFileContent.mockResolvedValue(null)
+
+    const { resolveMergeSources, latestSha } = setup()
+    expect(await resolveMergeSources()).toBeNull()
+    // latestSha is still surfaced so a modal fallback's overwrite has a target
+    expect(latestSha.value).toBe("remote-sha")
+  })
+
+  it("returns null when the base blob is unavailable (cache miss + blob null)", async () => {
+    fetchLatestSha.mockResolvedValue({ kind: "ok", sha: "remote-sha" })
+    dataGet.mockResolvedValue(null)
+    queryFileContent.mockImplementation((_u, _r, s: string) =>
+      Promise.resolve(s === "remote-sha" ? "THEIRS_B64" : null)
+    )
+
+    const { resolveMergeSources } = setup({ sha: "base-sha" })
+    expect(await resolveMergeSources()).toBeNull()
   })
 })
