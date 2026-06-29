@@ -147,6 +147,24 @@ describe("userRepo store — synchronous mutations", () => {
     expect(persisted.chosenHeadingFont).toBe("Serif")
     expect(persisted.chosenBodyFont).toBe("Sans")
   })
+
+  it("swapFonts exchanges the heading and body fonts and persists", () => {
+    const store = useUserRepoStore()
+    store.user = "alice"
+    store.repo = "notes"
+    store.setHeadingFont("Lora")
+    store.setBodyFont("Inter")
+
+    store.swapFonts()
+
+    expect(store.userSettings?.chosenHeadingFont).toBe("Inter")
+    expect(store.userSettings?.chosenBodyFont).toBe("Lora")
+    const persisted = JSON.parse(
+      localStorage.getItem("remanso:layout:alice:notes") as string
+    )
+    expect(persisted.chosenHeadingFont).toBe("Inter")
+    expect(persisted.chosenBodyFont).toBe("Lora")
+  })
 })
 
 describe("userRepo store — setUserRepo", () => {

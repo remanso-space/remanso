@@ -317,6 +317,13 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       }
       this.userSettings.chosenBodyFont = font
       this._persistLayout()
+    },
+    swapFonts() {
+      if (!this.userSettings) return
+      const { chosenHeadingFont, chosenBodyFont } = this.userSettings
+      this.userSettings.chosenHeadingFont = chosenBodyFont
+      this.userSettings.chosenBodyFont = chosenHeadingFont
+      this._persistLayout()
     }
   }
 })

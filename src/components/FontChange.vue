@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed } from "vue"
 
 import ThemeSwap from "@/components/ThemeSwap.vue"
 
@@ -32,15 +32,13 @@ const sortedFontFamilies = computed(() => {
 })
 const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
 
-// false → the dropdown edits the heading font, true → the paragraph font.
-const editingBody = ref(false)
-const activeFont = computed({
-  get: () =>
-    editingBody.value
-      ? store.userSettings?.chosenBodyFont
-      : store.userSettings?.chosenHeadingFont,
-  set: (value) =>
-    editingBody.value ? store.setBodyFont(value!) : store.setHeadingFont(value!)
+const headingFont = computed({
+  get: () => store.userSettings?.chosenHeadingFont,
+  set: (value) => store.setHeadingFont(value!)
+})
+const bodyFont = computed({
+  get: () => store.userSettings?.chosenBodyFont,
+  set: (value) => store.setBodyFont(value!)
 })
 const fontSize = computed({
   get: () => store.userSettings?.chosenFontSize,
@@ -51,22 +49,37 @@ const fontSize = computed({
 <template>
   <div class="font-change">
     <div>
-      <label class="font-toggle">
-        <span class="font-label" :class="{ active: !editingBody }">h</span>
-        <input
-          type="checkbox"
-          class="toggle toggle-sm"
-          v-model="editingBody"
-          aria-label="Switch between heading and paragraph font"
-        />
-        <span class="font-label" :class="{ active: editingBody }">p</span>
-      </label>
-      <select
-        id="font-target"
-        class="select"
-        v-model="activeFont"
-        :aria-label="editingBody ? 'Paragraph font' : 'Heading font'"
+      <label for="heading-font" class="font-label">h</label>
+      <select id="heading-font" class="select" v-model="headingFont">
+        <option v-for="font in sortedFontFamilies" :key="font" :value="font">
+          {{ font }}
+        </option>
+      </select>
+
+      <button
+        type="button"
+        class="btn btn-ghost btn-sm btn-circle"
+        aria-label="Swap heading and paragraph fonts"
+        @click="store.swapFonts()"
       >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M7 10h14l-4 -4" />
+          <path d="M17 14h-14l4 4" />
+        </svg>
+      </button>
+
+      <label for="body-font" class="font-label">p</label>
+      <select id="body-font" class="select" v-model="bodyFont">
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
         </option>
@@ -98,17 +111,6 @@ const fontSize = computed({
     flex-wrap: wrap;
     gap: 1rem;
     margin: 1rem;
-  }
-}
-
-.font-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-
-  .font-label.active {
-    opacity: 1;
   }
 }
 
