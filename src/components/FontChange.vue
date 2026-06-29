@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, ref } from "vue"
 
 import ThemeSwap from "@/components/ThemeSwap.vue"
 
@@ -32,13 +32,15 @@ const sortedFontFamilies = computed(() => {
 })
 const fontSizes = Array.from({ length: 7 }, (_, i) => `${9 + i * 2}pt`)
 
-const headingFont = computed({
-  get: () => store.userSettings?.chosenHeadingFont,
-  set: (value) => store.setHeadingFont(value!)
-})
-const bodyFont = computed({
-  get: () => store.userSettings?.chosenBodyFont,
-  set: (value) => store.setBodyFont(value!)
+// false → the dropdown edits the heading font, true → the paragraph font.
+const editingBody = ref(false)
+const activeFont = computed({
+  get: () =>
+    editingBody.value
+      ? store.userSettings?.chosenBodyFont
+      : store.userSettings?.chosenHeadingFont,
+  set: (value) =>
+    editingBody.value ? store.setBodyFont(value!) : store.setHeadingFont(value!)
 })
 const fontSize = computed({
   get: () => store.userSettings?.chosenFontSize,
@@ -49,15 +51,22 @@ const fontSize = computed({
 <template>
   <div class="font-change">
     <div>
-      <label for="heading-font" class="font-label">h</label>
-      <select id="heading-font" class="select" v-model="headingFont">
-        <option v-for="font in sortedFontFamilies" :key="font" :value="font">
-          {{ font }}
-        </option>
-      </select>
-
-      <label for="body-font" class="font-label">p</label>
-      <select id="body-font" class="select" v-model="bodyFont">
+      <label class="font-toggle">
+        <span class="font-label" :class="{ active: !editingBody }">h</span>
+        <input
+          type="checkbox"
+          class="toggle toggle-sm"
+          v-model="editingBody"
+          aria-label="Switch between heading and paragraph font"
+        />
+        <span class="font-label" :class="{ active: editingBody }">p</span>
+      </label>
+      <select
+        id="font-target"
+        class="select"
+        v-model="activeFont"
+        :aria-label="editingBody ? 'Paragraph font' : 'Heading font'"
+      >
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
         </option>
@@ -89,6 +98,17 @@ const fontSize = computed({
     flex-wrap: wrap;
     gap: 1rem;
     margin: 1rem;
+  }
+}
+
+.font-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  .font-label.active {
+    opacity: 1;
   }
 }
 
