@@ -49,6 +49,7 @@
     "markdown-it-shikiji": "^0.10.2",
     "mermaid": "^11.12.1",
     "nanoid": "^5.1.6",
+    "node-diff3": "^3.2.1",
     "notyf": "^3.10.0",
     "pastel-color": "^1.0.3",
     "pinia": "^2.2.6",
