@@ -45,8 +45,9 @@ defineSlots<{
 
 <style scoped lang="scss">
 ul {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
 }
 
 li {
@@ -57,17 +58,19 @@ li {
   }
 
   a {
-    padding-left: 0;
+    padding: 0;
+    min-height: 0;
+    height: auto;
     text-align: left;
     font-size: 1.2rem;
     line-height: 1.5rem;
   }
 
   .alias {
-    text-align: right;
+    text-align: left;
     display: flex;
-    justify-content: flex-end;
-    margin-top: 0.5rem;
+    justify-content: flex-start;
+    margin-top: 0.125rem;
   }
 }
 </style>

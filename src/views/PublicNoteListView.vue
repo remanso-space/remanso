@@ -130,6 +130,12 @@ const openProfile = () => {
     gap: 1rem;
   }
 
+  .tabs {
+    width: 100%;
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+
   h1 {
     flex: 1;
     text-align: center;
