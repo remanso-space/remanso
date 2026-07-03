@@ -186,6 +186,24 @@ pre {
   overflow-wrap: anywhere;
 }
 
+/* Line numbers for whole-file code views (non-markdown files).
+   Scoped to .code-file so fenced blocks inside notes stay untouched. */
+.code-file pre code {
+  counter-reset: line;
+}
+
+.code-file pre code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: var(--line-number-width, 3ch);
+  margin-right: 1.5ch;
+  text-align: right;
+  color: var(--color-base-content);
+  opacity: 0.35;
+  user-select: none;
+}
+
 pre.mermaid {
   display: flex;
   justify-content: center;

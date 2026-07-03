@@ -421,10 +421,22 @@ export const renderCodeFile = async ({
 }): Promise<string> => {
   await useShikiji()
   const heading = filename ? `# ${filename}\n\n` : ""
+  // Drop the trailing newline so the final empty line isn't numbered.
+  const lines = rawContent.replace(/\n$/, "").split("\n")
+  // Sized gutter so line numbers stay right-aligned past 3 digits.
+  const wrapper = `<div class="code-file" style="--line-number-width:${String(lines.length).length}ch">`
   if (lang !== null) {
-    return renderMarkdown(`${heading}\`\`\`\`${lang}\n${rawContent}\n\`\`\`\``)
+    const rendered = renderMarkdown(
+      `${heading}\`\`\`\`${lang}\n${lines.join("\n")}\n\`\`\`\``
+    )
+    // Shikiji always appends an empty line span; drop it so it isn't numbered.
+    return `${wrapper}${rendered.replace('\n<span class="line"></span></code>', "</code>")}</div>`
   }
-  return `${renderMarkdown(heading)}<pre><code>${md.utils.escapeHtml(rawContent)}</code></pre>`
+  // Mirror Shikiji's per-line spans so the line-number CSS applies uniformly.
+  const code = lines
+    .map((line) => `<span class="line">${md.utils.escapeHtml(line)}</span>`)
+    .join("\n")
+  return `${wrapper}${renderMarkdown(heading)}<pre><code>${code}</code></pre></div>`
 }
 
 export const markdownBuilder = (defaultPrefix?: Ref<string> | string) => {
