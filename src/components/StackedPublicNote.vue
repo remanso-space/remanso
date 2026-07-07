@@ -79,7 +79,8 @@ const content = computed(() =>
 
 useMarkdownPostRender(content, () => `.note-${classNameId.value}`, {
   onReady: () => listenToClick(),
-  tikz: true
+  tikz: true,
+  macroplan: true
 })
 </script>
 

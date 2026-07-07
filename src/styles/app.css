@@ -236,9 +236,18 @@ pre.tikz svg {
   }
 }
 
-.tikz-loading {
+.tikz-loading,
+.macroplan-loading {
   opacity: 0.6;
   font-style: italic;
+}
+
+/* The grid's milestone-flag stacking math assumes a monospace advance
+   (BAND_CHAR in MacroplanGrid.vue), and the macroplan app renders in
+   Fira Code — don't let the note's serif leak in. */
+.macroplan-block {
+  font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
 }
 
 .svg-download-host {
@@ -282,14 +291,16 @@ pre.tikz svg {
   filter: none;
 }
 
-.tikz-error {
+.tikz-error,
+.macroplan-error {
   border-left: 3px solid var(--color-error);
   padding: 0.5rem 0.75rem;
   background: color-mix(in srgb, var(--color-error) 10%, transparent);
   text-align: left;
 }
 
-.tikz-error pre {
+.tikz-error pre,
+.macroplan-error pre {
   white-space: pre-wrap;
   font-size: 0.85em;
 }

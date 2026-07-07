@@ -201,6 +201,7 @@ const { mode, toggleMode } = useEditionMode()
 useMarkdownPostRender(content, () => `.note-${sha.value}`, {
   onReady: () => listenToClick(),
   tikz: true,
+  macroplan: true,
   mermaid: () => rawContent.value.includes("```mermaid"),
   shikiji: () => isMarkdown.value && rawContent.value.includes("```"),
   images: () =>

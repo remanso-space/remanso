@@ -6,11 +6,13 @@ import {
   runTikz,
   useShikiji
 } from "@/hooks/useMarkdown.hook"
+import { runMacroplan } from "@/modules/macroplan/runMacroplan"
 import { attachSvgDownloads } from "@/utils/svgDownload"
 
 interface MarkdownPostRenderOptions {
   onReady?: () => void
   tikz?: boolean
+  macroplan?: boolean
   mermaid?: () => boolean
   shikiji?: () => boolean
   images?: () => string | null | undefined
@@ -42,6 +44,10 @@ export const useMarkdownPostRender = (
 
       if (wantsMermaid) {
         renderJobs.push(runMermaid(`${scope} .mermaid`))
+      }
+
+      if (options.macroplan) {
+        renderJobs.push(runMacroplan(`${scope} .macroplan-block`))
       }
 
       if (options.shikiji?.()) {

@@ -118,7 +118,8 @@ useResizeContainer("note-container", stackedNotes)
 
 useMarkdownPostRender(content, () => ".public-note-view .note-display", {
   onReady: () => listenToClick(),
-  tikz: true
+  tikz: true,
+  macroplan: true
 })
 </script>
 

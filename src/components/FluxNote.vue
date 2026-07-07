@@ -62,7 +62,8 @@ const hasContent = computed(() => !!renderedContent.value)
 
 useMarkdownPostRender(renderedContent, () => ".note-display", {
   onReady: () => listenToClick(),
-  tikz: true
+  tikz: true,
+  macroplan: true
 })
 
 watch(

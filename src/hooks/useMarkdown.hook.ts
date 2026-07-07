@@ -95,6 +95,37 @@ const markdownItTikzExtractor = (md: MarkdownIt) => {
   }
 }
 
+const markdownItMacroplanExtractor = (md: MarkdownIt) => {
+  const defaultFence =
+    md.renderer.rules.fence ||
+    function (
+      tokens: Array<Token>,
+      index: number,
+      options: Options,
+      _: unknown,
+      self: Renderer
+    ) {
+      return self.renderToken(tokens, index, options)
+    }
+
+  md.renderer.rules.fence = function (
+    tokens: Array<Token>,
+    index: number,
+    options: Options,
+    env: unknown,
+    self: Renderer
+  ) {
+    const token = tokens[index]
+
+    if (token.info.trim() === "macroplan") {
+      const encoded = encodeUTF8ToBase64(token.content)
+      return `<div class="macroplan-block" data-macroplan-source="${encoded}"><span class="macroplan-loading">Rendering macroplan…</span></div>\n`
+    }
+
+    return defaultFence(tokens, index, options, env, self)
+  }
+}
+
 const slugger = new GithubSlugger()
 
 let tabGroupCounter = 0
@@ -107,6 +138,7 @@ const md = new MarkdownIt({
 })
   .use(markdownItMermaidExtractor)
   .use(markdownItTikzExtractor)
+  .use(markdownItMacroplanExtractor)
   .use(html5Media)
   .use(blockEmbedPlugin, {
     youtube: {
