@@ -15,6 +15,7 @@ const EXT_TO_LANG: Record<string, string> = {
   scss: "css",
   json: "json",
   jsonc: "json",
+  rs: "rust",
   als: "alloy"
 }
 

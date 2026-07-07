@@ -194,6 +194,7 @@ export const useShikiji = (): Promise<void> => {
         "html",
         "css",
         "json",
+        "rust",
         {
           ...alloyGrammar,
           name: "alloy",
