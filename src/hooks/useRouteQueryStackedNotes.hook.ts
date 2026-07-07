@@ -111,6 +111,16 @@ export const useRouteQueryStackedNotes = () => {
     })
   }
 
+  // Focus the deepest note when opening a shared link with stacked notes,
+  // instead of landing on the readme and forcing a manual scroll (especially
+  // long on mobile where notes stack vertically).
+  const scrollToLastStackedNote = () => {
+    const lastNote = stackedNotes.value.at(-1)
+    if (lastNote) {
+      scrollToFocusedNote({ noteId: lastNote })
+    }
+  }
+
   const addStackedNote = (
     currentSha: string,
     sha: string,
@@ -168,6 +178,7 @@ export const useRouteQueryStackedNotes = () => {
     stackedNotes: readonly(stackedNotes),
     addStackedNote,
     replaceStackedNote,
-    scrollToFocusedNote
+    scrollToFocusedNote,
+    scrollToLastStackedNote
   }
 }

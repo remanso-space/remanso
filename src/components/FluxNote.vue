@@ -43,7 +43,8 @@ useUserSettings()
 const { visitRepo } = useVisitRepo({ user: user, repo: repo })
 const { toHTML } = markdownBuilder(repo)
 const { listenToClick } = useLinks("note-display")
-const { stackedNotes, scrollToFocusedNote } = useRouteQueryStackedNotes()
+const { stackedNotes, scrollToFocusedNote, scrollToLastStackedNote } =
+  useRouteQueryStackedNotes()
 
 const { titles } = useNoteView()
 const { isLogged } = useGitHubLogin()
@@ -78,7 +79,10 @@ const retryLoad = () => {
   store.setUserRepo(props.user, props.repo)
 }
 
-onMounted(() => visitRepo())
+onMounted(() => {
+  visitRepo()
+  scrollToLastStackedNote()
+})
 
 onUnmounted(() => {
   store.resetFiles()

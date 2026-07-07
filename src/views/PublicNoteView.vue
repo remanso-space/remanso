@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computedAsync } from "@vueuse/core"
 import { useTitle } from "@vueuse/core"
-import { computed, ref, watch } from "vue"
+import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
@@ -112,9 +112,14 @@ const language = computed(() =>
 
 const mainNoteId = computed(() => `${props.shortDid}-${props.rkey}`)
 
-const { stackedNotes, scrollToFocusedNote } = useRouteQueryStackedNotes()
+const { stackedNotes, scrollToFocusedNote, scrollToLastStackedNote } =
+  useRouteQueryStackedNotes()
 const { listenToClick } = useATProtoLinks("note-display", { mainNoteId })
 useResizeContainer("note-container", stackedNotes)
+
+onMounted(() => {
+  scrollToLastStackedNote()
+})
 
 useMarkdownPostRender(content, () => ".public-note-view .note-display", {
   onReady: () => listenToClick(),
