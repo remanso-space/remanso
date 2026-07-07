@@ -204,6 +204,28 @@ pre {
   user-select: none;
 }
 
+/* Shikiji renders dual-theme tokens but only inlines the light colors;
+   the dark palette lives in --shiki-dark* vars that we must apply ourselves.
+   Without this, dark theme keeps the white code background and the
+   base-content line numbers become white-on-white. */
+[data-theme="dracula"] :is(.shiki, .shiki span) {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) :is(.shiki, .shiki span) {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+}
+
 pre.mermaid {
   display: flex;
   justify-content: center;
