@@ -381,10 +381,10 @@ onMounted(() => {
               comes to rest.
             </h1>
             <p class="lede">
-              Point it at any markdown — a GitHub repo of your own, or public
-              notes from the open ATProto network — and Remanso turns it into a
-              calm, stackable notebook with backlinks where your thinking
-              finally runs clear.
+              Point it at any markdown: a GitHub repo of your own, or public
+              notes from the open ATProto network. Remanso turns it into a
+              stackable notebook with backlinks where your thinking finally
+              runs clear.
             </p>
             <div class="hero-ed-paths">
               <!-- CTA 01: GitHub repo -->
@@ -472,7 +472,7 @@ onMounted(() => {
                   </div>
                 </div>
                 <div v-else-if="publicNotesLoadFailed" class="network-empty">
-                  The pool is quiet right now.
+                  Nothing has drifted in yet.
                 </div>
                 <router-link
                   :to="{ name: 'PublicNoteListView' }"
