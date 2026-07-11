@@ -38,6 +38,10 @@ Tailwind v4 uses the modern CSS-based config in `src/styles/app.css`:
 - DaisyUI configured via `@plugin 'daisyui' { themes: retro --default, coffee --prefersdark; }`
 - `@tailwindcss/typography` for prose styling
 
+### Icons
+
+Use [Tabler icons](https://tabler.io/icons) for every icon. Paste the outline SVG inline and keep `stroke="currentColor"` so it inherits color from its parent (icons in the note header render in `--color-accent`).
+
 ### Directory Structure
 
 ```sh
