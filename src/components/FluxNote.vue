@@ -11,6 +11,7 @@ import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteView } from "@/hooks/useNoteView.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
+import { useResolveLiveNotes } from "@/hooks/useResolveLiveNotes.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { useVisitRepo } from "@/modules/history/hooks/useVisitRepo.hook"
 import CacheAllNotes from "@/modules/note/components/CacheAllNote.vue"
@@ -45,6 +46,10 @@ const { toHTML } = markdownBuilder(repo)
 const { listenToClick } = useLinks("note-display")
 const { stackedNotes, scrollToFocusedNote, scrollToLastStackedNote } =
   useRouteQueryStackedNotes()
+
+// A living link arrives with paths in `?liveNotes`; resolve them to the latest
+// shas, then focus the deepest note just like an ordinary shared link does.
+useResolveLiveNotes(() => scrollToLastStackedNote())
 
 const { titles } = useNoteView()
 const { isLogged } = useGitHubLogin()

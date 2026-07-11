@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import FontChange from "@/components/FontChange.vue"
 import HomeButton from "@/components/HomeButton.vue"
+import ShareNote from "@/components/ShareNote.vue"
 
 defineProps<{ user: string; repo: string }>()
 </script>
@@ -55,6 +56,7 @@ defineProps<{ user: string; repo: string }>()
         <path d="M5 20l6 -16l2 0l7 16" />
       </svg>
     </button>
+    <share-note />
     <router-link
       class="btn btn-ghost btn-circle"
       :to="{ name: 'FluxNoteView', params: { user, repo } }"
