@@ -55,7 +55,7 @@ const copy = async (url: string, label: string) => {
 
 <template>
   <button
-    class="btn btn-ghost btn-circle text-base-content"
+    class="btn btn-ghost btn-circle text-accent"
     title="Share this view"
     aria-label="Share this view"
     onclick="share_modal.showModal()"
