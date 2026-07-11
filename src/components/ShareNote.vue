@@ -90,7 +90,25 @@ const copy = async (url: string, label: string) => {
         class="share-option"
         @click="copy(snapshotUrl(), 'Snapshot')"
       >
-        <span class="share-option-icon">📌</span>
+        <span class="share-option-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-pin"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4" />
+            <path d="M9 15l-4.5 4.5" />
+            <path d="M14.5 4l5.5 5.5" />
+          </svg>
+        </span>
         <span class="share-option-text">
           <span class="share-option-title">This exact version</span>
           <span class="share-option-desc">
@@ -105,11 +123,28 @@ const copy = async (url: string, label: string) => {
         class="share-option"
         @click="copy(livingUrl(), 'Always-latest')"
       >
-        <span class="share-option-icon">🔄</span>
+        <span class="share-option-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-repeat"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3" />
+            <path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3" />
+          </svg>
+        </span>
         <span class="share-option-text">
           <span class="share-option-title">Always latest</span>
           <span class="share-option-desc">
-            Follows these notes — the reader gets the current version.
+            Follows these notes, so the reader always sees the current version.
           </span>
         </span>
       </button>
@@ -147,8 +182,8 @@ const copy = async (url: string, label: string) => {
 }
 
 .share-option-icon {
-  font-size: 1.4rem;
-  line-height: 1.6rem;
+  flex-shrink: 0;
+  color: var(--color-accent);
 }
 
 .share-option-text {
