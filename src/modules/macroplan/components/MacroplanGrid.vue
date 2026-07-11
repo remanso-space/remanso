@@ -232,6 +232,10 @@ const bandStyle = computed(() => ({
   display: grid;
   width: max-content;
   min-width: 100%;
+  /* Never let a too-tall container (e.g. the mobile 100svh note height that
+     cascades in) stretch the auto row tracks — pack rows to their content
+     height at the top. */
+  align-content: start;
   font-variant-ligatures: none;
 }
 
