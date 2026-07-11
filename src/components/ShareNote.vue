@@ -148,12 +148,6 @@ const copy = async (url: string, label: string) => {
           </span>
         </span>
       </button>
-
-      <div class="modal-action">
-        <form method="dialog">
-          <button class="btn btn-ghost">Close</button>
-        </form>
-      </div>
     </div>
     <form method="dialog" class="modal-backdrop">
       <button>close</button>
