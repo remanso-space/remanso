@@ -188,6 +188,19 @@ const loadNote = async () => {
 
 onMounted(loadNote)
 
+// A note only has a trustworthy baseline once it has finished loading. While
+// it is still loading (or after a failed load) rawContent holds the empty
+// placeholder and initialRawContent is null, so a naive
+// `rawContent !== initialRawContent` check reads as a huge edit — and saving
+// that would clobber the real file on GitHub with an empty commit. Gate every
+// "is this dirty?" decision on a loaded baseline.
+const isDirty = computed(
+  () =>
+    loadStatus.value === "ready" &&
+    initialRawContent.value !== null &&
+    rawContent.value !== initialRawContent.value
+)
+
 watch(
   path,
   (p) => {
@@ -212,6 +225,13 @@ useMarkdownPostRender(content, () => `.note-${sha.value}`, {
 const performSave = async (overrideSha?: string) => {
   if (!path.value) {
     console.warn("no path found for this file")
+    return
+  }
+
+  // Defence in depth: never push content we didn't successfully load, or we'd
+  // overwrite the file on GitHub with the empty placeholder.
+  if (loadStatus.value !== "ready" || initialRawContent.value === null) {
+    console.warn("refusing to save a note that hasn't finished loading")
     return
   }
 
@@ -287,8 +307,7 @@ watch(mode, async (newMode) => {
     return
   }
 
-  const hasUserFinishedToEdit =
-    newMode === "read" && rawContent.value !== initialRawContent.value
+  const hasUserFinishedToEdit = newMode === "read" && isDirty.value
 
   if (!hasUserFinishedToEdit) {
     return
@@ -336,7 +355,7 @@ const onBadgeClick = async () => {
       return
     }
 
-    const hasUnsavedEdits = rawContent.value !== initialRawContent.value
+    const hasUnsavedEdits = isDirty.value
     if (hasUnsavedEdits) {
       await handleConflict()
       return
@@ -377,7 +396,7 @@ const onBadgeClick = async () => {
           class="action"
         />
         <button
-          v-if="isMarkdown && canPush"
+          v-if="isMarkdown && canPush && loadStatus === 'ready'"
           class="action button is-text is-light"
           :class="{ 'is-link': mode === 'edit' }"
           :style="mode === 'edit' ? 'color: var(--color-primary)' : ''"
