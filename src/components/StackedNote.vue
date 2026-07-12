@@ -1,11 +1,5 @@
 <script lang="ts" setup>
-import {
-  computed,
-  defineAsyncComponent,
-  onMounted,
-  ref,
-  watch
-} from "vue"
+import { computed, defineAsyncComponent, onMounted, ref, watch } from "vue"
 
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useFile } from "@/hooks/useFile.hook"
@@ -217,8 +211,7 @@ useMarkdownPostRender(content, () => `.note-${sha.value}`, {
   macroplan: true,
   mermaid: () => rawContent.value.includes("```mermaid"),
   shikiji: () => isMarkdown.value && rawContent.value.includes("```"),
-  images: () =>
-    /\!\[.*?\]\(.*?\)/.test(rawContent.value) ? props.sha : null,
+  images: () => (/\!\[.*?\]\(.*?\)/.test(rawContent.value) ? props.sha : null),
   triggers: [mode]
 })
 
@@ -508,7 +501,7 @@ const onBadgeClick = async () => {
           <span>You're viewing an older shared version.</span>
           <button
             type="button"
-            class="snapshot-banner-action"
+            class="btn bt-sm btn-soft btn-info"
             @click="viewLatest"
           >
             View latest
@@ -605,16 +598,6 @@ $border-color: rgba(18, 19, 58, 0.2);
   border: 1px solid $border-color;
   border-radius: 0.375rem;
   font-size: 0.85em;
-}
-
-.snapshot-banner-action {
-  flex-shrink: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-primary);
-  cursor: pointer;
-  text-decoration: underline;
 }
 
 .action {
