@@ -31,7 +31,7 @@
 
 @plugin 'daisyui' {
   themes:
-    light --default,
+    cmyk --default,
     black --prefersdark;
 }
 
