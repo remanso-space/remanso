@@ -9,6 +9,16 @@
   --heading-font-family: "Libertinus Serif", serif;
   --font-size: 13pt;
   --font-color: #4a4a4a;
+  /* The theme accent, recolored to a readable lightness while keeping its
+     hue + chroma — so links and header icons stay vivid AND legible on any
+     theme (raw accent can be near-invisible, e.g. cmyk's light yellow on
+     white). Pinning lightness rather than desaturating is what keeps the
+     color "accent-y". light-dark() follows DaisyUI's per-theme color-scheme,
+     so it adapts automatically when you swap themes — no per-theme tuning. */
+  --link-accent: light-dark(
+    oklch(from var(--color-accent) 50% c h),
+    oklch(from var(--color-accent) 72% c h)
+  );
   --background-color: #ffffff;
   --note-width: 500px;
   --note-canvas-bg: color-mix(

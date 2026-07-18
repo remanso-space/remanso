@@ -55,7 +55,7 @@ const copy = async (url: string, label: string) => {
 
 <template>
   <button
-    class="btn btn-ghost btn-circle text-accent"
+    class="btn btn-ghost btn-circle share-trigger"
     title="Share this view"
     aria-label="Share this view"
     onclick="share_modal.showModal()"
@@ -156,6 +156,10 @@ const copy = async (url: string, label: string) => {
 </template>
 
 <style scoped lang="scss">
+.share-trigger {
+  color: var(--link-accent);
+}
+
 .share-option {
   display: flex;
   align-items: flex-start;
@@ -177,7 +181,7 @@ const copy = async (url: string, label: string) => {
 
 .share-option-icon {
   flex-shrink: 0;
-  color: var(--color-accent);
+  color: var(--link-accent);
 }
 
 .share-option-text {

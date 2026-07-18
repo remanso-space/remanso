@@ -167,7 +167,7 @@ defineProps<{ user: string; repo: string }>()
   margin-top: 10px;
 
   button {
-    color: var(--color-accent);
+    color: var(--link-accent);
   }
 }
 </style>
