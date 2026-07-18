@@ -48,7 +48,14 @@ module.exports = {
               // "text-decoration": "wavy underline var(--color-contrast-content)",
               // "text-decoration-thickness": "0.1em",
               "text-decoration": "none",
-              color: "var(--color-accent)"
+              // Theme-adaptive, contrast-safe link color. base-content is
+              // always readable against the theme's background (dark text on
+              // light themes, light text on dark themes), so blending 60% of
+              // it with the accent keeps the accent's hue while guaranteeing
+              // contrast on ANY theme — no per-theme tuning. See git history
+              // for the WCAG numbers (raw accent was 1.17:1 on cmyk).
+              color:
+                "color-mix(in oklch, var(--color-base-content) 60%, var(--color-accent))"
             },
             "a.btn-primary": {
               color: "var(--color-secondary-content)"
