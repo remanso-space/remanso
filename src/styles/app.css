@@ -254,16 +254,14 @@ pre.tikz svg {
   height: auto;
 }
 
-/* TikZ SVGs are monochrome black; invert them on dark themes so they
-   remain readable on the transparent background. */
-[data-theme="dracula"] pre.tikz svg {
+/* TikZ SVGs are monochrome black; invert them on the dark theme so they
+   remain readable on the transparent background. The theme is always set
+   explicitly (index.html defaults to cmyk; ThemeSwap toggles cmyk/black),
+   so we key off the dark theme name rather than prefers-color-scheme —
+   the latter wrongly inverts when the OS is dark but the light theme is
+   active. */
+[data-theme="black"] pre.tikz svg {
   filter: invert(1) hue-rotate(180deg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) pre.tikz svg {
-    filter: invert(1) hue-rotate(180deg);
-  }
 }
 
 .tikz-loading,
