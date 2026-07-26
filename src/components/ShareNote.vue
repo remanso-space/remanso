@@ -8,7 +8,7 @@ import {
   stackToLiveQuery
 } from "@/modules/note/liveNotes"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
-import { confirmMessage, errorMessage } from "@/utils/notif"
+import { copyLink } from "@/utils/copyLink"
 
 const route = useRoute()
 const router = useRouter()
@@ -47,14 +47,9 @@ const livingUrl = (): string => {
 const close = () =>
   (document.getElementById("share_modal") as HTMLDialogElement | null)?.close()
 
-const copy = async (url: string, label: string) => {
+const copy = (url: string, label: string) => {
   close()
-  try {
-    await navigator.clipboard.writeText(url)
-    confirmMessage(`🔗 ${label} link copied`)
-  } catch {
-    errorMessage("❌ Couldn't copy the link")
-  }
+  return copyLink(url, label)
 }
 </script>
 

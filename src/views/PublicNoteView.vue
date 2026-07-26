@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
+import SharePublicNote from "@/components/SharePublicNote.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
@@ -137,7 +138,10 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
     <div class="note article">
       <div class="header">
         <home-button />
-        <theme-swap />
+        <div class="header-actions">
+          <share-public-note v-if="content" />
+          <theme-swap />
+        </div>
       </div>
       <div class="repo-title-breadcrumb">
         <a
@@ -196,6 +200,12 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .heading-1 {
