@@ -196,6 +196,15 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
 
   .subheader {
     margin: 1rem auto 0;
+
+    // Theme-adaptive, contrast-safe accent — same var as prose links and
+    // header icons. Raw badge-accent renders text in --color-accent, which is
+    // unreadable on light themes (pale yellow on white on cmyk); --link-accent
+    // pins lightness per light/dark while keeping the accent hue. The handle
+    // link, language, date and separators all inherit this.
+    .badge-author {
+      color: var(--link-accent);
+    }
   }
 
   h1 {
