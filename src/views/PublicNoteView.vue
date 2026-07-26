@@ -22,6 +22,7 @@ import { displayLanguage } from "@/utils/displayLanguage"
 import { downloadFont } from "@/utils/downloadFont"
 import { errorMessage } from "@/utils/notif"
 import { slugify } from "@/utils/slugify"
+import { stripLeadingTitle } from "@/utils/stripLeadingTitle"
 
 const props = defineProps<{ shortDid: string; rkey: string; slug?: string }>()
 const router = useRouter()
@@ -81,10 +82,13 @@ const title = computed(() => noteRecord.value?.value.title)
 const content = computed(() =>
   noteRecord.value?.value.content && author.value
     ? toHTML(
-        withATProtoImages(noteRecord.value.value.content, {
-          pds: author.value.pds,
-          did: did.value
-        })
+        withATProtoImages(
+          stripLeadingTitle(noteRecord.value.value.content, title.value),
+          {
+            pds: author.value.pds,
+            did: did.value
+          }
+        )
       )
     : ""
 )
@@ -135,28 +139,6 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
         <home-button />
         <theme-swap />
       </div>
-      <div class="subheader">
-        <span
-          class="badge badge-author badge-soft badge-accent"
-          v-if="author && content"
-        >
-          <template v-if="language">
-            <span>{{ language }}</span>
-            <span>&nbsp;•&nbsp;</span>
-          </template>
-          <router-link
-            :to="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
-            class="link link-hover"
-          >
-            {{ author.handle }}
-          </router-link>
-          <template v-if="publishedAt">
-            <span>&nbsp;•&nbsp;</span>
-            <span>{{ publishedAt }}</span>
-          </template>
-        </span>
-        <div class="badge skeleton h-4 w-50" v-else></div>
-      </div>
       <div class="repo-title-breadcrumb">
         <a
           class="title-stacked-note-link"
@@ -164,6 +146,28 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
           v-if="breadcrumb"
           >{{ breadcrumb }}</a
         >
+      </div>
+      <div class="repo-title">
+        <h1 class="heading-1" v-if="title">{{ title }}</h1>
+        <div class="skeleton h-8 w-64" v-else-if="!noteNotFound"></div>
+
+        <div class="note-meta" v-if="author && content">
+          <template v-if="language">
+            <span>{{ language }}</span>
+            <span>&nbsp;•&nbsp;</span>
+          </template>
+          <router-link
+            :to="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
+            class="link link-hover handle"
+          >
+            {{ author.handle }}
+          </router-link>
+          <template v-if="publishedAt">
+            <span>&nbsp;•&nbsp;</span>
+            <span>{{ publishedAt }}</span>
+          </template>
+        </div>
+        <div class="skeleton h-4 w-50" v-else-if="!noteNotFound"></div>
       </div>
 
       <article class="note-display" v-if="content" v-html="content"></article>
@@ -194,16 +198,33 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
     gap: 1rem;
   }
 
-  .subheader {
-    margin: 1rem auto 0;
+  .heading-1 {
+    display: inline-block;
+  }
 
-    // Theme-adaptive, contrast-safe accent — same var as prose links and
-    // header icons. Raw badge-accent renders text in --color-accent, which is
-    // unreadable on light themes (pale yellow on white on cmyk); --link-accent
-    // pins lightness per light/dark while keeping the accent hue. The handle
-    // link, language, date and separators all inherit this.
-    .badge-author {
-      color: var(--link-accent);
+  .repo-title {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    .heading-1 {
+      margin-bottom: 0.25rem;
+    }
+
+    // House-style metadata: small + muted. The handle keeps the theme-adaptive,
+    // contrast-safe accent (--link-accent pins lightness per light/dark while
+    // keeping the accent hue; raw --color-accent is unreadable on light themes,
+    // e.g. pale yellow on white on cmyk). Language, date and separators inherit
+    // the muted look.
+    .note-meta {
+      font-size: 0.8em;
+      opacity: 0.8;
+
+      .handle {
+        color: var(--link-accent);
+      }
     }
   }
 
