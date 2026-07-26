@@ -39,7 +39,7 @@
 
 @plugin 'daisyui' {
   themes:
-    cmyk --default,
+    emerald --default,
     black --prefersdark;
 }
 
