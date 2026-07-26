@@ -1,5 +1,13 @@
 <script lang="ts" setup>
-import { computed, defineAsyncComponent, onMounted, ref, watch } from "vue"
+import { useDebounceFn } from "@vueuse/core"
+import {
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch
+} from "vue"
 
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useFile } from "@/hooks/useFile.hook"
@@ -15,6 +23,10 @@ import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
+import {
+  findCheckboxIndex,
+  setCheckboxInMarkdown
+} from "@/utils/markdownCheckbox"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
 import { errorMessage } from "@/utils/notif"
 import { threeWayMerge } from "@/utils/threeWayMerge"
@@ -294,6 +306,62 @@ const handleConflict = async () => {
   if (mode.value === "read") toggleMode()
 }
 
+// Ticking a checkbox in read mode rewrites the markdown source in place and
+// commits it, so a note used as a todo list stays usable without entering
+// edit mode. Toggles are debounced into a single commit.
+const CHECKBOX_COMMIT_DEBOUNCE_MS = 1000
+
+const hasPendingCheckboxToggle = ref(false)
+
+const canToggleCheckbox = computed(
+  () => canPush.value && isMarkdown.value && loadStatus.value === "ready"
+)
+
+const saveCheckboxToggles = async () => {
+  if (!hasPendingCheckboxToggle.value || !isDirty.value) return
+  hasPendingCheckboxToggle.value = false
+
+  await checkFreshness()
+  if (freshnessStatus.value === "outdated") {
+    await handleConflict()
+    return
+  }
+
+  await performSave()
+}
+
+const debouncedSaveCheckboxToggles = useDebounceFn(
+  saveCheckboxToggles,
+  CHECKBOX_COMMIT_DEBOUNCE_MS
+)
+
+const onContentChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.tagName !== "INPUT" || target.type !== "checkbox") return
+
+  if (!canToggleCheckbox.value) {
+    // Read-only note: keep the rendered box matching the file on GitHub.
+    target.checked = !target.checked
+    return
+  }
+
+  const index = findCheckboxIndex(event.currentTarget as Element, target)
+  if (index === -1) return
+
+  rawContent.value = setCheckboxInMarkdown(
+    rawContent.value,
+    index,
+    target.checked
+  )
+  hasPendingCheckboxToggle.value = true
+  void debouncedSaveCheckboxToggles()
+}
+
+onUnmounted(() => {
+  // Flush a pending toggle so navigating away doesn't lose it.
+  void saveCheckboxToggles()
+})
+
 watch(mode, async (newMode) => {
   if (newMode === "edit") {
     void checkFreshness()
@@ -511,6 +579,7 @@ const onBadgeClick = async () => {
           v-if="displayedContent"
           class="note-content"
           v-html="displayedContent"
+          @change="onContentChange"
         ></div>
         <note-state
           v-else
