@@ -406,6 +406,7 @@ iframe {
    pair): center the box on the text and give it room before its label. */
 .note-content li input[type="checkbox"],
 .note-display li input[type="checkbox"] {
+  @apply checkbox checkbox-sm;
   vertical-align: middle;
   transform: translateY(-0.1em);
   margin-right: 0.5em;
