@@ -31,9 +31,9 @@ describe("parseAtUri", () => {
   })
 
   it("throws when the URI does not start with at://", () => {
-    expect(() =>
-      parseAtUri("https://did:plc:abc/collection/rkey")
-    ).toThrow(/Invalid AT URI/)
+    expect(() => parseAtUri("https://did:plc:abc/collection/rkey")).toThrow(
+      /Invalid AT URI/
+    )
   })
 
   it("throws when the DID prefix is missing", () => {

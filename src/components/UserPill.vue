@@ -57,11 +57,7 @@ const displayInitial = computed(() =>
     var(--color-base-200)
   );
   --pill-accent: #e36598;
-  --pill-accent-wash: color-mix(
-    in oklch,
-    #e36598 12%,
-    var(--color-base-200)
-  );
+  --pill-accent-wash: color-mix(in oklch, #e36598 12%, var(--color-base-200));
 
   display: inline-flex;
   align-items: center;

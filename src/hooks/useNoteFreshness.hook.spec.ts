@@ -50,7 +50,9 @@ vi.mock("@/modules/repo/store/userRepo.store", () => ({
 
 import { useNoteFreshness } from "./useNoteFreshness.hook"
 
-const setup = (overrides: { sha?: string; path?: string; edited?: string | null } = {}) => {
+const setup = (
+  overrides: { sha?: string; path?: string; edited?: string | null } = {}
+) => {
   setActivePinia(createPinia())
   const sha = ref(overrides.sha ?? "local-sha")
   const path = ref(overrides.path ?? "note.md")
@@ -238,7 +240,11 @@ describe("useNoteFreshness.pullLatest", () => {
     await api.pullLatest()
 
     expect(fetchLatestSha).not.toHaveBeenCalled()
-    expect(queryFileContent).toHaveBeenCalledWith("alice", "notes", "cached-sha")
+    expect(queryFileContent).toHaveBeenCalledWith(
+      "alice",
+      "notes",
+      "cached-sha"
+    )
   })
 })
 
@@ -279,7 +285,11 @@ describe("useNoteFreshness.resolveMergeSources", () => {
     })
     // base must be read from its own immutable snapshot, never the path pointer
     expect(dataGet).toHaveBeenCalledWith(`${DataType.Note}-base-sha`)
-    expect(queryFileContent).toHaveBeenCalledWith("alice", "notes", "remote-sha")
+    expect(queryFileContent).toHaveBeenCalledWith(
+      "alice",
+      "notes",
+      "remote-sha"
+    )
     expect(latestSha.value).toBe("remote-sha")
   })
 

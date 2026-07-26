@@ -2,31 +2,10 @@ import { useDebounceFn } from "@vueuse/core"
 import { onUnmounted, Ref, ref, toValue } from "vue"
 
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
-
-const CHECKBOX_PATTERN = /\[([ xX])\]/g
-
-const setCheckboxInMarkdown = (
-  markdown: string,
-  index: number,
-  checked: boolean
-): string => {
-  let currentIndex = 0
-
-  return markdown.replace(CHECKBOX_PATTERN, (match) => {
-    if (currentIndex++ === index) {
-      return checked ? "[x]" : "[ ]"
-    }
-    return match
-  })
-}
-
-const findCheckboxIndex = (
-  container: Element,
-  checkbox: HTMLInputElement
-): number => {
-  const allCheckboxes = container.querySelectorAll('input[type="checkbox"]')
-  return Array.from(allCheckboxes).indexOf(checkbox)
-}
+import {
+  findCheckboxIndex,
+  setCheckboxInMarkdown
+} from "@/utils/markdownCheckbox"
 
 export const useCheckboxCommit = ({
   user,

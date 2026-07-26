@@ -5,14 +5,12 @@ vi.mock("@/modules/user/service/signIn", () => ({
   refreshToken: vi.fn()
 }))
 
-import {
-  getAccessToken,
-  refreshToken
-} from "@/modules/user/service/signIn"
+import { getAccessToken, refreshToken } from "@/modules/user/service/signIn"
 
 import { runWithAuthRetry } from "./octo"
 
-const unauthorized = () => Object.assign(new Error("Bad credentials"), { status: 401 })
+const unauthorized = () =>
+  Object.assign(new Error("Bad credentials"), { status: 401 })
 const notFound = () => Object.assign(new Error("Not found"), { status: 404 })
 
 describe("runWithAuthRetry", () => {

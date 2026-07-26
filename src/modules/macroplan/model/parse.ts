@@ -12,14 +12,18 @@ export class PlanParseError extends Error {
   }
 }
 
-const STATUSES = ["on-track", "at-risk", "off-track"] as const satisfies readonly StatusLevel[]
+const STATUSES = [
+  "on-track",
+  "at-risk",
+  "off-track"
+] as const satisfies readonly StatusLevel[]
 
 // ── Field schemas ──────────────────────────────────────────────────────────
 // A TOML date (smol-toml returns a Date subclass) or a yyyy-mm-dd string,
 // normalized to yyyy-mm-dd via `toYmd`.
 const Ymd = v.pipe(
   v.union([v.date(), v.string()], "must be a date (e.g. 2026-06-01)"),
-  v.transform((value: string | Date) => toYmd(value)),
+  v.transform((value: string | Date) => toYmd(value))
 )
 
 const Status = v.picklist(STATUSES, `must be one of ${STATUSES.join(", ")}`)
@@ -34,16 +38,19 @@ const FeatureSchema = v.object({
   delivered: v.optional(Ymd),
   learning: v.optional(v.string()),
   status: v.optional(Status),
-  note: v.optional(v.string()),
+  note: v.optional(v.string())
 })
 
 const MilestoneSchema = v.object({
   name: Name,
   week: Ymd,
   requires: v.optional(
-    v.array(v.string("must be a feature name"), "must be a list of feature names"),
-    [],
-  ),
+    v.array(
+      v.string("must be a feature name"),
+      "must be a list of feature names"
+    ),
+    []
+  )
 })
 
 /** The Macroplan format version this build understands (see docs/format.md).
@@ -63,18 +70,19 @@ export function parseMacroplan(source: string): RawPlan {
   checkVersion(data.macroplan_version)
 
   const features = asBlocks(data.feature, "feature").map((f, i) =>
-    check(FeatureSchema, f, blockWhere("feature", f, i)),
+    check(FeatureSchema, f, blockWhere("feature", f, i))
   )
   requireUniqueFeatureNames(features)
 
   return {
     title: data.title != null ? String(data.title) : "Untitled Macroplan",
-    start: data.start != null ? check(Ymd, data.start, "plan", "start") : undefined,
+    start:
+      data.start != null ? check(Ymd, data.start, "plan", "start") : undefined,
     end: data.end != null ? check(Ymd, data.end, "plan", "end") : undefined,
     features,
     milestones: asBlocks(data.milestone, "milestone").map((m, i) =>
-      check(MilestoneSchema, m, blockWhere("milestone", m, i)),
-    ),
+      check(MilestoneSchema, m, blockWhere("milestone", m, i))
+    )
   }
 }
 
@@ -88,18 +96,22 @@ function checkVersion(value: unknown): void {
   }
   if (value > FORMAT_VERSION) {
     throw new PlanParseError(
-      `unsupported macroplan_version ${value} — this build understands up to ${FORMAT_VERSION}`,
+      `unsupported macroplan_version ${value} — this build understands up to ${FORMAT_VERSION}`
     )
   }
 }
 
 /** Feature names are the join key for a Milestone's `requires`, so they must be
  *  unique — otherwise a requirement resolves ambiguously to the first match. */
-function requireUniqueFeatureNames(features: readonly { name: string }[]): void {
+function requireUniqueFeatureNames(
+  features: readonly { name: string }[]
+): void {
   const seen = new Set<string>()
   for (const f of features) {
     if (seen.has(f.name)) {
-      throw new PlanParseError(`duplicate feature name "${f.name}" — feature names must be unique`)
+      throw new PlanParseError(
+        `duplicate feature name "${f.name}" — feature names must be unique`
+      )
     }
     seen.add(f.name)
   }
@@ -119,7 +131,9 @@ function blockWhere(kind: string, block: unknown, i: number): string {
     block != null && typeof block === "object" && "name" in block
       ? (block as { name: unknown }).name
       : undefined
-  return name != null && name !== "" ? `${kind} "${String(name)}"` : `${kind} #${i + 1}`
+  return name != null && name !== ""
+    ? `${kind} "${String(name)}"`
+    : `${kind} #${i + 1}`
 }
 
 /** Validate `value` against `schema`, raising a contextual PlanParseError. */
@@ -127,7 +141,7 @@ function check<S extends v.GenericSchema>(
   schema: S,
   value: unknown,
   where: string,
-  field?: string,
+  field?: string
 ): v.InferOutput<S> {
   const result = v.safeParse(schema, value)
   if (!result.success) {
@@ -148,6 +162,7 @@ type Issue = {
 function friendly(issue: Issue, fallbackField?: string): string {
   const key = issue.path?.[0]?.key
   const field = typeof key === "string" ? key : fallbackField
-  if (issue.received === "undefined") return field ? `missing \`${field}\`` : "missing value"
+  if (issue.received === "undefined")
+    return field ? `missing \`${field}\`` : "missing value"
   return field ? `\`${field}\` ${issue.message}` : issue.message
 }

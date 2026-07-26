@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
+import SharePublicNote from "@/components/SharePublicNote.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
@@ -22,6 +23,7 @@ import { displayLanguage } from "@/utils/displayLanguage"
 import { downloadFont } from "@/utils/downloadFont"
 import { errorMessage } from "@/utils/notif"
 import { slugify } from "@/utils/slugify"
+import { stripLeadingTitle } from "@/utils/stripLeadingTitle"
 
 const props = defineProps<{ shortDid: string; rkey: string; slug?: string }>()
 const router = useRouter()
@@ -81,10 +83,13 @@ const title = computed(() => noteRecord.value?.value.title)
 const content = computed(() =>
   noteRecord.value?.value.content && author.value
     ? toHTML(
-        withATProtoImages(noteRecord.value.value.content, {
-          pds: author.value.pds,
-          did: did.value
-        })
+        withATProtoImages(
+          stripLeadingTitle(noteRecord.value.value.content, title.value),
+          {
+            pds: author.value.pds,
+            did: did.value
+          }
+        )
       )
     : ""
 )
@@ -132,30 +137,9 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
   <main class="public-note-view repo-note note-container">
     <div class="note article">
       <div class="header">
-        <home-button />
-        <theme-swap />
-      </div>
-      <div class="subheader">
-        <span
-          class="badge badge-author badge-soft badge-accent"
-          v-if="author && content"
-        >
-          <template v-if="language">
-            <span>{{ language }}</span>
-            <span>&nbsp;•&nbsp;</span>
-          </template>
-          <router-link
-            :to="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
-            class="link link-hover"
-          >
-            {{ author.handle }}
-          </router-link>
-          <template v-if="publishedAt">
-            <span>&nbsp;•&nbsp;</span>
-            <span>{{ publishedAt }}</span>
-          </template>
-        </span>
-        <div class="badge skeleton h-4 w-50" v-else></div>
+        <theme-swap class="header-start" />
+        <home-button class="header-center" />
+        <share-public-note v-if="content" class="header-end" />
       </div>
       <div class="repo-title-breadcrumb">
         <a
@@ -164,6 +148,28 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
           v-if="breadcrumb"
           >{{ breadcrumb }}</a
         >
+      </div>
+      <div class="repo-title">
+        <h1 class="heading-1" v-if="title">{{ title }}</h1>
+        <div class="skeleton h-8 w-64" v-else-if="!noteNotFound"></div>
+
+        <div class="note-meta" v-if="author && content">
+          <template v-if="language">
+            <span>{{ language }}</span>
+            <span>&nbsp;•&nbsp;</span>
+          </template>
+          <router-link
+            :to="{ name: 'PublicNoteListByDidView', params: { shortDid } }"
+            class="link link-hover handle"
+          >
+            {{ author.handle }}
+          </router-link>
+          <template v-if="publishedAt">
+            <span>&nbsp;•&nbsp;</span>
+            <span>{{ publishedAt }}</span>
+          </template>
+        </div>
+        <div class="skeleton h-4 w-50" v-else-if="!noteNotFound"></div>
       </div>
 
       <article class="note-display" v-if="content" v-html="content"></article>
@@ -185,17 +191,58 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
   flex: 1;
   width: 100%;
 
+  // Three fixed slots rather than space-between: the theme pill and the share
+  // circle don't measure the same, so only a dedicated centre column puts the
+  // logo on the same axis as the title and meta below — and keeps it there while
+  // the share button is still waiting on the note content.
   .header {
     margin-top: 1rem;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    flex-wrap: wrap;
     gap: 1rem;
   }
 
-  .subheader {
-    margin: 1rem auto 0;
+  .header-start {
+    justify-self: start;
+  }
+
+  .header-center {
+    justify-self: center;
+  }
+
+  .header-end {
+    justify-self: end;
+  }
+
+  .heading-1 {
+    display: inline-block;
+  }
+
+  .repo-title {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    .heading-1 {
+      margin-bottom: 0.25rem;
+    }
+
+    // House-style metadata: small + muted. The handle keeps the theme-adaptive,
+    // contrast-safe accent (--link-accent pins lightness per light/dark while
+    // keeping the accent hue; raw --color-accent is unreadable on light themes,
+    // e.g. pale yellow on white on cmyk). Language, date and separators inherit
+    // the muted look.
+    .note-meta {
+      font-size: 0.8em;
+      opacity: 0.8;
+
+      .handle {
+        color: var(--link-accent);
+      }
+    }
   }
 
   h1 {

@@ -60,11 +60,7 @@ const isGitHubLoggedIn = computed(() => !!accessToken.value)
   );
   --pm-accent: #e36598;
   --pm-accent-wash: color-mix(in oklch, #e36598 12%, var(--color-base-200));
-  --pm-accent-deep: color-mix(
-    in oklch,
-    #e36598 75%,
-    var(--color-base-content)
-  );
+  --pm-accent-deep: color-mix(in oklch, #e36598 75%, var(--color-base-content));
 }
 
 .profile-modal-box {

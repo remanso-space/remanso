@@ -58,5 +58,4 @@ describe("getOctokit timeout hook", () => {
     expect(timeoutSpy).not.toHaveBeenCalled()
     expect(receivedSignal).toBe(controller.signal)
   })
-
 })

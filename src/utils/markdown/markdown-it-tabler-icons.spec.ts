@@ -7,9 +7,7 @@ describe("markdownItTablerIcons", () => {
   const renderer = () => MarkdownIt().use(markdownItTablerIcons)
 
   it("renders a tabler icon for :icon-name: syntax", () => {
-    expect(renderer().render(":home:")).toContain(
-      '<i class="ti ti-home"></i>'
-    )
+    expect(renderer().render(":home:")).toContain('<i class="ti ti-home"></i>')
   })
 
   it("supports hyphenated icon names", () => {

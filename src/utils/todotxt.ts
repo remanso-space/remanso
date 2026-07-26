@@ -187,7 +187,10 @@ export const removeTokenFromBody = (
     `(?:^|\\s)\\${prefix}${escapeRegex(value)}(?=\\s|$)`,
     "g"
   )
-  return body.replace(re, "").replace(/[ \t]+/g, " ").trim()
+  return body
+    .replace(re, "")
+    .replace(/[ \t]+/g, " ")
+    .trim()
 }
 
 // Remove a `key:value` tag (e.g. `due:2025-01-15`) from a task body.
@@ -200,7 +203,10 @@ export const removeTagFromBody = (
     `(?:^|\\s)${escapeRegex(key)}:${escapeRegex(value)}(?=\\s|$)`,
     "g"
   )
-  return body.replace(re, "").replace(/[ \t]+/g, " ").trim()
+  return body
+    .replace(re, "")
+    .replace(/[ \t]+/g, " ")
+    .trim()
 }
 
 const todayIso = (now: Date): string => {

@@ -2,7 +2,7 @@
 
 Remanso displays markdown **Notes** from GitHub repositories with Zettelkasten-style backlinks, and publishes/reads decentralized public notes over ATProto. This glossary is the shared vocabulary for the domain — it must appear verbatim in code, tests, commits, and docs.
 
-**Naming convention:** Themed river/Amazonian names (after *Remanso*, a still backwater) are used for **user-facing surfaces and places** (e.g. **Igarapé**). **Core technical concepts** keep their standard Zettelkasten/Obsidian names (**Note, Backlink, Path, Card, Draft, Fleeting**) for discoverability.
+**Naming convention:** Themed river/Amazonian names (after _Remanso_, a still backwater) are used for **user-facing surfaces and places** (e.g. **Igarapé**). **Core technical concepts** keep their standard Zettelkasten/Obsidian names (**Note, Backlink, Path, Card, Draft, Fleeting**) for discoverability.
 
 ## Language
 
@@ -16,8 +16,8 @@ _Avoid_: "file" when you mean the semantic document.
 A Note's stable identity — its location within the repo (e.g. `ideas/zettel.md`). What authors link to and what survives edits.
 
 **SHA**:
-The git blob hash of a Note's content — a *content version*, not the Note's identity. Changes on every edit. Legitimately used as the address of a **Snapshot reference** (an immutable shared version).
-_Avoid_: treating SHA as the Note's *identity* (identity is **Path**); but SHA *is* the right address for an immutable snapshot.
+The git blob hash of a Note's content — a _content version_, not the Note's identity. Changes on every edit. Legitimately used as the address of a **Snapshot reference** (an immutable shared version).
+_Avoid_: treating SHA as the Note's _identity_ (identity is **Path**); but SHA _is_ the right address for an immutable snapshot.
 
 **File** / **RepoFile**:
 The repo artifact carrying a Note's metadata (`path`, `sha`, `size`, …) as returned by the GitHub API. A File is how a Note appears in a repo listing, not a separate domain entity.
@@ -40,7 +40,7 @@ _Avoid_: "Todo Note" — Tasks live in a single todo.txt file, not as Notes.
 ### Reading & navigation
 
 **Igarapé**:
-The primary reading surface — the channel you travel as you read a Note and follow its backlinks (Amazonian/Tupi: a narrow navigable waterway through the forest). Any kind of Note appears in the Igarapé. Named to extend the river metaphor set by *Remanso* (a still backwater).
+The primary reading surface — the channel you travel as you read a Note and follow its backlinks (Amazonian/Tupi: a narrow navigable waterway through the forest). Any kind of Note appears in the Igarapé. Named to extend the river metaphor set by _Remanso_ (a still backwater).
 _Avoid_: "Flux" (dropped — internal jargon, no domain meaning).
 
 **Index**:
@@ -58,10 +58,10 @@ An inbound reference to a Note — another Note that links to it. The Zettelkast
 The navigation pattern in the **Igarapé** where following a Backlink opens the target Note alongside the current one, accumulating a horizontal stack you can read across.
 
 **Live reference**:
-A reference to a Note **by Path** that resolves to its *current* content (e.g. a Backlink you follow in your own repo). Reflects edits.
+A reference to a Note **by Path** that resolves to its _current_ content (e.g. a Backlink you follow in your own repo). Reflects edits.
 
 **Snapshot reference**:
-A reference to a Note **by SHA** that resolves to that *exact, immutable* version (e.g. a shared/bookmarked stack link). Content-addressed; deliberately unaffected by later edits, so what was shared cannot change underneath a reader. Not a fragility — an integrity feature.
+A reference to a Note **by SHA** that resolves to that _exact, immutable_ version (e.g. a shared/bookmarked stack link). Content-addressed; deliberately unaffected by later edits, so what was shared cannot change underneath a reader. Not a fragility — an integrity feature.
 
 ### Spaced repetition
 
@@ -115,7 +115,7 @@ Personal Data Server — where an Author's ATProto records (and image blobs) are
 
 ## Flagged ambiguities
 
-- **Identity = Path; two reference modes (refined 2026-06-28)** — see [ADR-0001](docs/adr/0001-note-identity-is-path.md). A Note's *identity* is its **Path**, so **Live references** (Backlinks in your repo) must resolve to current content. But a **Snapshot reference** (a shared `?stackedNotes=sha` link) deliberately pins a **SHA** for immutability — that is an integrity feature, not a fragility. The earlier framing of "SHA-as-handle = fragility" was too absolute; ADR-0001 is to be amended to record both modes.
+- **Identity = Path; two reference modes (refined 2026-06-28)** — see [ADR-0001](docs/adr/0001-note-identity-is-path.md). A Note's _identity_ is its **Path**, so **Live references** (Backlinks in your repo) must resolve to current content. But a **Snapshot reference** (a shared `?stackedNotes=sha` link) deliberately pins a **SHA** for immutability — that is an integrity feature, not a fragility. The earlier framing of "SHA-as-handle = fragility" was too absolute; ADR-0001 is to be amended to record both modes.
 - `useNotes()` / `useFolderNotes()` are named "notes" but return `RepoFile[]`. Per this glossary they return **Files** (the repo-listing view), not `Note` objects — a naming drift to reconcile in code.
 - `FluxNote` / `FluxNoteView` should be renamed to **Igarapé** (`Igarape` / `IgarapeView`) in code — "Flux" is dropped jargon.
 - `HistoricNotes` view (route `/history`) is the **Index**, not history — rename to `NoteIndex` and move off the `/history` path.
