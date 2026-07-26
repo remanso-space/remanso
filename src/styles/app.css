@@ -402,6 +402,15 @@ iframe {
   padding-inline-start: 0.2rem;
 }
 
+/* Task-list checkboxes (markdown-it-checkbox emits a bare <input><label>
+   pair): center the box on the text and give it room before its label. */
+.note-content li input[type="checkbox"],
+.note-display li input[type="checkbox"] {
+  vertical-align: middle;
+  transform: translateY(-0.1em);
+  margin-right: 0.5em;
+}
+
 /* Image lightbox — desktop click-to-fullscreen */
 
 /* Affordance: zoomable content images and diagrams (desktop only). */
