@@ -3,5 +3,5 @@
 
 export const themeConfig = {
   light: "emerald",
-  dark: "black"
+  dark: 'dark'
 }
