@@ -137,11 +137,9 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
   <main class="public-note-view repo-note note-container">
     <div class="note article">
       <div class="header">
-        <home-button />
-        <div class="header-actions">
-          <share-public-note v-if="content" />
-          <theme-swap />
-        </div>
+        <theme-swap class="header-start" />
+        <home-button class="header-center" />
+        <share-public-note v-if="content" class="header-end" />
       </div>
       <div class="repo-title-breadcrumb">
         <a
@@ -193,19 +191,28 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
   flex: 1;
   width: 100%;
 
+  // Three fixed slots rather than space-between: the theme pill and the share
+  // circle don't measure the same, so only a dedicated centre column puts the
+  // logo on the same axis as the title and meta below — and keeps it there while
+  // the share button is still waiting on the note content.
   .header {
     margin-top: 1rem;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    flex-wrap: wrap;
     gap: 1rem;
   }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .header-start {
+    justify-self: start;
+  }
+
+  .header-center {
+    justify-self: center;
+  }
+
+  .header-end {
+    justify-self: end;
   }
 
   .heading-1 {

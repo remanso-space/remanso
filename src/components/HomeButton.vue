@@ -8,6 +8,8 @@ const goHome = () => router.push({ name: "Home" })
 <template>
   <button
     class="btn btn-ghost btn-circle btn-lg text-base-content"
+    title="Home"
+    aria-label="Home"
     @click="goHome"
   >
     <img src="/favicon.png" alt="Remanso icon" class="remanso-logo" />
