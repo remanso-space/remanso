@@ -61,7 +61,7 @@ onUnmounted(stopTicking)
 
 <template>
   <div
-    class="instrument my-4 w-fit rounded-box border border-base-300 bg-base-100 p-3"
+    class="instrument mx-auto my-4 w-fit rounded-box border border-base-300 bg-base-100 p-3"
   >
     <div class="flex items-center gap-3">
       <span class="font-mono text-2xl tabular-nums">
@@ -69,7 +69,7 @@ onUnmounted(stopTicking)
       </span>
       <div class="flex gap-1">
         <button
-          class="btn btn-ghost btn-sm text-accent"
+          class="btn btn-ghost btn-sm text-(--link-accent)"
           :title="running ? 'Pause' : 'Start'"
           :aria-label="running ? 'Pause' : 'Start'"
           @click="running ? pause() : start()"
@@ -109,7 +109,7 @@ onUnmounted(stopTicking)
           </svg>
         </button>
         <button
-          class="btn btn-ghost btn-sm text-accent"
+          class="btn btn-ghost btn-sm text-(--link-accent)"
           title="Lap"
           aria-label="Lap"
           :disabled="!running && elapsed === 0"
@@ -133,7 +133,7 @@ onUnmounted(stopTicking)
           </svg>
         </button>
         <button
-          class="btn btn-ghost btn-sm text-accent"
+          class="btn btn-ghost btn-sm text-(--link-accent)"
           title="Restart"
           aria-label="Restart"
           :disabled="!running && elapsed === 0"
@@ -155,7 +155,7 @@ onUnmounted(stopTicking)
           </svg>
         </button>
         <button
-          class="btn btn-ghost btn-sm text-accent"
+          class="btn btn-ghost btn-sm text-(--link-accent)"
           title="Stop"
           aria-label="Stop"
           :disabled="!running && elapsed === 0"

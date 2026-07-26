@@ -33,7 +33,9 @@ describe("TimerInstrument", () => {
     await wrapper.get('[title="Start"]').trigger("click")
     vi.advanceTimersByTime(1100)
     await vi.waitFor(() => expect(display(wrapper)).toBe("00:00"))
-    expect(wrapper.get("span.font-mono").classes()).toContain("text-accent")
+    expect(wrapper.get("span.font-mono").classes()).toContain(
+      "text-(--link-accent)"
+    )
   })
 
   it("pauses and resumes", async () => {

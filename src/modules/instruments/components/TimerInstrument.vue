@@ -63,11 +63,11 @@ onUnmounted(stopTicking)
 
 <template>
   <div
-    class="instrument my-4 flex w-fit items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3"
+    class="instrument mx-auto my-4 flex w-fit items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3"
   >
     <span
       class="font-mono text-2xl tabular-nums"
-      :class="done ? 'text-accent animate-pulse' : ''"
+      :class="done ? 'text-(--link-accent) animate-pulse' : ''"
     >
       {{ formatSeconds(remaining) }}
     </span>
@@ -84,7 +84,7 @@ onUnmounted(stopTicking)
     </label>
     <div class="flex gap-1">
       <button
-        class="btn btn-ghost btn-sm text-accent"
+        class="btn btn-ghost btn-sm text-(--link-accent)"
         :title="running ? 'Pause' : 'Start'"
         :aria-label="running ? 'Pause' : 'Start'"
         @click="running ? pause() : start()"
@@ -124,7 +124,7 @@ onUnmounted(stopTicking)
         </svg>
       </button>
       <button
-        class="btn btn-ghost btn-sm text-accent"
+        class="btn btn-ghost btn-sm text-(--link-accent)"
         title="Reset"
         aria-label="Reset"
         @click="reset"

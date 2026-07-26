@@ -38,9 +38,11 @@ Tailwind v4 uses the modern CSS-based config in `src/styles/app.css`:
 - DaisyUI configured via `@plugin 'daisyui' { themes: retro --default, coffee --prefersdark; }`
 - `@tailwindcss/typography` for prose styling
 
+**Accent color**: never use the raw DaisyUI accent (`text-accent` / `var(--color-accent)`) for text or icons — on some themes it has too little contrast (e.g. cmyk's light yellow on white). Always use `--link-accent` (defined in `src/styles/app.css`): it re-pins the accent's lightness per light/dark scheme so contrast is always readable. Use `color: var(--link-accent)` in styles or the `text-(--link-accent)` utility in templates.
+
 ### Icons
 
-Use [Tabler icons](https://tabler.io/icons) for every icon. Paste the outline SVG inline and keep `stroke="currentColor"` so it inherits color from its parent (icons in the note header render in `--color-accent`).
+Use [Tabler icons](https://tabler.io/icons) for every icon. Paste the outline SVG inline and keep `stroke="currentColor"` so it inherits color from its parent (accent-colored icons get `--link-accent` from their parent, see Styling above).
 
 ### Directory Structure
 
