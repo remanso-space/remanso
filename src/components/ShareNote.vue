@@ -2,7 +2,11 @@
 import { computed } from "vue"
 import { LocationQueryRaw, useRoute, useRouter } from "vue-router"
 
-import { stackToLivePaths } from "@/modules/note/liveNotes"
+import {
+  LEGACY_LIVE_NOTES_PARAM,
+  LIVE_NOTES_PARAM,
+  stackToLiveQuery
+} from "@/modules/note/liveNotes"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { confirmMessage, errorMessage } from "@/utils/notif"
 
@@ -33,9 +37,10 @@ const snapshotUrl = (): string => absoluteUrl({ ...route.query })
 const livingUrl = (): string => {
   const query = { ...route.query }
   delete query.stackedNotes
+  delete query[LEGACY_LIVE_NOTES_PARAM]
   return absoluteUrl({
     ...query,
-    liveNotes: stackToLivePaths(stackedShas.value, store.files)
+    [LIVE_NOTES_PARAM]: stackToLiveQuery(stackedShas.value, store.files)
   })
 }
 

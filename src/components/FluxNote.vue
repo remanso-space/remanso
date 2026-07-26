@@ -47,7 +47,7 @@ const { listenToClick } = useLinks("note-display")
 const { stackedNotes, scrollToFocusedNote, scrollToLastStackedNote } =
   useRouteQueryStackedNotes()
 
-// A living link arrives with paths in `?liveNotes`; resolve them to the latest
+// A living link arrives with paths in `?notes`; resolve them to the latest
 // shas, then focus the deepest note just like an ordinary shared link does.
 useResolveLiveNotes(() => scrollToLastStackedNote())
 
