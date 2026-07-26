@@ -82,6 +82,31 @@ files are near-empty so no i18n wiring for v1.
 - Instruments mounted via `createApp` are separate app instances: no Pinia, no
   router, no i18n inside — fine for stateless instruments.
 
+## Second wave (added 2026-07-26, grounded in the owner's notes vault)
+
+New registered names (aliases share one component): `until`/`since`
+(DateCountInstrument, day counter vs an ISO date + optional label),
+`flashcards` (table-fed shuffled reveal deck) and `flashcard` (same component,
+singular: first table row as a lone reveal/hide card, no deck mechanics),
+`intervals` (sequenced
+multi-step timer, `15m échauffement, 1m gainage` / `30s x6`),
+`takt-time` (time to ship one unit, `22 / 480m` → 21:49 per unit) and `takt`
+(same component, inverse view: units per hour → 2.75 units / hour) — demand
+first, then time, the order the lean question is asked, `urn` (equivalent-bet
+calibration, `1/20`), `bayes` (interactive Bayes explorable with sliders +
+1000-dot population grid, `prior=1% sensitivity=90% fpr=5%`).
+
+### Sibling-table contract extension
+
+Instruments flagged in `instrumentWantsTable` (registry) receive the markdown
+table rendered immediately after their placeholder: `runInstruments` reads the
+next element sibling (tables are wrapped in `div.overflow-x-auto`), extracts
+header + rows as trimmed text, hides the wrapper, and passes
+`{ header, rows }` as the `table` prop. The table stays the single source of
+data in the note and the readable GitHub fallback. Only flashcards uses it for
+now; any instrument can opt in via the registry flag. All instrument
+components receive `args`, `name`, and (when extracted) `table` props.
+
 ## Tests
 
 - Block rule: matches bare and arg forms, ignores unknown names, no conflict
