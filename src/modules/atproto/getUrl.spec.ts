@@ -19,9 +19,7 @@ describe("getUrl", () => {
 
   it("returns null when the author cannot be resolved", async () => {
     vi.mocked(getAuthor).mockResolvedValue(null)
-    expect(
-      await getUrl({ did: "did:plc:abc", rkey: "r1" })
-    ).toBeNull()
+    expect(await getUrl({ did: "did:plc:abc", rkey: "r1" })).toBeNull()
   })
 
   it("builds a getRecord URL with the right query params on the author's PDS", async () => {

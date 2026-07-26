@@ -274,8 +274,8 @@ pre.tikz svg {
    (BAND_CHAR in MacroplanGrid.vue), and the macroplan app renders in
    Fira Code — don't let the note's serif leak in. */
 .macroplan-block {
-  font-family: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas,
-    monospace;
+  font-family:
+    "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .svg-download-host {

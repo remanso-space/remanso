@@ -60,25 +60,13 @@ onMounted(() => {
       </p>
 
       <div class="modal-action flex-col gap-2">
-        <button
-          type="button"
-          class="btn btn-ghost"
-          @click="onCancel()"
-        >
+        <button type="button" class="btn btn-ghost" @click="onCancel()">
           Cancel
         </button>
-        <button
-          type="button"
-          class="btn btn-warning"
-          @click="onOverwrite()"
-        >
+        <button type="button" class="btn btn-warning" @click="onOverwrite()">
           Save anyway (overwrite)
         </button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          @click="onDiscard()"
-        >
+        <button type="button" class="btn btn-primary" @click="onDiscard()">
           Discard my edits, pull latest
         </button>
       </div>

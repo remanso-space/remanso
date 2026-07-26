@@ -11,12 +11,7 @@ import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 const CONCURRENCY = 8
 const BULK_FLUSH_SIZE = 50
 
-export type CacheFailureKind =
-  | "fetch"
-  | "build"
-  | "save"
-  | "readme"
-  | "unknown"
+export type CacheFailureKind = "fetch" | "build" | "save" | "readme" | "unknown"
 
 export type CacheFailure = {
   kind: CacheFailureKind
@@ -43,9 +38,7 @@ const runWithConcurrency = async <T>(
     await worker(items[i])
     return next()
   }
-  await Promise.all(
-    Array.from({ length: Math.min(limit, items.length) }, next)
-  )
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, next))
 }
 
 export const useOfflineNotes = () => {

@@ -12,12 +12,16 @@ const SIZE = 1024
 
 async function main() {
   const { data, info } = await sharp(SRC)
-    .resize(SIZE, SIZE, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .resize(SIZE, SIZE, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
 
-  if (info.channels !== 4) throw new Error(`expected RGBA, got ${info.channels} channels`)
+  if (info.channels !== 4)
+    throw new Error(`expected RGBA, got ${info.channels} channels`)
 
   const out = Buffer.alloc(data.length)
   for (let i = 0; i < data.length; i += 4) {

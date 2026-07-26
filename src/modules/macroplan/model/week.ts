@@ -54,6 +54,6 @@ export function weekLabel(week: WeekId): string {
   return utcNoon(week).toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
-    timeZone: "UTC",
+    timeZone: "UTC"
   })
 }

@@ -1,11 +1,8 @@
 import { nextTick, type Ref, toValue, watch } from "vue"
 
 import { useImages } from "@/hooks/useImages.hook"
-import {
-  runMermaid,
-  runTikz,
-  useShikiji
-} from "@/hooks/useMarkdown.hook"
+import { runMermaid, runTikz, useShikiji } from "@/hooks/useMarkdown.hook"
+import { runInstruments } from "@/modules/instruments/runInstruments"
 import { runMacroplan } from "@/modules/macroplan/runMacroplan"
 import { attachSvgDownloads } from "@/utils/svgDownload"
 
@@ -49,6 +46,10 @@ export const useMarkdownPostRender = (
       if (options.macroplan) {
         renderJobs.push(runMacroplan(`${scope} .macroplan-block`))
       }
+
+      // Unconditional: cost is one querySelectorAll when no blocks exist,
+      // and every view (repo + public ATProto) gets instruments for free.
+      renderJobs.push(runInstruments(`${scope} .instrument-block`))
 
       if (options.shikiji?.()) {
         void useShikiji()

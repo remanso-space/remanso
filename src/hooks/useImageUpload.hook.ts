@@ -16,7 +16,9 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   return btoa(binary)
 }
 
-const splitPath = (fullPath: string): { directory: string; filename: string } => {
+const splitPath = (
+  fullPath: string
+): { directory: string; filename: string } => {
   const lastSlash = fullPath.lastIndexOf("/")
   if (lastSlash === -1) return { directory: "", filename: fullPath }
   return {

@@ -12,9 +12,7 @@ describe("extractYouTubeId", () => {
   })
 
   it("extracts id from youtu.be short URLs", () => {
-    expect(extractYouTubeId("https://youtu.be/dQw4w9WgXcQ")).toBe(
-      "dQw4w9WgXcQ"
-    )
+    expect(extractYouTubeId("https://youtu.be/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ")
   })
 
   it("extracts id from youtube.com/watch?v=", () => {
@@ -43,14 +41,14 @@ describe("extractYouTubeId", () => {
 
   it("prefers v= param over path segments", () => {
     expect(
-      extractYouTubeId(
-        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLxyz"
-      )
+      extractYouTubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLxyz")
     ).toBe("dQw4w9WgXcQ")
   })
 
   it("returns null for non-YouTube hosts", () => {
-    expect(extractYouTubeId("https://example.com/watch?v=dQw4w9WgXcQ")).toBeNull()
+    expect(
+      extractYouTubeId("https://example.com/watch?v=dQw4w9WgXcQ")
+    ).toBeNull()
   })
 
   it("returns null for youtube.com root URL with no id", () => {

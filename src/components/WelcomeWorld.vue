@@ -108,7 +108,11 @@ const publicNoteHandle = (did: string) => {
   const handle = getPublicAuthor(did)
   return handle ? `@${handle}` : toShortDid(did)
 }
-const publicNoteRoute = (note: { did: string; rkey: string; title: string }) => ({
+const publicNoteRoute = (note: {
+  did: string
+  rkey: string
+  title: string
+}) => ({
   name: "PublicNoteView",
   params: {
     shortDid: toShortDid(note.did),
@@ -327,10 +331,7 @@ onMounted(() => {
               </template>
 
               <div class="section-label mono">§ drifting in</div>
-              <ul
-                v-if="hasPublicNotes"
-                class="network-side-list"
-              >
+              <ul v-if="hasPublicNotes" class="network-side-list">
                 <li
                   v-for="note in sidebarPublicNotes"
                   :key="`${note.did}-${note.rkey}`"
@@ -383,8 +384,8 @@ onMounted(() => {
             <p class="lede">
               Point it at any markdown: a GitHub repo of your own, or public
               notes from the open ATProto network. Remanso turns it into a
-              stackable notebook with backlinks where your thinking finally
-              runs clear.
+              stackable notebook with backlinks where your thinking finally runs
+              clear.
             </p>
             <div class="hero-ed-paths">
               <!-- CTA 01: GitHub repo -->
@@ -430,16 +431,12 @@ onMounted(() => {
                   <div>
                     <div class="hep-t">From the open network</div>
                     <div class="hep-d">
-                      Live notes published via ATProto. No account needed —
-                      tap one and read.
+                      Live notes published via ATProto. No account needed — tap
+                      one and read.
                     </div>
                   </div>
                 </div>
-                <div
-                  v-if="hasPublicNotes"
-                  class="network-strip"
-                  role="list"
-                >
+                <div v-if="hasPublicNotes" class="network-strip" role="list">
                   <router-link
                     v-for="note in recentPublicNotes"
                     :key="`${note.did}-${note.rkey}`"

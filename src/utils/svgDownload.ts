@@ -15,9 +15,9 @@ const collectFontFamilies = (svg: SVGSVGElement): Set<string> => {
     })
   }
   collect(svg.getAttribute("font-family"))
-  svg.querySelectorAll<Element>("[font-family]").forEach((el) =>
-    collect(el.getAttribute("font-family"))
-  )
+  svg
+    .querySelectorAll<Element>("[font-family]")
+    .forEach((el) => collect(el.getAttribute("font-family")))
   return families
 }
 
@@ -52,7 +52,9 @@ const collectFontFaceCss = (families: Set<string>): string => {
   return parts.join("\n")
 }
 
-const getSvgPixelSize = (svg: SVGSVGElement): { width: number; height: number } => {
+const getSvgPixelSize = (
+  svg: SVGSVGElement
+): { width: number; height: number } => {
   const viewBox = svg.viewBox?.baseVal
   if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
     return { width: viewBox.width, height: viewBox.height }
@@ -162,7 +164,11 @@ const downloadAsPng = async (
   }
 }
 
-const makeButton = (label: string, title: string, onClick: () => void): HTMLButtonElement => {
+const makeButton = (
+  label: string,
+  title: string,
+  onClick: () => void
+): HTMLButtonElement => {
   const btn = document.createElement("button")
   btn.type = "button"
   btn.className = "btn btn-xs btn-neutral svg-download-button"
@@ -179,7 +185,9 @@ const makeButton = (label: string, title: string, onClick: () => void): HTMLButt
 
 const RENDERED_DIAGRAM_SELECTOR = ".tikz svg, .mermaid svg"
 
-export const attachSvgDownloads = (scope: ParentNode | null | undefined): void => {
+export const attachSvgDownloads = (
+  scope: ParentNode | null | undefined
+): void => {
   if (!scope) return
   const svgs = scope.querySelectorAll<SVGSVGElement>(RENDERED_DIAGRAM_SELECTOR)
   let index = 0

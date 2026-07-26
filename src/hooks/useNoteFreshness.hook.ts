@@ -88,7 +88,9 @@ export const useNoteFreshness = ({
     const usedCachedSha = latestSha.value !== null
     const { sha: remoteSha, failureStatus } = await resolveRemoteSha(path.value)
     if (!remoteSha) {
-      console.warn("pullLatest: could not resolve remote sha", { path: path.value })
+      console.warn("pullLatest: could not resolve remote sha", {
+        path: path.value
+      })
       if (failureStatus) status.value = failureStatus
       return { raw: null, failureStatus }
     }

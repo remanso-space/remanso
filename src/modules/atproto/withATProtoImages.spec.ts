@@ -12,9 +12,7 @@ describe("withATProtoImages", () => {
       { pds: PDS, did: DID }
     )
 
-    expect(out).toContain(
-      `${PDS}/xrpc/com.atproto.sync.getBlob`
-    )
+    expect(out).toContain(`${PDS}/xrpc/com.atproto.sync.getBlob`)
     expect(out).toContain("did=did%3Aplc%3Aabc123")
     expect(out).toContain(
       "cid=bafkreigh2akiscaildc7r4apx2t6q4t6n6kxjpw3xhqxkfvvbprdaezz4i"

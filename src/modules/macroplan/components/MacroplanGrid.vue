@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue"
 
-import type { FeatureRow, MarkerKind,Plan } from "../model/types"
-import { type WeekId,weekLabel } from "../model/week"
+import type { FeatureRow, MarkerKind, Plan } from "../model/types"
+import { type WeekId, weekLabel } from "../model/week"
 
 const props = defineProps<{ plan: Plan }>()
 
@@ -12,38 +12,38 @@ const GLYPH: Record<MarkerKind, string> = {
   original: "◯",
   reestimate: "△",
   "delivered-on-time": "◉",
-  "delivered-late": "▲",
+  "delivered-late": "▲"
 }
 const MARKER_CLASS: Record<MarkerKind, string> = {
   original: "text-base-content/50",
   reestimate: "text-warning",
   "delivered-on-time": "text-success",
-  "delivered-late": "text-error",
+  "delivered-late": "text-error"
 }
 // When two markers land on the same week, the higher rank owns the cell.
 const RANK: Record<MarkerKind, number> = {
   "delivered-late": 3,
   "delivered-on-time": 3,
   reestimate: 2,
-  original: 1,
+  original: 1
 }
 const TONE_TEXT: Record<Tone, string> = {
   success: "text-success",
   warning: "text-warning",
   error: "text-error",
-  neutral: "text-primary",
+  neutral: "text-primary"
 }
 const TONE_BORDER: Record<Tone, string> = {
   success: "border-success",
   warning: "border-warning",
   error: "border-error",
-  neutral: "border-primary",
+  neutral: "border-primary"
 }
 const TONE_DOT: Record<Tone, string> = {
   success: "bg-success",
   warning: "bg-warning",
   error: "bg-error",
-  neutral: "bg-base-300",
+  neutral: "bg-base-300"
 }
 
 // Layout constants (must match the CSS vars --name-w / --wk) for stacking math.
@@ -54,7 +54,7 @@ const BAND_CHAR = 6.6 // ≈ Fira Code advance (px) at the band font size
 const weeks = computed(() => props.plan.weeks)
 
 const gridStyle = computed(() => ({
-  gridTemplateColumns: `var(--name-w) repeat(${weeks.value.length}, var(--wk)) minmax(9rem, 1fr)`,
+  gridTemplateColumns: `var(--name-w) repeat(${weeks.value.length}, var(--wk)) minmax(9rem, 1fr)`
 }))
 
 function tone(row: FeatureRow): Tone {
@@ -72,7 +72,8 @@ function statusWord(row: FeatureRow): string {
 function markerAt(row: FeatureRow, w: WeekId): MarkerKind | null {
   let best: MarkerKind | null = null
   for (const m of row.markers) {
-    if (m.week === w && (best === null || RANK[m.kind] > RANK[best])) best = m.kind
+    if (m.week === w && (best === null || RANK[m.kind] > RANK[best]))
+      best = m.kind
   }
   return best
 }
@@ -96,16 +97,23 @@ const matrix = computed<Cell[][]>(() =>
       if (inBar) {
         const isStart = w === row.startWeek
         const isEnd = w === row.barEndWeek
-        line = isStart && isEnd ? "none" : isStart ? "right" : isEnd ? "left" : "full"
+        line =
+          isStart && isEnd
+            ? "none"
+            : isStart
+              ? "right"
+              : isEnd
+                ? "left"
+                : "full"
       }
       return {
         line,
         isStart: inBar && w === row.startWeek,
         glyph: m ? GLYPH[m] : "",
-        glyphCls: m ? MARKER_CLASS[m] : "",
+        glyphCls: m ? MARKER_CLASS[m] : ""
       }
-    }),
-  ),
+    })
+  )
 )
 
 // Per-week column metadata for the header + the now / milestone column rules.
@@ -114,8 +122,8 @@ const cols = computed(() =>
     w,
     label: weekLabel(w),
     isNow: props.plan.nowInRange && w === props.plan.nowWeek,
-    isMilestone: props.plan.milestones.some((m) => m.week === w),
-  })),
+    isMilestone: props.plan.milestones.some((m) => m.week === w)
+  }))
 )
 
 function colClass(i: number): string {
@@ -135,7 +143,8 @@ const milestoneFlags = computed(() => {
   const rowEnd: number[] = [] // px x-extent of the last flag placed in each row
   return items.map((x) => {
     const startX = NAME_W + (x.col - 2) * WK
-    const text = `◆ ${x.m.name}` + (x.m.unmet.length ? ` · ${x.m.unmet.length} unmet` : "")
+    const text =
+      `◆ ${x.m.name}` + (x.m.unmet.length ? ` · ${x.m.unmet.length} unmet` : "")
     const width = text.length * BAND_CHAR + 14
     let row = 0
     while (row < rowEnd.length && rowEnd[row] > startX - 6) row++
@@ -146,22 +155,35 @@ const milestoneFlags = computed(() => {
     return { name: x.m.name, unmet: x.m.unmet, col: x.col, row: row + 1, title }
   })
 })
-const bandRows = computed(() => milestoneFlags.value.reduce((n, f) => Math.max(n, f.row), 0))
+const bandRows = computed(() =>
+  milestoneFlags.value.reduce((n, f) => Math.max(n, f.row), 0)
+)
 const bandStyle = computed(() => ({
   gridTemplateColumns: `var(--name-w) repeat(${weeks.value.length}, var(--wk))`,
-  gridTemplateRows: `repeat(${bandRows.value}, 1.15rem)`,
+  gridTemplateRows: `repeat(${bandRows.value}, 1.15rem)`
 }))
 </script>
 
 <template>
-  <div class="macroplan overflow-auto rounded-box border border-base-300 bg-base-100">
+  <div
+    class="macroplan overflow-auto rounded-box border border-base-300 bg-base-100"
+  >
     <!-- milestone band: stacked label flags with leader lines down to the axis -->
     <div v-if="milestoneFlags.length" class="ms-band" :style="bandStyle">
       <template v-for="f in milestoneFlags" :key="f.name + '-' + f.col">
-        <i class="ms-lead" :style="{ gridColumn: f.col, gridRow: f.row + ' / -1' }" />
-        <span class="ms-flag" :style="{ gridColumn: f.col, gridRow: f.row }" :title="f.title">
+        <i
+          class="ms-lead"
+          :style="{ gridColumn: f.col, gridRow: f.row + ' / -1' }"
+        />
+        <span
+          class="ms-flag"
+          :style="{ gridColumn: f.col, gridRow: f.row }"
+          :title="f.title"
+        >
           <span class="ms-dia">◆</span> {{ f.name
-          }}<span v-if="f.unmet.length" class="ms-unmet"> · {{ f.unmet.length }} unmet</span>
+          }}<span v-if="f.unmet.length" class="ms-unmet">
+            · {{ f.unmet.length }} unmet</span
+          >
         </span>
       </template>
     </div>
@@ -191,9 +213,19 @@ const bandStyle = computed(() => ({
           class="cell"
           :class="colClass(ci)"
         >
-          <i v-if="cell.line !== 'none'" class="bar" :class="[cell.line, TONE_TEXT[tone(row)]]"></i>
-          <i v-if="cell.isStart" class="riser" :class="TONE_TEXT[tone(row)]"></i>
-          <span v-if="cell.glyph" class="glyph" :class="cell.glyphCls">{{ cell.glyph }}</span>
+          <i
+            v-if="cell.line !== 'none'"
+            class="bar"
+            :class="[cell.line, TONE_TEXT[tone(row)]]"
+          ></i>
+          <i
+            v-if="cell.isStart"
+            class="riser"
+            :class="TONE_TEXT[tone(row)]"
+          ></i>
+          <span v-if="cell.glyph" class="glyph" :class="cell.glyphCls">{{
+            cell.glyph
+          }}</span>
         </div>
         <div class="learncell">
           <template v-if="row.delivered">
@@ -204,7 +236,9 @@ const bandStyle = computed(() => ({
           </template>
           <template v-else>
             <span class="dot" :class="TONE_DOT[tone(row)]"></span>
-            <span class="note" :title="row.note || ''">{{ row.note || statusWord(row) }}</span>
+            <span class="note" :title="row.note || ''">{{
+              row.note || statusWord(row)
+            }}</span>
           </template>
         </div>
       </template>
@@ -258,7 +292,11 @@ const bandStyle = computed(() => ({
   z-index: 1;
 }
 .ms-dia {
-  color: color-mix(in oklab, var(--color-base-content) 55%, var(--color-base-100));
+  color: color-mix(
+    in oklab,
+    var(--color-base-content) 55%,
+    var(--color-base-100)
+  );
 }
 .ms-unmet {
   color: var(--color-error); /* unmet required features = a problem = red */
@@ -267,7 +305,8 @@ const bandStyle = computed(() => ({
 .ms-lead {
   justify-self: start;
   width: 0;
-  border-left: 2px dashed color-mix(in oklab, var(--color-base-content) 30%, var(--color-base-100));
+  border-left: 2px dashed
+    color-mix(in oklab, var(--color-base-content) 30%, var(--color-base-100));
   pointer-events: none;
 }
 
@@ -407,10 +446,15 @@ const bandStyle = computed(() => ({
 /* "today" — a neutral grey column (red is reserved for problems) */
 .cell.col-now,
 .cell.col-now .glyph {
-  background: color-mix(in oklab, var(--color-base-content) 7%, var(--color-base-100));
+  background: color-mix(
+    in oklab,
+    var(--color-base-content) 7%,
+    var(--color-base-100)
+  );
 }
 .col-ms {
-  border-left: 2px dashed color-mix(in oklab, var(--color-base-content) 30%, var(--color-base-100));
+  border-left: 2px dashed
+    color-mix(in oklab, var(--color-base-content) 30%, var(--color-base-100));
 }
 
 .legend {
@@ -430,7 +474,12 @@ const bandStyle = computed(() => ({
   height: 0.8rem;
   vertical-align: -0.1rem;
   border-radius: 0.15rem;
-  background: color-mix(in oklab, var(--color-base-content) 7%, var(--color-base-100));
-  border: 1px solid color-mix(in oklab, var(--color-base-content) 22%, var(--color-base-100));
+  background: color-mix(
+    in oklab,
+    var(--color-base-content) 7%,
+    var(--color-base-100)
+  );
+  border: 1px solid
+    color-mix(in oklab, var(--color-base-content) 22%, var(--color-base-100));
 }
 </style>

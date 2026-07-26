@@ -2,7 +2,7 @@
 
 A **Note**'s stable identity is its **Path** (its location in the repo, e.g. `ideas/zettel.md`), not its content **SHA**. We decided this because authors link to Notes by path (markdown `[[…]]` resolved via `resolvePath()`) and expect those links to survive edits — whereas a Note's SHA changes on every edit.
 
-This is surprising in the current code, which keys **Backlinks** (`Backlink { sha }`) and the stacked-notes URL (`?stackedNotes=sha1;sha2`) by SHA. Those are runtime *handles* that must resolve *through* the Path; if a SHA-handle ever disagrees with the Path, the Path wins.
+This is surprising in the current code, which keys **Backlinks** (`Backlink { sha }`) and the stacked-notes URL (`?stackedNotes=sha1;sha2`) by SHA. Those are runtime _handles_ that must resolve _through_ the Path; if a SHA-handle ever disagrees with the Path, the Path wins.
 
 ## Considered options
 

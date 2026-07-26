@@ -29,7 +29,9 @@ import {
   queryFileContent
 } from "./repo"
 
-const makeOctokitWithRequest = (impl: (route: string, params: unknown) => unknown) => ({
+const makeOctokitWithRequest = (
+  impl: (route: string, params: unknown) => unknown
+) => ({
   request: vi.fn(impl)
 })
 

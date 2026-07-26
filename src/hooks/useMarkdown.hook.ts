@@ -24,6 +24,7 @@ import {
   encodeUTF8ToBase64
 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
+import { markdownItInstruments } from "@/utils/markdown/markdown-it-instruments"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
 import { renderFallback } from "@/utils/markdown/renderFallback"
 
@@ -139,6 +140,7 @@ const md = new MarkdownIt({
   .use(markdownItMermaidExtractor)
   .use(markdownItTikzExtractor)
   .use(markdownItMacroplanExtractor)
+  .use(markdownItInstruments)
   .use(html5Media)
   .use(blockEmbedPlugin, {
     youtube: {

@@ -87,10 +87,9 @@ describe("resolveLiveQueryToShas", () => {
   })
 
   it("tolerates padding and empty segments from a hand-edited link", () => {
-    expect(resolveLiveQueryToShas([" notes/one , ,notes/two,"], files)).toEqual([
-      "b".repeat(40),
-      "c".repeat(40)
-    ])
+    expect(resolveLiveQueryToShas([" notes/one , ,notes/two,"], files)).toEqual(
+      ["b".repeat(40), "c".repeat(40)]
+    )
   })
 
   it("passes a sha-shaped entry through as a pinned fallback", () => {

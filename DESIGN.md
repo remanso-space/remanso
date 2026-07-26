@@ -1,6 +1,6 @@
 # Remanso — Design (QFD)
 
-Goal-driven design for what Remanso is *for*: a **beautiful, primarily read-only** viewer for notes authored in the IDE (git push) and read as a Matuschak-style stacked-notes web — built to make notes feel **good-looking**, to evoke **pride and peace** (including reading *gracefully on a flaky mobile/metro connection*), and to **lower every wall** to making your voice public. Relies on [CONTEXT.md](CONTEXT.md) for vocabulary (Note, Path, SHA, Backlink, Igarapé, Stacked Notes, Live/Snapshot reference, Published Note, Publish), [ADR-0001](docs/adr/0001-note-identity-is-path.md) (Note identity = Path) and [ADR-0002](docs/adr/0002-two-reference-modes.md) (Live vs Snapshot reference). The earlier "Path↔SHA resolution layer" is not a goal in itself — it folds in under Peace (live references that never break) and integrity (immutable Snapshot references).
+Goal-driven design for what Remanso is _for_: a **beautiful, primarily read-only** viewer for notes authored in the IDE (git push) and read as a Matuschak-style stacked-notes web — built to make notes feel **good-looking**, to evoke **pride and peace** (including reading _gracefully on a flaky mobile/metro connection_), and to **lower every wall** to making your voice public. Relies on [CONTEXT.md](CONTEXT.md) for vocabulary (Note, Path, SHA, Backlink, Igarapé, Stacked Notes, Live/Snapshot reference, Published Note, Publish), [ADR-0001](docs/adr/0001-note-identity-is-path.md) (Note identity = Path) and [ADR-0002](docs/adr/0002-two-reference-modes.md) (Live vs Snapshot reference). The earlier "Path↔SHA resolution layer" is not a goal in itself — it folds in under Peace (live references that never break) and integrity (immutable Snapshot references).
 
 Strength weights used in matrices: **9** strong, **3** medium, **1** weak, blank none.
 
@@ -268,52 +268,52 @@ Basement rows per function: **target / difficulty (1–5) / absolute weight / re
 
 ## 1. Goals — the WHATs
 
-| ID  | Goal                                                                                  | Weight | Source |
-|-----|---------------------------------------------------------------------------------------|:------:|--------|
-| G1  | **Beauty** — notes render gorgeously; the page is something you want to look at        |   9    | Author intent (this session) |
-| G2  | **Pride & Peace** — calm, trustworthy, quietly proud: nothing breaks, nothing misleads, nothing clutters; reads gracefully on a flaky mobile/metro connection | 10 | Author intent (this session) |
-| G3  | **Effortless public voice** — lower *every* wall to making your voice public: one gesture (`.pub.md`), open decentralized rails, no forms | 8 | Author intent (this session) |
+| ID  | Goal                                                                                                                                                          | Weight | Source                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: | ---------------------------- |
+| G1  | **Beauty** — notes render gorgeously; the page is something you want to look at                                                                               |   9    | Author intent (this session) |
+| G2  | **Pride & Peace** — calm, trustworthy, quietly proud: nothing breaks, nothing misleads, nothing clutters; reads gracefully on a flaky mobile/metro connection |   10   | Author intent (this session) |
+| G3  | **Effortless public voice** — lower _every_ wall to making your voice public: one gesture (`.pub.md`), open decentralized rails, no forms                     |   8    | Author intent (this session) |
 
 ## 2. Functions — the HOWs
 
-| ID  | Function                                                                 | Dir | Target (now) | Target (future) |
-|-----|-------------------------------------------------------------------------|:---:|--------------|-----------------|
-| F1  | **Render rich content faithfully** (math, code, diagrams, images, alerts, checkboxes) — for repo Notes *and* Published Notes | ↑ | every supported type renders correctly; failures degrade gracefully (never raw error dumps) | — |
-| F2  | **Present beautiful typography & layout** (fonts, width, prose, theme, lightbox); Published Notes carry their own theme/fonts/language | ↑ | tasteful defaults + per-repo/per-note tuning | — |
-| F3  | **Never show a broken live reference** (backlinks/images/notes resolve to current, or degrade gracefully) | ↓ | 0 visible broken refs in normal use; graceful placeholder on flaky network | 0 incl. edge cases |
-| F4  | **Preserve Snapshot references immutably** (a shared SHA link renders the exact shared version; never silently substitutes current content) | → | 100% snapshot fidelity; on uncached miss, latest-cached + disclosure banner | — |
-| F5  | **Serve instantly, offline & resilient on mobile/flaky networks** (PouchDB cache-first; no spinner anxiety in the metro) | ↓ | full offline read; cached render fast | cached render ≤ ~100 ms; survives mid-read connection loss |
-| F6  | **Keep the surface calm & uncluttered** (reading-first, settings tucked away, the Remanso stillness) | → | minimal chrome; no nags/noise | — |
-| F7  | **Reveal the web of connections** (backlinks + stacked notes) — *calm by default, on demand* | ↑ | every Note shows inbound links; stacking fluid; nothing flooded | — |
-| F8  | **Publish in one gesture to open rails** (`.pub.md` → ATProto Published Note; no in-app form; decentralized, author-owned) | ↓ | publish = rename + push (1 gesture), 0 in-app steps | — |
+| ID  | Function                                                                                                                                    | Dir | Target (now)                                                                                | Target (future)                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | :-: | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| F1  | **Render rich content faithfully** (math, code, diagrams, images, alerts, checkboxes) — for repo Notes _and_ Published Notes                |  ↑  | every supported type renders correctly; failures degrade gracefully (never raw error dumps) | —                                                          |
+| F2  | **Present beautiful typography & layout** (fonts, width, prose, theme, lightbox); Published Notes carry their own theme/fonts/language      |  ↑  | tasteful defaults + per-repo/per-note tuning                                                | —                                                          |
+| F3  | **Never show a broken live reference** (backlinks/images/notes resolve to current, or degrade gracefully)                                   |  ↓  | 0 visible broken refs in normal use; graceful placeholder on flaky network                  | 0 incl. edge cases                                         |
+| F4  | **Preserve Snapshot references immutably** (a shared SHA link renders the exact shared version; never silently substitutes current content) |  →  | 100% snapshot fidelity; on uncached miss, latest-cached + disclosure banner                 | —                                                          |
+| F5  | **Serve instantly, offline & resilient on mobile/flaky networks** (PouchDB cache-first; no spinner anxiety in the metro)                    |  ↓  | full offline read; cached render fast                                                       | cached render ≤ ~100 ms; survives mid-read connection loss |
+| F6  | **Keep the surface calm & uncluttered** (reading-first, settings tucked away, the Remanso stillness)                                        |  →  | minimal chrome; no nags/noise                                                               | —                                                          |
+| F7  | **Reveal the web of connections** (backlinks + stacked notes) — _calm by default, on demand_                                                |  ↑  | every Note shows inbound links; stacking fluid; nothing flooded                             | —                                                          |
+| F8  | **Publish in one gesture to open rails** (`.pub.md` → ATProto Published Note; no in-app form; decentralized, author-owned)                  |  ↓  | publish = rename + push (1 gesture), 0 in-app steps                                         | —                                                          |
 
 ## 3. Cascade — Goals → Functions → How → Components
 
-- **G1 Beauty**  _W:9_
-  - **F1** Render rich content faithfully  _Dir↑_
+- **G1 Beauty** _W:9_
+  - **F1** Render rich content faithfully _Dir↑_
     - **How**: markdown-it pipeline with plugins; each renderer wrapped so a parse failure yields a styled fallback, not a stack trace
       - **Component**: C1 `useMarkdown` + plugins (KaTeX, Shikiji, Mermaid, TikZ, GitHub alerts, checkboxes)
-  - **F2** Beautiful typography & layout  _Dir↑_
+  - **F2** Beautiful typography & layout _Dir↑_
     - **How**: DaisyUI theme + `@tailwindcss/typography` prose + per-repo `UserSettings`; Published Notes apply their stored theme/fonts
       - **Component**: C2 Theme & typography system (themes, fonts/width, image lightbox)
-- **G2 Pride & Peace**  _W:10_
-  - **F3** Never show a broken live reference  _Dir↓ Target 0 broken_
+- **G2 Pride & Peace** _W:10_
+  - **F3** Never show a broken live reference _Dir↓ Target 0 broken_
     - **How**: a single bidirectional Path↔SHA index; resolve Live references by Path; fix the in-stack edit bug; graceful placeholder when a target is genuinely missing
       - **Component**: C3 Reference resolver (Path↔SHA index over `store.files`)
-  - **F4** Preserve Snapshot references immutably  _Dir→_  — see [ADR-0002](docs/adr/0002-two-reference-modes.md)
+  - **F4** Preserve Snapshot references immutably _Dir→_ — see [ADR-0002](docs/adr/0002-two-reference-modes.md)
     - **How**: keep SHA-addressed stack URLs; render the pinned version; on cache miss show honest "unavailable", never substitute current
       - **Component**: C4 Snapshot pinning + unavailable state
-  - **F5** Serve instantly, offline & resilient  _Dir↓ Target offline read_
+  - **F5** Serve instantly, offline & resilient _Dir↓ Target offline read_
     - **How**: cache-first reads from PouchDB via the worker; render from cache before/without network; tolerate mid-read connection loss
       - **Component**: C5 PouchDB cache + `DataApi` worker; C9 Freshness/pull
-  - **F6** Keep the surface calm & uncluttered  _Dir→_
+  - **F6** Keep the surface calm & uncluttered _Dir→_
     - **How**: reading-first Igarapé; settings/chrome tucked away; no nags
       - **Component**: C6 Igarapé surface + calm chrome
-  - **F7** Reveal the web of connections — calm by default  _Dir↑_
+  - **F7** Reveal the web of connections — calm by default _Dir↑_
     - **How**: backlinks present but quiet; a Note opens into the stack only when its Backlink is summoned (progressive disclosure)
       - **Component**: C7 Backlinks + Stacked Notes (reveal-on-demand)
-- **G3 Effortless public voice**  _W:8_
-  - **F8** Publish in one gesture to open rails  _Dir↓ friction_
+- **G3 Effortless public voice** _W:8_
+  - **F8** Publish in one gesture to open rails _Dir↓ friction_
     - **How**: `.pub.md` suffix → external/CI publish to ATProto as a Published Note; in-app surfaces read those records, styled like private notes
       - **Component**: C8 Publish pipeline + ATProto read plumbing (`getUrl`, `withATProtoImages`, `Public*`→`Published*` views)
 
@@ -322,79 +322,80 @@ Basement rows per function: **target / difficulty (1–5) / absolute weight / re
 Cells: link strength (9/3/1/blank). Importance row = Σ(weight × strength).
 
 |                       | F1  | F2  | F3  | F4  | F5  | F6  | F7  | F8  |
-|-----------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| --------------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
 | G1 Beauty (9)         |  9  |  9  |  3  |  1  |  1  |  3  |  1  |  1  |
 | G2 Pride & Peace (10) |  3  |  3  |  9  |  9  |  9  |  9  |  9  |  3  |
 | G3 Public voice (8)   |  3  |  3  |  1  |  1  |  1  |  1  |  3  |  9  |
 | **Σ**                 | 135 | 135 | 125 | 107 | 107 | 125 | 123 | 111 |
 
-**Top engineering priorities:** F1/F2 (rendering beauty) lead on raw Σ because all three goals touch them; F3 and F6 follow on the strength of Pride & Peace. **Caveat the matrix hides:** the *primary read context is mobile on a flaky metro connection*, which makes F3 (graceful) + F5 (offline-resilient) the **reliability spine to watch hardest** — a broken note in the metro is far more peace-destroying than its mid-pack Σ suggests. Treat F3+F5 as critical despite F5's rank (see §7).
+**Top engineering priorities:** F1/F2 (rendering beauty) lead on raw Σ because all three goals touch them; F3 and F6 follow on the strength of Pride & Peace. **Caveat the matrix hides:** the _primary read context is mobile on a flaky metro connection_, which makes F3 (graceful) + F5 (offline-resilient) the **reliability spine to watch hardest** — a broken note in the metro is far more peace-destroying than its mid-pack Σ suggests. Treat F3+F5 as critical despite F5's rank (see §7).
 
 ## 5. Roof — Function × Function tradeoffs
 
 `◎` strong reinforce · `○` mild reinforce · `×` mild conflict · `⊗` strong conflict.
 
-|        | F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8 |
-|--------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| **F1** | —  | ○  |    |    | ⊗  |    |    |    |
-| **F2** |    | —  |    |    |    | ×  |    | ○  |
-| **F3** |    |    | —  | ×  | ◎  |    |    |    |
-| **F4** |    |    |    | —  |    |    |    |    |
-| **F5** |    |    |    |    | —  |    |    |    |
-| **F6** |    |    |    |    |    | —  | ×  |    |
-| **F7** |    |    |    |    |    |    | —  |    |
-| **F8** |    |    |    |    |    |    |    | —  |
+|        | F1  | F2  | F3  | F4  | F5  | F6  | F7  | F8  |
+| ------ | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| **F1** |  —  |  ○  |     |     |  ⊗  |     |     |     |
+| **F2** |     |  —  |     |     |     |  ×  |     |  ○  |
+| **F3** |     |     |  —  |  ×  |  ◎  |     |     |     |
+| **F4** |     |     |     |  —  |     |     |     |     |
+| **F5** |     |     |     |     |  —  |     |     |     |
+| **F6** |     |     |     |     |     |  —  |  ×  |     |
+| **F7** |     |     |     |     |     |     |  —  |     |
+| **F8** |     |     |     |     |     |     |     |  —  |
 
 **Conflicts that actually shape the design:**
+
 - **F1 ⊗ F5** (rich rendering vs instant/offline-on-mobile) — heavy renderers fight load speed and battery. Mitigation: lazy-load renderers, cache rendered HTML, render-from-cache first (T2).
-- **F3 × F4** (never-broken vs immutable snapshot) — resolved by [ADR-0002](docs/adr/0002-two-reference-modes.md): pre-cache aggressively; on a true miss, show latest-cached + a disclosure banner — integrity via *disclosure, not refusal*, so the metro never dead-ends (T3).
+- **F3 × F4** (never-broken vs immutable snapshot) — resolved by [ADR-0002](docs/adr/0002-two-reference-modes.md): pre-cache aggressively; on a true miss, show latest-cached + a disclosure banner — integrity via _disclosure, not refusal_, so the metro never dead-ends (T3).
 - **F6 × F7** (calm vs the web) — resolved: **calm by default, reveal on demand** (T1).
 - **F3 ◎ F5** (graceful refs reinforce offline resilience) — cache-first resolution makes both true at once; design them together.
 - **F2 × F6** (customization vs clutter) — keep settings tucked away, defaults tasteful.
 
 ## 6. Components & Function → Component map
 
-| ID  | Component                                                   | ADR      |
-|-----|------------------------------------------------------------|----------|
+| ID  | Component                                                  | ADR      |
+| --- | ---------------------------------------------------------- | -------- |
 | C1  | `useMarkdown` + markdown-it plugins (math/code/diagrams/…) | —        |
 | C2  | Theme & typography system (themes, fonts/width, lightbox)  | —        |
-| C3  | Reference resolver — Path↔SHA index over `store.files`      | ADR-0001 |
+| C3  | Reference resolver — Path↔SHA index over `store.files`     | ADR-0001 |
 | C4  | Snapshot pinning + "unavailable" state                     | ADR-0002 |
 | C5  | PouchDB cache + `DataApi` worker (cache-first reads)       | —        |
-| C6  | Igarapé reading surface + calm chrome                       | —        |
+| C6  | Igarapé reading surface + calm chrome                      | —        |
 | C7  | Backlinks + Stacked Notes (reveal-on-demand)               | —        |
 | C8  | Publish pipeline + ATProto read plumbing                   | —        |
 | C9  | Freshness / pull (external-commit detection)               | ADR-0001 |
 
-|     | C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8 | C9 |
-|-----|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| F1  | 9  | 3  |    |    | 3  |    |    | 1  |    |
-| F2  | 1  | 9  |    |    |    | 3  |    | 1  |    |
-| F3  |    |    | 9  | 1  | 3  |    | 3  |    | 9  |
-| F4  |    |    | 1  | 9  | 3  |    |    |    |    |
-| F5  |    |    | 3  | 3  | 9  |    |    |    | 3  |
-| F6  |    | 3  |    |    |    | 9  | 3  |    |    |
-| F7  |    |    | 3  |    |    | 3  | 9  |    |    |
-| F8  |    | 1  |    |    |    |    |    | 9  |    |
+|     | C1  | C2  | C3  | C4  | C5  | C6  | C7  | C8  | C9  |
+| --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| F1  |  9  |  3  |     |     |  3  |     |     |  1  |     |
+| F2  |  1  |  9  |     |     |     |  3  |     |  1  |     |
+| F3  |     |     |  9  |  1  |  3  |     |  3  |     |  9  |
+| F4  |     |     |  1  |  9  |  3  |     |     |     |     |
+| F5  |     |     |  3  |  3  |  9  |     |     |     |  3  |
+| F6  |     |  3  |     |     |     |  9  |  3  |     |     |
+| F7  |     |     |  3  |     |     |  3  |  9  |     |     |
+| F8  |     |  1  |     |     |     |     |     |  9  |     |
 
 ## 7. Critical performance budget
 
-| Rank | Function | Target | Watched on | If we miss it |
-|------|----------|--------|------------|---------------|
-| 1 | F3 (never broken) | 0 visible broken live refs | manual mobile run + a "broken-ref" dev assertion; fix the StackedNote `saveCacheNote` path bug | render a calm placeholder ("note unavailable"), never a stack trace or empty column |
-| 2 | F5 (offline/mobile) | full offline read; survive mid-read connection loss | DevTools offline/slow-3G throttling on the stacked-notes flow | cache-first always; if uncached + offline, honest "not downloaded yet" placeholder |
-| 3 | F1 (render fidelity) | all content types render; failures degrade | snapshot-render a fixture note (math/code/mermaid/tikz/alerts) | per-block styled fallback; the rest of the note still renders |
-| 4 | F4 (snapshot integrity) | 100% pinned-version fidelity | test: edit a Note, re-open an old `?stackedNotes=sha` link | show pinned version; on a true miss, latest-cached + disclosure banner — never *silent* substitution (ADR-0002) |
-| 5 | F8 (publish friction) | 1 gesture, 0 in-app steps | end-to-end: `.pub.md` push → appears in `/notes` | surface the failure plainly; do not require an in-app fallback form (would re-raise the wall) |
+| Rank | Function                | Target                                              | Watched on                                                                                     | If we miss it                                                                                                   |
+| ---- | ----------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1    | F3 (never broken)       | 0 visible broken live refs                          | manual mobile run + a "broken-ref" dev assertion; fix the StackedNote `saveCacheNote` path bug | render a calm placeholder ("note unavailable"), never a stack trace or empty column                             |
+| 2    | F5 (offline/mobile)     | full offline read; survive mid-read connection loss | DevTools offline/slow-3G throttling on the stacked-notes flow                                  | cache-first always; if uncached + offline, honest "not downloaded yet" placeholder                              |
+| 3    | F1 (render fidelity)    | all content types render; failures degrade          | snapshot-render a fixture note (math/code/mermaid/tikz/alerts)                                 | per-block styled fallback; the rest of the note still renders                                                   |
+| 4    | F4 (snapshot integrity) | 100% pinned-version fidelity                        | test: edit a Note, re-open an old `?stackedNotes=sha` link                                     | show pinned version; on a true miss, latest-cached + disclosure banner — never _silent_ substitution (ADR-0002) |
+| 5    | F8 (publish friction)   | 1 gesture, 0 in-app steps                           | end-to-end: `.pub.md` push → appears in `/notes`                                               | surface the failure plainly; do not require an in-app fallback form (would re-raise the wall)                   |
 
 ## 8. Tradeoffs — Got / Paid / ADR
 
-| ID  | Tradeoff | Got | Paid | ADR |
-|-----|----------|-----|------|-----|
-| T1  | Calm-by-default over web-forward (F6 > F7 prominence) | Stillness; the Remanso peace | Connections less immediately visible (mitigated by reveal-on-demand) | — |
-| T2  | Lazy-load + cache rendered HTML (F1 ⊗ F5) | Fidelity *and* instant/offline render | Cache complexity; possible stale-render window | — |
-| T3  | Integrity via disclosure, not refusal (F3 + F4 in the unavailable edge) | No silent rewrite *and* no metro dead-end: latest-cached + a banner | A banner caveat instead of a guaranteed exact view when uncached | [ADR-0002](docs/adr/0002-two-reference-modes.md) |
-| T4  | Filename-suffix publishing (`.pub.md`) over in-app publish UI (F8) | Near-zero friction; publishing is a gesture, not a feature | Less in-app preview/control; coupling to a naming convention | — |
+| ID  | Tradeoff                                                                | Got                                                                 | Paid                                                                 | ADR                                              |
+| --- | ----------------------------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ |
+| T1  | Calm-by-default over web-forward (F6 > F7 prominence)                   | Stillness; the Remanso peace                                        | Connections less immediately visible (mitigated by reveal-on-demand) | —                                                |
+| T2  | Lazy-load + cache rendered HTML (F1 ⊗ F5)                               | Fidelity _and_ instant/offline render                               | Cache complexity; possible stale-render window                       | —                                                |
+| T3  | Integrity via disclosure, not refusal (F3 + F4 in the unavailable edge) | No silent rewrite _and_ no metro dead-end: latest-cached + a banner | A banner caveat instead of a guaranteed exact view when uncached     | [ADR-0002](docs/adr/0002-two-reference-modes.md) |
+| T4  | Filename-suffix publishing (`.pub.md`) over in-app publish UI (F8)      | Near-zero friction; publishing is a gesture, not a feature          | Less in-app preview/control; coupling to a naming convention         | —                                                |
 
 ### Tensions being watched (unresolved by design)
 
@@ -404,10 +405,10 @@ Cells: link strength (9/3/1/blank). Importance row = Σ(weight × strength).
 ## 9. Inconsistencies spotted and fixed
 
 - **In-stack edit bug:** `StackedNote.performSave()` called `saveCacheNote()` without `path`, so `store.files` never got the new SHA after an in-Igarapé edit (`FleetingNotes` passed it correctly). Broke F3. **Fixed** — `StackedNote.vue` now passes `path`.
-- **Asymmetric file index:** `addFile` deduped by SHA only, `registerUploadedFile` by PATH — so an edit (same path, new SHA) left a stale duplicate entry. **Fixed** — `addFile` now dedups by SHA *and* path (a path is unique), with a regression test in `userRepo.store.spec.ts`. (Full bidirectional index C3 still the longer-term direction.)
+- **Asymmetric file index:** `addFile` deduped by SHA only, `registerUploadedFile` by PATH — so an edit (same path, new SHA) left a stale duplicate entry. **Fixed** — `addFile` now dedups by SHA _and_ path (a path is unique), with a regression test in `userRepo.store.spec.ts`. (Full bidirectional index C3 still the longer-term direction.)
 - **ADR-0001 over-absolute:** it called SHA-keyed references "a fragility". **Refined** by ADR-0002 into two intentional modes (Live/Snapshot).
 - **`CLAUDE.md` "edit history tracking"** mislabels the visited-repos History; no edit-history feature exists. (Flagged in CONTEXT.md.)
-- **Snapshot cache not immutable:** editing writes new content under the *viewed* (old) SHA's cache key (`prepareNoteCache` keys by the viewed sha), so a re-opened old-SHA snapshot can serve new content from cache. **Decided fix (ADR-0002):** key the immutable store by the content's *own* SHA (write-once), keep the Path key as the latest pointer. *(Not yet implemented — the C3/C4 cache slice; unlocks the snapshot banner.)*
+- **Snapshot cache not immutable:** editing writes new content under the _viewed_ (old) SHA's cache key (`prepareNoteCache` keys by the viewed sha), so a re-opened old-SHA snapshot can serve new content from cache. **Decided fix (ADR-0002):** key the immutable store by the content's _own_ SHA (write-once), keep the Path key as the latest pointer. _(Not yet implemented — the C3/C4 cache slice; unlocks the snapshot banner.)_
 - **Naming drift carried from the language session:** `Flux`→`Igarapé`, `HistoricNotes`→`Index`, `Repetition`→`Card`, `PublicNote*`→`PublishedNote*`, `useNotes()` returns Files not Notes. (Tracked in CONTEXT.md "Flagged ambiguities".)
 
 ---
