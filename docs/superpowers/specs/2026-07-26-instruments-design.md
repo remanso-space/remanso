@@ -119,6 +119,12 @@ calibration, `1/20`), `bayes` (interactive Bayes explorable with sliders +
   keeps the pacing (which *is* the instrument) while dropping the tween, the way
   `app.css` already treats the image lightbox.
 
+## Fourth wave (added 2026-07-27)
+
+`prime-hand`, `quota-ratchet` and `reification` — three rhetorical explorables
+for the *Accounting for Slavery* note. Full design in
+`2026-07-27-accounting-for-slavery-instruments-design.md`.
+
 ### Sibling-table contract extension
 
 Instruments flagged in `instrumentWantsTable` (registry) receive the markdown

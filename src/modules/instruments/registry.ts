@@ -24,7 +24,13 @@ const loaders = {
   kingman: () =>
     import("./components/KingmanInstrument.vue").then((m) => m.default),
   breath: () =>
-    import("./components/BreathInstrument.vue").then((m) => m.default)
+    import("./components/BreathInstrument.vue").then((m) => m.default),
+  "prime-hand": () =>
+    import("./components/PrimeHandInstrument.vue").then((m) => m.default),
+  "quota-ratchet": () =>
+    import("./components/QuotaRatchetInstrument.vue").then((m) => m.default),
+  reification: () =>
+    import("./components/ReificationInstrument.vue").then((m) => m.default)
 } satisfies Record<string, () => Promise<Component>>
 
 export type InstrumentName = keyof typeof loaders
@@ -44,7 +50,9 @@ export const instrumentLoaders: Record<
  */
 export const instrumentWantsTable: Partial<Record<InstrumentName, true>> = {
   flashcards: true,
-  flashcard: true
+  flashcard: true,
+  "prime-hand": true,
+  reification: true
 }
 
 /**
