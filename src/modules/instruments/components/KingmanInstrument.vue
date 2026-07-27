@@ -37,41 +37,78 @@ const workInProgress = computed(() => wip(params.value))
 const vFactor = computed(() => variabilityFactor(params.value))
 const uFactor = computed(() => utilizationFactor(params.value))
 
+// How many times its own service time a job spends waiting: Wq / τ = V·U.
+const waitMultiple = computed(() => vFactor.value * uFactor.value)
+
 const sliders = computed(() => [
-  { label: "Utilization ρ", model: utilizationPct, min: 0, max: 99, step: 1 },
-  { label: "Arrival variability Ca", model: ca, min: 0, max: 3, step: 0.1 },
-  { label: "Service variability Cs", model: cs, min: 0, max: 3, step: 0.1 },
-  { label: "Service time τ", model: serviceTime, min: 1, max: 60, step: 1 }
+  {
+    label: "Utilization ρ",
+    hint: "how busy the server is",
+    model: utilizationPct,
+    min: 0,
+    max: 99,
+    step: 1
+  },
+  {
+    label: "Arrival variability Ca",
+    hint: "how bursty the arrivals are",
+    model: ca,
+    min: 0,
+    max: 3,
+    step: 0.1
+  },
+  {
+    label: "Service variability Cs",
+    hint: "how uneven the work is",
+    model: cs,
+    min: 0,
+    max: 3,
+    step: 0.1
+  },
+  {
+    label: "Service time τ",
+    hint: "just the clock — scales the times, not the counts",
+    model: serviceTime,
+    min: 1,
+    max: 60,
+    step: 1
+  }
 ])
 
 const displayValue = (label: string, value: number): string =>
   label === "Utilization ρ" ? `${value}%` : round1(value)
 
-// Cycle-time-vs-utilization curve: the ρ/(1−ρ) blow-up made visible. Keep the
-// current variability, sweep ρ, and clamp the y-axis so the point stays on
-// screen even as the curve shoots off the top near ρ = 1.
+// Cycle-time-vs-utilization curve, plotted as a multiple of service time so it
+// is unit-free. The y-axis ceiling is FIXED: variability visibly lifts the
+// whole curve, and ρ walks the point up the wall toward infinity at 100%.
 const CURVE_MAX_U = 0.98
+const Y_MAX = 10
 const WIDTH = 320
 const HEIGHT = 120
 
 const chart = computed(() => {
   const v = vFactor.value
-  const tau = params.value.serviceTime
-  const ctAt = (u: number): number => (1 + v * (u / (1 - u))) * tau
-  const yMax = Math.max(ctAt(0.9), cycle.value * 1.15, tau * 2)
+  const multAt = (u: number): number => 1 + v * (u / (1 - u))
 
   const x = (u: number): number => (u / CURVE_MAX_U) * WIDTH
-  const y = (ct: number): number => HEIGHT - (Math.min(ct, yMax) / yMax) * HEIGHT
+  const y = (mult: number): number =>
+    HEIGHT - (Math.min(mult, Y_MAX) / Y_MAX) * HEIGHT
 
   const steps = 80
   const path = Array.from({ length: steps + 1 }, (_, index) => {
     const u = (index / steps) * CURVE_MAX_U
-    return `${index === 0 ? "M" : "L"}${x(u).toFixed(1)},${y(ctAt(u)).toFixed(1)}`
+    return `${index === 0 ? "M" : "L"}${x(u).toFixed(1)},${y(multAt(u)).toFixed(1)}`
   }).join(" ")
 
+  const currentMult = multAt(params.value.utilization)
   return {
     path,
-    point: { cx: x(params.value.utilization), cy: y(cycle.value) }
+    floorY: y(1),
+    point: {
+      cx: x(Math.min(params.value.utilization, CURVE_MAX_U)),
+      cy: Math.max(4, y(currentMult))
+    },
+    offScale: currentMult > Y_MAX
   }
 })
 </script>
@@ -97,34 +134,50 @@ const chart = computed(() => {
           :step="slider.step"
           :aria-label="slider.label"
         />
+        <span class="text-xs opacity-50">{{ slider.hint }}</span>
       </label>
     </div>
 
     <div class="mt-3 flex items-baseline gap-2">
       <span class="font-mono text-2xl tabular-nums text-(--link-accent)">
-        {{ round1(workInProgress) }}
+        {{ round1(cycle) }}
       </span>
-      <span class="text-sm opacity-60">items in progress</span>
+      <span class="text-sm opacity-60">cycle time</span>
     </div>
     <p class="mt-1 text-sm text-base-content/60">
-      Little's Law: WIP = throughput × cycle time =
-      {{ round1(params.utilization / params.serviceTime) }} ×
-      {{ round1(cycle) }}
+      {{ round1(params.serviceTime) }} doing the work +
+      <span class="tabular-nums">{{ round1(wait) }}</span> waiting in the queue
+    </p>
+    <p class="mt-1 text-sm text-base-content/60">
+      A job waits
+      <span class="tabular-nums font-semibold">{{ round1(waitMultiple) }}×</span>
+      as long as the work itself takes.
     </p>
 
-    <p class="mt-2 text-xs text-base-content/60">
-      Kingman Wq ≈ V·U·τ = {{ round1(vFactor) }} · {{ round1(uFactor) }} ·
-      {{ round1(params.serviceTime) }} =
-      <span class="tabular-nums">{{ round1(wait) }}</span> wait,
-      <span class="tabular-nums">{{ round1(cycle) }}</span> cycle time
+    <p class="mt-2 text-sm text-base-content/60">
+      Little's Law →
+      <span class="font-mono tabular-nums text-(--link-accent)">
+        {{ round1(workInProgress) }}
+      </span>
+      items in progress (throughput {{ round1(params.utilization / params.serviceTime) }}
+      × cycle time {{ round1(cycle) }})
     </p>
 
     <svg
       class="mt-3 w-full"
       :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
       role="img"
-      aria-label="Cycle time versus utilization, exploding near 100%"
+      aria-label="Cycle time as a multiple of service time versus utilization"
     >
+      <line
+        x1="0"
+        :y1="chart.floorY"
+        :x2="WIDTH"
+        :y2="chart.floorY"
+        stroke="var(--color-base-300)"
+        stroke-width="1"
+        stroke-dasharray="3 3"
+      />
       <path
         :d="chart.path"
         fill="none"
@@ -139,7 +192,11 @@ const chart = computed(() => {
       />
     </svg>
     <p class="mt-1 text-center text-xs opacity-60">
-      cycle time as utilization ρ rises to 100%
+      cycle time (× service time) as utilization ρ rises to 100%<span
+        v-if="chart.offScale"
+      >
+        — off the top of the chart</span
+      >
     </p>
   </div>
 </template>

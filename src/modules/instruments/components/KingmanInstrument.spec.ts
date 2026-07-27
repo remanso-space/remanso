@@ -6,11 +6,21 @@ import KingmanInstrument from "@/modules/instruments/components/KingmanInstrumen
 const mountKingman = (args = "u=80% ca=1 cs=1 t=10") =>
   mount(KingmanInstrument, { props: { args, name: "kingman" } })
 
-const wipText = (wrapper: ReturnType<typeof mountKingman>) =>
+const cycleText = (wrapper: ReturnType<typeof mountKingman>) =>
   wrapper.get("span.font-mono").text()
 
+const wipText = (wrapper: ReturnType<typeof mountKingman>) =>
+  wrapper.findAll("span.font-mono")[1].text()
+
 describe("KingmanInstrument", () => {
-  it("renders the M/M/1 WIP from args", () => {
+  it("renders cycle time as the headline", () => {
+    const wrapper = mountKingman()
+    // τ·(1 + V·U) = 10·(1 + 1·4) = 50
+    expect(cycleText(wrapper)).toBe("50")
+    expect(wrapper.text()).toContain("cycle time")
+  })
+
+  it("renders the M/M/1 WIP from Little's Law", () => {
     const wrapper = mountKingman()
     expect(wipText(wrapper)).toBe("4")
     expect(wrapper.text()).toContain("Little's Law")
@@ -24,18 +34,28 @@ describe("KingmanInstrument", () => {
     expect(values).toEqual(["90", "1.5", "0.5", "12"])
   })
 
-  it("recomputes the WIP when utilization rises", async () => {
+  it("recomputes cycle time when utilization rises", async () => {
     const wrapper = mountKingman()
-    expect(wipText(wrapper)).toBe("4")
+    expect(cycleText(wrapper)).toBe("50")
     await wrapper.get('input[aria-label="Utilization ρ"]').setValue("90")
-    expect(wipText(wrapper)).toBe("9")
+    // 10·(1 + 1·9) = 100
+    expect(cycleText(wrapper)).toBe("100")
+  })
+
+  it("service time scales cycle time but not WIP", async () => {
+    const wrapper = mountKingman()
+    expect(cycleText(wrapper)).toBe("50")
+    expect(wipText(wrapper)).toBe("4")
+    await wrapper.get('input[aria-label="Service time τ"]').setValue("20")
+    expect(cycleText(wrapper)).toBe("100")
+    expect(wipText(wrapper)).toBe("4")
   })
 
   it("drops the wait to zero with no variability", async () => {
     const wrapper = mountKingman()
     await wrapper.get('input[aria-label="Arrival variability Ca"]').setValue("0")
     await wrapper.get('input[aria-label="Service variability Cs"]').setValue("0")
-    expect(wrapper.text()).toContain("0 wait")
+    expect(wrapper.text()).toContain("0 waiting in the queue")
   })
 
   it("draws the cycle-time curve and the current point", () => {
