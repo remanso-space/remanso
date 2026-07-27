@@ -58,9 +58,9 @@ const closing = computed(() => {
 
     <p class="filter-tally mt-3 text-sm">
       Called violence:
-      <span class="tabular-nums text-(--link-accent)">{{ tally.events }}</span>
+      <span class="font-bold tabular-nums text-error">{{ tally.events }}</span>
       of <span class="tabular-nums">{{ tally.totalEvents }}</span> events ·
-      <span class="tabular-nums text-(--link-accent)">
+      <span class="font-bold tabular-nums text-error">
         {{ formatLives(tally.lives) }}
       </span>
       of <span class="tabular-nums">{{ formatLives(tally.totalLives) }}</span>
@@ -81,7 +81,7 @@ const closing = computed(() => {
         <span>{{ event.text }}</span>
         <span
           class="shrink-0 tabular-nums"
-          :class="counted(index) ? 'text-(--link-accent)' : ''"
+          :class="counted(index) ? 'font-bold text-error' : ''"
         >
           {{ formatLives(event.lives) }}
         </span>
