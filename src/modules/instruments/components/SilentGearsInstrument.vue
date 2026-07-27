@@ -161,17 +161,17 @@ const count = (perYear: number) =>
     <div
       v-for="toll in named"
       :key="toll.cause"
-      class="gears-named mt-3 flex items-center justify-between rounded-box border border-(--link-accent) p-2"
+      class="gears-named mt-3 flex items-center justify-between rounded-box border-2 border-error bg-error/10 p-2"
     >
       <div>
         <span
-          class="text-[0.65rem] font-semibold tracking-widest text-(--link-accent) uppercase"
+          class="text-[0.65rem] font-semibold tracking-widest text-error uppercase"
         >
           Violence
         </span>
         <div class="text-sm">{{ toll.cause }}</div>
       </div>
-      <span class="font-mono text-2xl tabular-nums text-(--link-accent)">
+      <span class="font-mono text-2xl font-bold tabular-nums text-error">
         {{ count(toll.perYear) }}
       </span>
     </div>
