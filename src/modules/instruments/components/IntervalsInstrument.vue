@@ -3,11 +3,13 @@ import { computed, onUnmounted, ref } from "vue"
 
 import { beep, primeAudio } from "../audio"
 import { formatSeconds } from "../duration"
-import { parseIntervals } from "../intervals"
+import { parseIntervals, parseIntervalsFromList } from "../intervals"
 
-const props = defineProps<{ args: string; name: string }>()
+const props = defineProps<{ args: string; name: string; list?: string[] }>()
 
-const steps = parseIntervals(props.args)
+const steps =
+  parseIntervals(props.args) ??
+  (props.list ? parseIntervalsFromList(props.list) : null)
 const stepList = steps ?? []
 const totalSeconds = stepList.reduce((sum, step) => sum + step.seconds, 0)
 

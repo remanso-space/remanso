@@ -44,3 +44,13 @@ export const instrumentWantsTable: Partial<Record<InstrumentName, true>> = {
   flashcards: true,
   flashcard: true
 }
+
+/**
+ * Instruments that read the markdown list right below them as data when no
+ * inline args are given — runInstruments extracts the sibling `<ul>`/`<ol>`
+ * items and passes them as the `list` prop. The list stays visible as the
+ * single source and the plain GitHub fallback.
+ */
+export const instrumentWantsList: Partial<Record<InstrumentName, true>> = {
+  intervals: true
+}

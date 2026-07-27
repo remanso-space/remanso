@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { parseIntervals } from "@/modules/instruments/intervals"
+import {
+  parseIntervals,
+  parseIntervalsFromList
+} from "@/modules/instruments/intervals"
 
 describe("parseIntervals", () => {
   it("parses comma-separated steps with labels and accents", () => {
@@ -63,5 +66,41 @@ describe("parseIntervals", () => {
   it("returns null for repeats below 2", () => {
     expect(parseIntervals("30s x1")).toBeNull()
     expect(parseIntervals("30s x0")).toBeNull()
+  })
+})
+
+describe("parseIntervalsFromList", () => {
+  it("parses `label | duration` items with accents", () => {
+    expect(
+      parseIntervalsFromList([
+        "support à cheval | 30s",
+        "marche de l'éléphant | 30s",
+        "fente avant - chaque jambe | 30s"
+      ])
+    ).toEqual([
+      { seconds: 30, label: "support à cheval" },
+      { seconds: 30, label: "marche de l'éléphant" },
+      { seconds: 30, label: "fente avant - chaque jambe" }
+    ])
+  })
+
+  it("accepts either order and a bare duration", () => {
+    expect(parseIntervalsFromList(["30s | warmup", "1m plank"])).toEqual([
+      { seconds: 30, label: "warmup" },
+      { seconds: 60, label: "plank" }
+    ])
+  })
+
+  it("still expands xN repeats on a bare-duration item", () => {
+    expect(parseIntervalsFromList(["30s pompes x3"])).toEqual([
+      { seconds: 30, label: "pompes 1/3" },
+      { seconds: 30, label: "pompes 2/3" },
+      { seconds: 30, label: "pompes 3/3" }
+    ])
+  })
+
+  it("returns null when any item is unparsable or the list is empty", () => {
+    expect(parseIntervalsFromList(["30s ok", "nope"])).toBeNull()
+    expect(parseIntervalsFromList([])).toBeNull()
   })
 })

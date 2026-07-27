@@ -3,6 +3,7 @@ import { type App, createApp } from "vue"
 import {
   instrumentLoaders,
   type InstrumentName,
+  instrumentWantsList,
   instrumentWantsTable
 } from "./registry"
 
@@ -52,6 +53,22 @@ const extractSiblingTable = (el: HTMLElement): InstrumentTable | undefined => {
 }
 
 /**
+ * For list-fed instruments with no inline args: read the `<ul>`/`<ol>`
+ * rendered right after the placeholder and return its item texts. The list
+ * stays visible — a readable overview in Remanso and the GitHub fallback.
+ */
+const extractSiblingList = (el: HTMLElement): string[] | undefined => {
+  const sibling = el.nextElementSibling
+  if (!(sibling instanceof HTMLElement) || !sibling.matches("ul,ol")) {
+    return undefined
+  }
+  const items = Array.from(sibling.querySelectorAll(":scope > li")).map(
+    (li) => li.textContent?.trim() ?? ""
+  )
+  return items.length > 0 ? items : undefined
+}
+
+/**
  * Mount an instrument component onto every :::name::: placeholder in scope.
  * Components only load when a placeholder actually exists, so notes without
  * instruments pay nothing.
@@ -70,15 +87,16 @@ export const runInstruments = async (querySelector: string): Promise<void> => {
       const loader = instrumentLoaders[name]
       if (!loader) return
       el.dataset.instrumentMounted = "true"
+      const args = el.dataset.args ?? ""
       const table = instrumentWantsTable[name]
         ? extractSiblingTable(el)
         : undefined
+      const list =
+        instrumentWantsList[name] && !args.trim()
+          ? extractSiblingList(el)
+          : undefined
       const component = await loader()
-      const app = createApp(component, {
-        args: el.dataset.args ?? "",
-        name,
-        table
-      })
+      const app = createApp(component, { args, name, table, list })
       app.mount(el)
       mounted.push({ app, el })
     })

@@ -49,3 +49,37 @@ export const parseIntervals = (args: string): IntervalStep[] | null => {
   }
   return steps.length > 0 ? steps : null
 }
+
+/**
+ * Parse one markdown list item, `label | duration` (either order), into
+ * steps by reformatting to parseStep's `duration label` syntax. A bare item
+ * with no pipe goes straight to parseStep, keeping `xN` repeat support.
+ */
+const parseListItem = (item: string): IntervalStep[] | null => {
+  const text = item.trim()
+  if (!text) return null
+  const pipe = text.indexOf("|")
+  if (pipe === -1) return parseStep(text)
+  const left = text.slice(0, pipe).trim()
+  const right = text.slice(pipe + 1).trim()
+  const [duration, label] =
+    parseDuration(right) !== null ? [right, left] : [left, right]
+  return parseStep(label ? `${duration} ${label}` : duration)
+}
+
+/**
+ * Parse a markdown list (each item `label | duration`) into steps — lets a
+ * note keep the steps as a normal, GitHub-readable list instead of duplicating
+ * them in the `:::intervals ...:::` args. Any unparsable item invalidates all.
+ */
+export const parseIntervalsFromList = (
+  items: string[]
+): IntervalStep[] | null => {
+  const steps: IntervalStep[] = []
+  for (const item of items) {
+    const parsed = parseListItem(item)
+    if (parsed === null) return null
+    steps.push(...parsed)
+  }
+  return steps.length > 0 ? steps : null
+}

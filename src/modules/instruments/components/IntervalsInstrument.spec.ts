@@ -34,6 +34,28 @@ describe("IntervalsInstrument", () => {
     expect(wrapper.get("progress").attributes("max")).toBe("270")
   })
 
+  it("reads steps from the list prop when args are empty", () => {
+    const wrapper = mount(IntervalsInstrument, {
+      props: {
+        args: "",
+        name: "intervals",
+        list: ["support à cheval | 30s", "marche de l'éléphant | 45s"]
+      }
+    })
+    expect(display(wrapper)).toBe("00:30")
+    expect(wrapper.text()).toContain("support à cheval")
+    expect(wrapper.text()).toContain("step 1 / 2")
+    expect(wrapper.text()).toContain("next: marche de l'éléphant 45s")
+  })
+
+  it("prefers inline args over the list prop", () => {
+    const wrapper = mount(IntervalsInstrument, {
+      props: { args: "1m plank", name: "intervals", list: ["burpees | 30s"] }
+    })
+    expect(display(wrapper)).toBe("01:00")
+    expect(wrapper.text()).toContain("plank")
+  })
+
   it("shows a muted hint for invalid args", () => {
     const wrapper = mountIntervals("garbage")
     expect(wrapper.text()).toContain(
