@@ -20,7 +20,8 @@ const loaders = {
   takt: () =>
     import("./components/TaktTimeInstrument.vue").then((m) => m.default),
   urn: () => import("./components/UrnInstrument.vue").then((m) => m.default),
-  bayes: () => import("./components/BayesInstrument.vue").then((m) => m.default),
+  bayes: () =>
+    import("./components/BayesInstrument.vue").then((m) => m.default),
   kingman: () =>
     import("./components/KingmanInstrument.vue").then((m) => m.default),
   breath: () =>
@@ -30,7 +31,11 @@ const loaders = {
   "quota-ratchet": () =>
     import("./components/QuotaRatchetInstrument.vue").then((m) => m.default),
   reification: () =>
-    import("./components/ReificationInstrument.vue").then((m) => m.default)
+    import("./components/ReificationInstrument.vue").then((m) => m.default),
+  "silent-gears": () =>
+    import("./components/SilentGearsInstrument.vue").then((m) => m.default),
+  "naming-filter": () =>
+    import("./components/NamingFilterInstrument.vue").then((m) => m.default)
 } satisfies Record<string, () => Promise<Component>>
 
 export type InstrumentName = keyof typeof loaders
@@ -52,7 +57,9 @@ export const instrumentWantsTable: Partial<Record<InstrumentName, true>> = {
   flashcards: true,
   flashcard: true,
   "prime-hand": true,
-  reification: true
+  reification: true,
+  "silent-gears": true,
+  "naming-filter": true
 }
 
 /**
