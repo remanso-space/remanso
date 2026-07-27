@@ -19,6 +19,13 @@ const diff =
       : differenceInCalendarDays(parsed, today)
     : 0
 
+// Shown in the reader's locale and timezone (parseISO already parses the
+// date-only string as local midnight, so the day count is local too).
+const localeDate =
+  valid && parsed
+    ? parsed.toLocaleDateString(undefined, { dateStyle: "long" })
+    : ""
+
 const formatCount = (count: number): string =>
   String(count).replace(/\B(?=(\d{3})+(?!\d))/g, " ")
 
@@ -46,7 +53,7 @@ const display =
         {{ display }}
       </div>
       <div class="text-sm opacity-60">
-        <template v-if="label">{{ label }} · </template>{{ isoDate }}
+        <template v-if="label">{{ label }} · </template>{{ localeDate }}
       </div>
     </template>
     <div v-else class="text-sm opacity-60">

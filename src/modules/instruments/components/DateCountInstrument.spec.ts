@@ -66,12 +66,17 @@ describe("DateCountInstrument", () => {
     expect(wrapper.find("div.font-mono").exists()).toBe(false)
   })
 
-  it("renders the label and target date in muted text", () => {
+  it("renders the label and target date in the reader's locale", () => {
     const wrapper = mount(DateCountInstrument, {
       props: { args: "2026-08-13 Fin de la prépa", name: "until" }
     })
     expect(wrapper.text()).toContain("Fin de la prépa")
-    expect(wrapper.text()).toContain("2026-08-13")
+    expect(wrapper.text()).toContain(
+      new Date(2026, 7, 13).toLocaleDateString(undefined, {
+        dateStyle: "long"
+      })
+    )
+    expect(wrapper.text()).not.toContain("2026-08-13")
     expect(wrapper.get("div.text-sm").classes()).toContain("opacity-60")
   })
 })
