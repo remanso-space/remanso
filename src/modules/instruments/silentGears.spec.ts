@@ -92,8 +92,23 @@ describe("totals", () => {
     expect(unnamedPerNamed(tolls, 365)).toBe(12)
   })
 
+  it("holds the ratio steady between two ticks of the named counter", () => {
+    // The named toll only reaches a whole death every 365/365 = 1 day here;
+    // dividing the floored counters would double the ratio just before a tick.
+    const rare = [
+      { cause: "Hunger", perYear: 3650, named: false },
+      { cause: "Riots", perYear: 300, named: true }
+    ]
+    expect(unnamedPerNamed(rare, 1.3)).toBe(12)
+    expect(unnamedPerNamed(rare, 2.4)).toBe(12)
+    expect(unnamedPerNamed(rare, 3650)).toBe(12)
+  })
+
   it("reports no ratio while nothing named has happened", () => {
     expect(unnamedPerNamed(tolls, 0)).toBeNull()
+    expect(unnamedPerNamed([{ cause: "A", perYear: 1, named: false }], 9)).toBe(
+      null
+    )
   })
 })
 

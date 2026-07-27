@@ -79,14 +79,25 @@ export const namedTotal = (tolls: Toll[], days: number): number =>
 export const silentTotal = (tolls: Toll[], days: number): number =>
   sumAt(tolls, days, false)
 
+const rateOf = (tolls: Toll[], named: boolean): number =>
+  tolls
+    .filter((toll) => toll.named === named)
+    .reduce((sum, toll) => sum + toll.perYear, 0)
+
 /**
- * How many uncounted deaths per death that gets called violence. Null while
- * nothing named has happened yet — a ratio over zero says nothing.
+ * How many uncounted deaths per death that gets called violence. Taken from
+ * the yearly rates, not the displayed counters: those are floored to whole
+ * deaths, and the named one ticks so rarely that dividing them would saw
+ * between the true ratio and twice it between two ticks.
+ *
+ * Null until the named counter shows at least one death — a ratio quoted
+ * against nothing that has happened yet says nothing.
  */
 export const unnamedPerNamed = (tolls: Toll[], days: number): number | null => {
-  const named = namedTotal(tolls, days)
+  if (namedTotal(tolls, days) === 0) return null
+  const named = rateOf(tolls, true)
   if (named === 0) return null
-  return Math.round(silentTotal(tolls, days) / named)
+  return Math.round(rateOf(tolls, false) / named)
 }
 
 /** Whole days of world time, as years, months of 30 days, and days. */
