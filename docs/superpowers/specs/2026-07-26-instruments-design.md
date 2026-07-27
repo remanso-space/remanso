@@ -96,6 +96,29 @@ first, then time, the order the lean question is asked, `urn` (equivalent-bet
 calibration, `1/20`), `bayes` (interactive Bayes explorable with sliders +
 1000-dot population grid, `prior=1% sensitivity=90% fpr=5%`).
 
+## Third wave (added 2026-07-27)
+
+- `kingman` — VUT queueing explorable: sliders for ρ, Ca, Cs (τ fixed at 1, so
+  every number reads as a multiple of service time), cycle-time headline,
+  Little's-Law WIP, and a cycle-time-vs-utilization curve. Args:
+  `u=85% ca=1 cs=1`.
+- `breath` — breath pacer for a note about pausing. Args: a dash-separated
+  pattern in seconds with positional phases (`5-5` inhale/exhale, `4-7-8`
+  inhale/hold/exhale, `4-4-4-4` box breathing) plus an optional `xN` cycle count
+  (default 6); no args at all means `4-4-4-4 x6`. Zero-second phases are
+  dropped, so `4-0-8` is a valid way to write "no hold"; a pattern without both
+  an inhale and an exhale is invalid. A circle scales with the phase — the pure
+  scale math lives in `breath.ts` and is unit-tested. Ticks every 100 ms so the
+  animation reads as motion, and deliberately makes **no sound**: a breath pacer
+  that chimes defeats its own purpose.
+  Art direction follows the rest of Remanso — ink on paper, not an app widget:
+  an accent-stroked ring (`--link-accent`, 10% fill) breathing up to a dashed
+  `base-300` reference circle that marks full lungs, serif label and counter
+  inherited from the note, mono tabular numerals only for the countdown, and the
+  same card chrome as every other instrument. `motion-reduce:transition-none`
+  keeps the pacing (which *is* the instrument) while dropping the tween, the way
+  `app.css` already treats the image lightbox.
+
 ### Sibling-table contract extension
 
 Instruments flagged in `instrumentWantsTable` (registry) receive the markdown

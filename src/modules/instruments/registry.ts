@@ -22,7 +22,9 @@ const loaders = {
   urn: () => import("./components/UrnInstrument.vue").then((m) => m.default),
   bayes: () => import("./components/BayesInstrument.vue").then((m) => m.default),
   kingman: () =>
-    import("./components/KingmanInstrument.vue").then((m) => m.default)
+    import("./components/KingmanInstrument.vue").then((m) => m.default),
+  breath: () =>
+    import("./components/BreathInstrument.vue").then((m) => m.default)
 } satisfies Record<string, () => Promise<Component>>
 
 export type InstrumentName = keyof typeof loaders
