@@ -14,17 +14,21 @@ const props = defineProps<{ args: string; name: string }>()
 
 const initial = parseKingmanArgs(props.args)
 
+// Service time is fixed at 1: every time below is a multiple of "how long the
+// work itself takes". τ only rescales the clock — it leaves the counts and the
+// curve untouched — so exposing it as a slider just reads as a dead control.
+const SERVICE_TIME = 1
+
 // Sliders hold utilization as a percentage; the rest as their natural values.
 const utilizationPct = ref(Math.round(initial.utilization * 100))
 const ca = ref(initial.ca)
 const cs = ref(initial.cs)
-const serviceTime = ref(initial.serviceTime)
 
 const params = computed(() => ({
   utilization: Math.min(0.999, Math.max(0, utilizationPct.value / 100)),
   ca: ca.value,
   cs: cs.value,
-  serviceTime: serviceTime.value
+  serviceTime: SERVICE_TIME
 }))
 
 const round1 = (value: number): string =>
@@ -36,9 +40,6 @@ const workInProgress = computed(() => wip(params.value))
 
 const vFactor = computed(() => variabilityFactor(params.value))
 const uFactor = computed(() => utilizationFactor(params.value))
-
-// How many times its own service time a job spends waiting: Wq / τ = V·U.
-const waitMultiple = computed(() => vFactor.value * uFactor.value)
 
 const sliders = computed(() => [
   {
@@ -64,14 +65,6 @@ const sliders = computed(() => [
     min: 0,
     max: 3,
     step: 0.1
-  },
-  {
-    label: "Service time τ",
-    hint: "just the clock — scales the times, not the counts",
-    model: serviceTime,
-    min: 1,
-    max: 60,
-    step: 1
   }
 ])
 
@@ -118,7 +111,11 @@ const chart = computed(() => {
     class="instrument mx-auto my-4 w-full max-w-md rounded-box border border-base-300 bg-base-100 p-3"
   >
     <div class="flex flex-col gap-2">
-      <label v-for="slider in sliders" :key="slider.label" class="block">
+      <label
+        v-for="slider in sliders"
+        :key="slider.label"
+        class="flex flex-col gap-0.5"
+      >
         <span class="flex justify-between text-sm text-base-content/60">
           <span>{{ slider.label }}</span>
           <span class="tabular-nums">
@@ -128,7 +125,7 @@ const chart = computed(() => {
         <input
           v-model.number="slider.model.value"
           type="range"
-          class="range range-xs"
+          class="range range-xs w-full"
           :min="slider.min"
           :max="slider.max"
           :step="slider.step"
@@ -140,18 +137,14 @@ const chart = computed(() => {
 
     <div class="mt-3 flex items-baseline gap-2">
       <span class="font-mono text-2xl tabular-nums text-(--link-accent)">
-        {{ round1(cycle) }}
+        {{ round1(cycle) }}×
       </span>
       <span class="text-sm opacity-60">cycle time</span>
     </div>
     <p class="mt-1 text-sm text-base-content/60">
-      {{ round1(params.serviceTime) }} doing the work +
-      <span class="tabular-nums">{{ round1(wait) }}</span> waiting in the queue
-    </p>
-    <p class="mt-1 text-sm text-base-content/60">
-      A job waits
-      <span class="tabular-nums font-semibold">{{ round1(waitMultiple) }}×</span>
-      as long as the work itself takes.
+      1× doing the work +
+      <span class="tabular-nums">{{ round1(wait) }}×</span> waiting in the queue
+      <span class="opacity-70">(multiples of service time)</span>
     </p>
 
     <p class="mt-2 text-sm text-base-content/60">
@@ -159,8 +152,8 @@ const chart = computed(() => {
       <span class="font-mono tabular-nums text-(--link-accent)">
         {{ round1(workInProgress) }}
       </span>
-      items in progress (throughput {{ round1(params.utilization / params.serviceTime) }}
-      × cycle time {{ round1(cycle) }})
+      items in progress (throughput {{ round1(params.utilization) }} × cycle time
+      {{ round1(cycle) }})
     </p>
 
     <svg
