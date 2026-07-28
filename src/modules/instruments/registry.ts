@@ -41,11 +41,7 @@ const loaders = {
       (m) => m.default
     ),
   "colorblind-resort": () =>
-    import("./components/ColorblindResortInstrument.vue").then(
-      (m) => m.default
-    ),
-  sablier: () =>
-    import("./components/SablierInstrument.vue").then((m) => m.default)
+    import("./components/ColorblindResortInstrument.vue").then((m) => m.default)
 } satisfies Record<string, () => Promise<Component>>
 
 export type InstrumentName = keyof typeof loaders
@@ -71,8 +67,7 @@ export const instrumentWantsTable: Partial<Record<InstrumentName, true>> = {
   "silent-gears": true,
   "naming-filter": true,
   "coincidence-stack": true,
-  "colorblind-resort": true,
-  sablier: true
+  "colorblind-resort": true
 }
 
 /**
