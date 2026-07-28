@@ -61,10 +61,20 @@ describe("SilentGearsInstrument", () => {
     expect(wrapper.get(".gears-silent").text()).not.toContain("Violence")
   })
 
-  it("states the ratio of unnamed dead to named ones", async () => {
+  it("states the running toll and the ratio it holds at", async () => {
     const wrapper = mountGears("speed=365")
     await play(wrapper, 1000)
-    expect(wrapper.get(".gears-ratio").text()).toContain("12")
+    expect(wrapper.get(".gears-unnamed").text()).toBe("4,380")
+    expect(wrapper.get(".gears-ratio-value").text()).toBe("12 to 1")
+  })
+
+  it("keeps the unnamed toll climbing while the ratio holds", async () => {
+    const wrapper = mountGears("speed=365")
+    await play(wrapper, 1000)
+    vi.advanceTimersByTime(2000)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.get(".gears-unnamed").text()).toBe("13,140")
+    expect(wrapper.get(".gears-ratio-value").text()).toBe("12 to 1")
   })
 
   it("freezes the counters on pause and clears them on reset", async () => {

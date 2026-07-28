@@ -177,8 +177,15 @@ const count = (perYear: number) =>
     </div>
 
     <p v-if="ratio !== null" class="gears-ratio mt-3 text-sm">
-      <span class="tabular-nums">{{ formatCount(ratio) }}</span> dead that
-      nobody calls anything, for every one that has a name.
+      <span class="gears-unnamed font-bold tabular-nums text-error">
+        {{ formatCount(silentSum) }}
+      </span>
+      dead nobody names, against
+      <span class="tabular-nums">{{ formatCount(namedSum) }}</span>
+      called violence —
+      <span class="gears-ratio-value tabular-nums">
+        {{ formatCount(ratio) }} to 1</span
+      >.
     </p>
     <p v-else-if="silentSum > 0" class="gears-ratio mt-3 text-sm">
       <span class="tabular-nums">{{ formatCount(silentSum) }}</span> dead so
