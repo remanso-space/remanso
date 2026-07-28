@@ -115,5 +115,16 @@ export const parseGrains = (table?: InstrumentTable): Grain[] => {
 export const countAt = (daysLeft: number, grain: Grain): number =>
   Math.floor((Math.max(0, daysLeft) / grain.days) * (1 + 1e-9))
 
+/**
+ * Plafond de grains dessinés dans la lentille : au-delà, on ne peut plus poser
+ * un point par grain à l'écran. Le nombre, lui, continue d'exploser — c'est le
+ * chiffre qui porte l'argument, la nuée de points n'en est que l'ombre.
+ */
+export const DOT_CAP = 400
+
+/** Combien de points poser à l'écran pour ce compte, plafonnés à DOT_CAP. */
+export const visibleDots = (count: number): number =>
+  Math.min(Math.max(0, Math.floor(count)), DOT_CAP)
+
 export const formatCount = (count: number): string =>
   count.toLocaleString("en-US")
