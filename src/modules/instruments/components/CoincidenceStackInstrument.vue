@@ -8,11 +8,11 @@ import {
   type Institution,
   parseInstitutions
 } from "../coincidenceStack"
-import { consumeTable, type InstrumentProps } from "../sibling"
+import { consumeRows, type InstrumentProps } from "../sibling"
 
 const props = defineProps<InstrumentProps>()
 
-const table = consumeTable(props.sibling)
+const table = consumeRows(props.sibling)
 
 const institutions = parseInstitutions(table)
 const counted = ref<boolean[]>(institutions.map(() => false))

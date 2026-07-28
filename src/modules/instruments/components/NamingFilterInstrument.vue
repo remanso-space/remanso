@@ -9,11 +9,11 @@ import {
   parseEvents,
   tallyAt
 } from "../namingFilter"
-import { consumeTable, type InstrumentProps } from "../sibling"
+import { consumeRows, type InstrumentProps } from "../sibling"
 
 const props = defineProps<InstrumentProps>()
 
-const table = consumeTable(props.sibling)
+const table = consumeRows(props.sibling)
 
 const events = parseEvents(table)
 

@@ -2,11 +2,11 @@
 import { computed, ref } from "vue"
 
 import { countSorted, parseCases } from "../colorblindResort"
-import { consumeTable, type InstrumentProps } from "../sibling"
+import { consumeRows, type InstrumentProps } from "../sibling"
 
 const props = defineProps<InstrumentProps>()
 
-const table = consumeTable(props.sibling)
+const table = consumeRows(props.sibling)
 
 const cases = parseCases(table)
 const tally = countSorted(cases)

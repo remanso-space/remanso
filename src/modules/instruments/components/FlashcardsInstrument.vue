@@ -2,7 +2,7 @@
 import { computed, ref } from "vue"
 
 import { shuffle } from "../shuffle"
-import { consumeTable, type InstrumentProps } from "../sibling"
+import { consumeRows, type InstrumentProps } from "../sibling"
 
 interface Card {
   question: string
@@ -11,7 +11,7 @@ interface Card {
 
 const props = defineProps<InstrumentProps>()
 
-const table = consumeTable(props.sibling)
+const table = consumeRows(props.sibling)
 
 const swapped = /\bswap\b/.test(props.args)
 

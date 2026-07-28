@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import SilentGearsInstrument from "@/modules/instruments/components/SilentGearsInstrument.vue"
 import type { InstrumentTable } from "@/modules/instruments/sibling"
-import { tableSibling } from "@/test/instrumentSibling"
+import { listSibling, tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Cause", "Deaths per year", "Called violence"],
@@ -104,6 +104,32 @@ describe("SilentGearsInstrument", () => {
       props: { args: "", name: "silent-gears" }
     })
     expect(wrapper.text()).toContain("Hunger")
+    expect(wrapper.get(".gears-named").text()).toContain("Terrorism and riots")
+  })
+
+  it("reads the same tolls from a pipe-separated list", async () => {
+    const wrapper = mount(SilentGearsInstrument, {
+      props: {
+        args: "speed=365",
+        name: "silent-gears",
+        sibling: listSibling([
+          "Hunger | 3650 | no",
+          "Work | 730 | no",
+          "Riots | 365 | yes"
+        ])
+      }
+    })
+    await play(wrapper, 1000)
+    expect(silentCounts(wrapper)).toEqual(["3,650", "730"])
+    expect(wrapper.get(".gears-named").text()).toContain("Riots")
+  })
+
+  it("keeps the note's own bullets and falls back to the defaults", () => {
+    const bullets = listSibling(["A remark about hunger", "And another"])
+    const wrapper = mount(SilentGearsInstrument, {
+      props: { args: "", name: "silent-gears", sibling: bullets }
+    })
+    expect(bullets.style.display).toBe("")
     expect(wrapper.get(".gears-named").text()).toContain("Terrorism and riots")
   })
 })

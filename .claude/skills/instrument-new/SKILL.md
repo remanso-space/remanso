@@ -135,10 +135,11 @@ before starting.
   unused (an undeclared prop leaks as a `sibling="[object HTMLDivElement]"`
   attribute)
 - every instrument gets the element rendered right after its placeholder,
-  whatever it is. Read it with `consumeTable(props.sibling)` (table-fed: reads
-  and hides it) or `readList(props.sibling)` (list-fed: stays visible) from
-  `../sibling`. Both return `undefined` when the sibling is some other shape —
-  fall back to `DEFAULT_*` data, never throw.
+  whatever it is. Read it with `consumeRows(props.sibling)` (rows of data: takes
+  a table *or* a pipe-separated list, hides the source it read) or
+  `readList(props.sibling)` (plain items, stays visible) from `../sibling`. Both
+  return `undefined` when the sibling is some other shape — fall back to
+  `DEFAULT_*` data, never throw.
 - outer div: `class="instrument mx-auto my-4 w-full max-w-md rounded-box border border-base-300 bg-base-100 p-3"`
 - Tailwind + DaisyUI only. Accents use `text-(--link-accent)`, never raw
   `text-accent`. Counts of dead or harmed use `text-error`.
@@ -184,7 +185,9 @@ Two to four sentences: what to do with the instrument and what to notice.
 ```
 
 The table must be the immediate next block after the placeholder — that element
-is what the instrument is handed, and `consumeTable` hides it. Place the section where the argument needs
+is what the instrument is handed, and `consumeRows` hides it. A pipe-separated
+list works too (`- Hunger | 9000000 | no`); a list without pipes is left alone,
+so the note's own bullets are never eaten. Place the section where the argument needs
 weight, before the `---` and `## Références` block.
 
 ## Step 8 — verify

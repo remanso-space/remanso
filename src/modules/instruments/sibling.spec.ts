@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  consumeTable,
+  consumeRows,
   readList,
+  readRows,
   readTable
 } from "@/modules/instruments/sibling"
 import { listSibling, tableSibling } from "@/test/instrumentSibling"
@@ -38,16 +39,53 @@ describe("readTable", () => {
   })
 })
 
-describe("consumeTable", () => {
-  it("hides the table it read — the instrument renders that data itself", () => {
-    const sibling = tableSibling({ header: ["A"], rows: [["1"]] })
-    expect(consumeTable(sibling)).toBeDefined()
-    expect(sibling.style.display).toBe("none")
+describe("readRows", () => {
+  it("takes a table as-is, header and all", () => {
+    expect(readRows(tableSibling({ header: ["A"], rows: [["1"]] }))).toEqual({
+      header: ["A"],
+      rows: [["1"]]
+    })
+  })
+
+  it("splits a pipe-separated list into cells", () => {
+    expect(
+      readRows(listSibling(["Hunger | 9000000", "Riots | 8300 | yes"]))
+    ).toEqual({
+      header: [],
+      rows: [
+        ["Hunger", "9000000"],
+        ["Riots", "8300", "yes"]
+      ]
+    })
+  })
+
+  it("refuses a list without pipes — those are the note's own bullets", () => {
+    expect(readRows(listSibling(["one", "two"]))).toBeUndefined()
+    expect(readRows(listSibling(["Hunger | 900", "a plain remark"]))).toBe(
+      undefined
+    )
+  })
+
+  it("returns undefined for anything that is not a table or a list", () => {
+    expect(readRows(html("<p>prose</p>"))).toBeUndefined()
+    expect(readRows(undefined)).toBeUndefined()
+  })
+})
+
+describe("consumeRows", () => {
+  it("hides the source it read — the instrument renders that data itself", () => {
+    const table = tableSibling({ header: ["A"], rows: [["1"]] })
+    expect(consumeRows(table)).toBeDefined()
+    expect(table.style.display).toBe("none")
+
+    const list = listSibling(["Hunger | 900"])
+    expect(consumeRows(list)).toBeDefined()
+    expect(list.style.display).toBe("none")
   })
 
   it("leaves a sibling it could not read visible", () => {
     const sibling = listSibling(["one"])
-    expect(consumeTable(sibling)).toBeUndefined()
+    expect(consumeRows(sibling)).toBeUndefined()
     expect(sibling.style.display).toBe("")
   })
 })

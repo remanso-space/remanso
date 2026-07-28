@@ -8,11 +8,11 @@ import {
   snapFraction,
   totalHands
 } from "../primeHand"
-import { consumeTable, type InstrumentProps } from "../sibling"
+import { consumeRows, type InstrumentProps } from "../sibling"
 
 const props = defineProps<InstrumentProps>()
 
-const table = consumeTable(props.sibling)
+const table = consumeRows(props.sibling)
 
 const people = parsePeople(table)
 const hasPeople = people.length > 0

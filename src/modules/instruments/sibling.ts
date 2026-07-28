@@ -21,6 +21,10 @@ export interface InstrumentProps {
   sibling?: HTMLElement
 }
 
+/**
+ * Rows of cells, however the note wrote them. `header` is empty when the
+ * source had no header row to give — a list, or a headerless table.
+ */
 export interface InstrumentTable {
   header: string[]
   rows: string[][]
@@ -52,18 +56,6 @@ export const readTable = (
 }
 
 /**
- * Read the sibling table and hide it: the instrument now renders that data
- * itself, so showing both would duplicate it on screen.
- */
-export const consumeTable = (
-  sibling?: HTMLElement | null
-): InstrumentTable | undefined => {
-  const table = readTable(sibling)
-  if (table && sibling) sibling.style.display = "none"
-  return table
-}
-
-/**
  * Read the sibling as a `<ul>`/`<ol>` and return its item texts. The list
  * stays visible — a readable overview next to the instrument.
  */
@@ -77,4 +69,39 @@ export const readList = (
     (li) => li.textContent?.trim() ?? ""
   )
   return items.length > 0 ? items : undefined
+}
+
+/**
+ * Read the sibling as rows of cells, from a table *or* a pipe-separated list:
+ *
+ *     - Hunger | 9000000
+ *     - Terrorism and riots | 8300 | yes
+ *
+ * Every item must carry a pipe. A note's ordinary prose bullets are also a
+ * `<ul>`, and eating those would replace a paragraph of the note with a
+ * garbled instrument — the pipe is what marks a list as data.
+ */
+export const readRows = (
+  sibling?: HTMLElement | null
+): InstrumentTable | undefined => {
+  const table = readTable(sibling)
+  if (table) return table
+
+  const items = readList(sibling)
+  if (!items || !items.every((item) => item.includes("|"))) return undefined
+
+  const rows = items.map((item) => item.split("|").map((cell) => cell.trim()))
+  return { header: [], rows }
+}
+
+/**
+ * Read the sibling rows and hide the source: the instrument renders that data
+ * itself, so showing both would duplicate it on screen.
+ */
+export const consumeRows = (
+  sibling?: HTMLElement | null
+): InstrumentTable | undefined => {
+  const rows = readRows(sibling)
+  if (rows && sibling) sibling.style.display = "none"
+  return rows
 }
