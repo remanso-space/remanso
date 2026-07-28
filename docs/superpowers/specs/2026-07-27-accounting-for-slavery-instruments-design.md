@@ -1,4 +1,4 @@
-# Instruments for the *Accounting for Slavery* note
+# Instruments for the _Accounting for Slavery_ note
 
 Date: 2026-07-27
 Status: approved

@@ -6,7 +6,7 @@ description: Use when the user asks for a new explorable-explanation instrument 
 # New instrument for a note
 
 An instrument is a small interactive component embedded in a note with
-`:::name args:::`. It exists to make one idea *felt* rather than described: the
+`:::name args:::`. It exists to make one idea _felt_ rather than described: the
 mechanic **is** the argument. `reification` makes you slide away from a cotton
 row until a girl becomes a number in a portfolio; `quota-ratchet` hands you a
 game whose target only ever rises; `naming-filter` widens the word "violence"
@@ -66,22 +66,22 @@ cat /home/jean/projects/remanso/src/modules/instruments/registry.ts
 Then read the doc comment at the top of the logic module for any instrument that
 looks close. As of 2026-07-28 the set is:
 
-| Instrument | Mechanic |
-| --- | --- |
-| `timer`, `stopwatch` | countdown with a beep; elapsed time with laps |
-| `until`, `since` | days to or from a date |
-| `flashcards` | table rows as recall cards |
-| `intervals` | a timed sequence read from a markdown list |
-| `takt-time` | demand and available time into a takt |
-| `urn` | draws from an urn, sampling by hand |
-| `bayes` | prior, sensitivity, false positive rate into a posterior |
-| `kingman` | utilization into queue wait — the hockey stick |
-| `breath` | a paced breathing cycle |
-| `prime-hand` | rate people as ¼ to a full hand and watch the life drop out |
-| `quota-ratchet` | a quota that rises when met and is paid for when missed |
-| `reification` | distance from the work turning a person into a figure |
-| `silent-gears` | an unlabelled toll accumulating beside a named one |
-| `naming-filter` | widening a word without adding any harm |
+| Instrument           | Mechanic                                                    |
+| -------------------- | ----------------------------------------------------------- |
+| `timer`, `stopwatch` | countdown with a beep; elapsed time with laps               |
+| `until`, `since`     | days to or from a date                                      |
+| `flashcards`         | table rows as recall cards                                  |
+| `intervals`          | a timed sequence read from a markdown list                  |
+| `takt-time`          | demand and available time into a takt                       |
+| `urn`                | draws from an urn, sampling by hand                         |
+| `bayes`              | prior, sensitivity, false positive rate into a posterior    |
+| `kingman`            | utilization into queue wait — the hockey stick              |
+| `breath`             | a paced breathing cycle                                     |
+| `prime-hand`         | rate people as ¼ to a full hand and watch the life drop out |
+| `quota-ratchet`      | a quota that rises when met and is paid for when missed     |
+| `reification`        | distance from the work turning a person into a figure       |
+| `silent-gears`       | an unlabelled toll accumulating beside a named one          |
+| `naming-filter`      | widening a word without adding any harm                     |
 
 ## Step 4 — branch A: an existing instrument fits
 
@@ -169,8 +169,8 @@ Two to four sentences: what to do with the instrument and what to notice.
 :::name:::
 
 | Column | Column | Column |
-| --- | --- | --- |
-| … | … | … |
+| ------ | ------ | ------ |
+| …      | …      | …      |
 ```
 
 The table must be the immediate next block after the placeholder — the runtime

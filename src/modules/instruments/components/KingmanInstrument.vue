@@ -152,8 +152,8 @@ const chart = computed(() => {
       <span class="font-mono tabular-nums text-(--link-accent)">
         {{ round1(workInProgress) }}
       </span>
-      items in progress (throughput {{ round1(params.utilization) }} × cycle time
-      {{ round1(cycle) }})
+      items in progress (throughput {{ round1(params.utilization) }} × cycle
+      time {{ round1(cycle) }})
     </p>
 
     <svg

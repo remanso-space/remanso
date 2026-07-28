@@ -55,8 +55,12 @@ describe("KingmanInstrument", () => {
 
   it("drops the wait to zero with no variability", async () => {
     const wrapper = mountKingman()
-    await wrapper.get('input[aria-label="Arrival variability Ca"]').setValue("0")
-    await wrapper.get('input[aria-label="Service variability Cs"]').setValue("0")
+    await wrapper
+      .get('input[aria-label="Arrival variability Ca"]')
+      .setValue("0")
+    await wrapper
+      .get('input[aria-label="Service variability Cs"]')
+      .setValue("0")
     expect(wrapper.text()).toContain("0× waiting in the queue")
   })
 

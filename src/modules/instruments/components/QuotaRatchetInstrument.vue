@@ -18,9 +18,7 @@ const picked = ref(params.target)
 const finished = computed(() => isFinished(state.value))
 const sliderMax = computed(() => Math.round(state.value.target * 2))
 
-const dayLabel = computed(
-  () => `Day ${state.value.day} of ${params.days}`
-)
+const dayLabel = computed(() => `Day ${state.value.day} of ${params.days}`)
 
 const consequence = (entry: (typeof state.value.log)[number]): string => {
   if (entry.picked > entry.target) return `target raised to ${entry.nextTarget}`

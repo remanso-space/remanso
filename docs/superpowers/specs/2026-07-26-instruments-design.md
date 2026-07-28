@@ -116,13 +116,13 @@ calibration, `1/20`), `bayes` (interactive Bayes explorable with sliders +
   `base-300` reference circle that marks full lungs, serif label and counter
   inherited from the note, mono tabular numerals only for the countdown, and the
   same card chrome as every other instrument. `motion-reduce:transition-none`
-  keeps the pacing (which *is* the instrument) while dropping the tween, the way
+  keeps the pacing (which _is_ the instrument) while dropping the tween, the way
   `app.css` already treats the image lightbox.
 
 ## Fourth wave (added 2026-07-27)
 
 `prime-hand`, `quota-ratchet` and `reification` — three rhetorical explorables
-for the *Accounting for Slavery* note. Full design in
+for the _Accounting for Slavery_ note. Full design in
 `2026-07-27-accounting-for-slavery-instruments-design.md`.
 
 ### Sibling-table contract extension

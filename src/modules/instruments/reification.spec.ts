@@ -37,10 +37,12 @@ describe("parseStages", () => {
   })
 
   it("strips units from the miles column", () => {
-    expect(parseStages({ header: [], rows: [["1,200 mi", "far"]] })[0]).toEqual({
-      miles: 1200,
-      text: "far"
-    })
+    expect(parseStages({ header: [], rows: [["1,200 mi", "far"]] })[0]).toEqual(
+      {
+        miles: 1200,
+        text: "far"
+      }
+    )
   })
 
   it("falls back to the default sequence without a usable table", () => {
