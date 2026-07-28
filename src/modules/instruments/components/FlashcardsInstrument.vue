@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 
-import type { InstrumentTable } from "../runInstruments"
 import { shuffle } from "../shuffle"
+import { consumeTable, type InstrumentProps } from "../sibling"
 
 interface Card {
   question: string
   answer: string
 }
 
-const props = defineProps<{
-  args: string
-  name: string
-  table?: InstrumentTable
-}>()
+const props = defineProps<InstrumentProps>()
+
+const table = consumeTable(props.sibling)
 
 const swapped = /\bswap\b/.test(props.args)
 
@@ -25,7 +23,7 @@ const toCard = (cells: string[]): Card => {
     : { question: front, answer: back }
 }
 
-const cards = (props.table?.rows ?? []).map(toCard)
+const cards = (table?.rows ?? []).map(toCard)
 const hasCards = cards.length > 0
 
 // :::flashcard::: (singular) = one reveal card: first row only, no deck
@@ -43,7 +41,7 @@ const progress = computed(
 )
 
 const directionHint = computed(() => {
-  const header = props.table?.header ?? []
+  const header = table?.header ?? []
   if (header.length < 2) return ""
   const front = header[0]
   const back = header.slice(1).join(" — ")

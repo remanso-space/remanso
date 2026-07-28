@@ -52,30 +52,3 @@ export const instrumentLoaders: Record<
   InstrumentName,
   () => Promise<Component>
 > = loaders
-
-/**
- * Instruments that consume the markdown table right below them as data —
- * runInstruments extracts the sibling table, hides it, and passes it as the
- * `table` prop. Keeps long content (full-sentence flashcards) in a normal
- * table: single source, readable GitHub fallback.
- */
-export const instrumentWantsTable: Partial<Record<InstrumentName, true>> = {
-  flashcards: true,
-  flashcard: true,
-  "prime-hand": true,
-  reification: true,
-  "silent-gears": true,
-  "naming-filter": true,
-  "coincidence-stack": true,
-  "colorblind-resort": true
-}
-
-/**
- * Instruments that read the markdown list right below them as data when no
- * inline args are given — runInstruments extracts the sibling `<ul>`/`<ol>`
- * items and passes them as the `list` prop. The list stays visible as the
- * single source and the plain GitHub fallback.
- */
-export const instrumentWantsList: Partial<Record<InstrumentName, true>> = {
-  intervals: true
-}

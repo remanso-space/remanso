@@ -3,8 +3,9 @@ import { computed, onUnmounted, ref, watch } from "vue"
 
 import { beep, primeAudio } from "../audio"
 import { formatSeconds, parseDuration } from "../duration"
+import type { InstrumentProps } from "../sibling"
 
-const props = defineProps<{ args: string }>()
+const props = defineProps<InstrumentProps>()
 
 const argSeconds = parseDuration(props.args)
 const minutesInput = ref(5)

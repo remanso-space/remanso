@@ -4,12 +4,14 @@ import { computed, onUnmounted, ref } from "vue"
 import { beep, primeAudio } from "../audio"
 import { formatSeconds } from "../duration"
 import { parseIntervals, parseIntervalsFromList } from "../intervals"
+import { type InstrumentProps, readList } from "../sibling"
 
-const props = defineProps<{ args: string; name: string; list?: string[] }>()
+const props = defineProps<InstrumentProps>()
 
+// Inline args win; the sibling list is the fallback source. It stays visible.
+const list = readList(props.sibling)
 const steps =
-  parseIntervals(props.args) ??
-  (props.list ? parseIntervalsFromList(props.list) : null)
+  parseIntervals(props.args) ?? (list ? parseIntervalsFromList(list) : null)
 const stepList = steps ?? []
 const totalSeconds = stepList.reduce((sum, step) => sum + step.seconds, 0)
 

@@ -9,8 +9,9 @@ import {
   waitTime,
   wip
 } from "../kingman"
+import type { InstrumentProps } from "../sibling"
 
-const props = defineProps<{ args: string; name: string }>()
+const props = defineProps<InstrumentProps>()
 
 const initial = parseKingmanArgs(props.args)
 

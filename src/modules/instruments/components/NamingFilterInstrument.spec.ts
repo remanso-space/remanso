@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 
 import NamingFilterInstrument from "@/modules/instruments/components/NamingFilterInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Event", "Lives", "Kind"],
@@ -16,7 +17,7 @@ const table: InstrumentTable = {
 
 const mountFilter = () =>
   mount(NamingFilterInstrument, {
-    props: { args: "", name: "naming-filter", table }
+    props: { args: "", name: "naming-filter", sibling: tableSibling(table) }
   })
 
 type Wrapper = ReturnType<typeof mountFilter>

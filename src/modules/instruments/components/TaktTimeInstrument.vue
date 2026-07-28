@@ -2,8 +2,9 @@
 import { computed, ref } from "vue"
 
 import { formatSeconds, parseDuration } from "../duration"
+import type { InstrumentProps } from "../sibling"
 
-const props = defineProps<{ args: string; name: string }>()
+const props = defineProps<InstrumentProps>()
 
 // Demand first, then available time — the order the lean question is asked:
 // "22 products in 480 minutes".

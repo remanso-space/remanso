@@ -1,4 +1,4 @@
-import type { InstrumentTable } from "./runInstruments"
+import type { InstrumentTable } from "./sibling"
 
 /**
  * One of Baldwin's institutions. `outcome` is what he *knows* — the sorting he

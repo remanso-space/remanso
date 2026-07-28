@@ -2,15 +2,13 @@
 import { computed, ref } from "vue"
 
 import { countSorted, parseCases } from "../colorblindResort"
-import type { InstrumentTable } from "../runInstruments"
+import { consumeTable, type InstrumentProps } from "../sibling"
 
-const props = defineProps<{
-  args: string
-  name: string
-  table?: InstrumentTable
-}>()
+const props = defineProps<InstrumentProps>()
 
-const cases = parseCases(props.table)
+const table = consumeTable(props.sibling)
+
+const cases = parseCases(table)
 const tally = countSorted(cases)
 
 const colorblind = ref(false)

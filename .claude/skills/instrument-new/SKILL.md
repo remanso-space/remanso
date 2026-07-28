@@ -130,7 +130,15 @@ before starting.
 
 **Component** — `src/modules/instruments/components/<Name>Instrument.vue`:
 
-- `<script setup lang="ts">`, props `{ args: string; name: string; table?: InstrumentTable; list?: string[] }`
+- `<script setup lang="ts">`, `defineProps<InstrumentProps>()` from `../sibling`
+  — every instrument takes the same three props, `sibling` included even when
+  unused (an undeclared prop leaks as a `sibling="[object HTMLDivElement]"`
+  attribute)
+- every instrument gets the element rendered right after its placeholder,
+  whatever it is. Read it with `consumeTable(props.sibling)` (table-fed: reads
+  and hides it) or `readList(props.sibling)` (list-fed: stays visible) from
+  `../sibling`. Both return `undefined` when the sibling is some other shape —
+  fall back to `DEFAULT_*` data, never throw.
 - outer div: `class="instrument mx-auto my-4 w-full max-w-md rounded-box border border-base-300 bg-base-100 p-3"`
 - Tailwind + DaisyUI only. Accents use `text-(--link-accent)`, never raw
   `text-accent`. Counts of dead or harmed use `text-error`.
@@ -141,15 +149,17 @@ before starting.
   `.filter-tally`)
 - no persisted state
 
-**Registry** — `src/modules/instruments/registry.ts`: the loader entry, plus
-`instrumentWantsTable` or `instrumentWantsList` if it is fed by a sibling block.
+**Registry** — `src/modules/instruments/registry.ts`: the loader entry. Nothing
+else — what an instrument reads from its sibling is its own business.
 
 **Tests** — `<name>.spec.ts` beside the logic and
 `components/<Name>Instrument.spec.ts` beside the component:
 
 - logic: parsing, defaults, fallbacks, clamping, the arithmetic, the edges
-- component: mount it, drive the real inputs, assert the DOM. Fake timers for
-  anything that ticks (`vi.useFakeTimers()` in `beforeEach`).
+- component: mount it, drive the real inputs, assert the DOM. Build the data
+  sibling with `tableSibling(table)` / `listSibling(items)` from
+  `@/test/instrumentSibling`. Fake timers for anything that ticks
+  (`vi.useFakeTimers()` in `beforeEach`).
 - `wrapper.text()` concatenates adjacent nodes without spaces — expect
   `"Station burns2"`, not `"Station burns 2"`.
 
@@ -173,8 +183,8 @@ Two to four sentences: what to do with the instrument and what to notice.
 | …      | …      | …      |
 ```
 
-The table must be the immediate next block after the placeholder — the runtime
-reads that sibling and hides it. Place the section where the argument needs
+The table must be the immediate next block after the placeholder — that element
+is what the instrument is handed, and `consumeTable` hides it. Place the section where the argument needs
 weight, before the `---` and `## Références` block.
 
 ## Step 8 — verify

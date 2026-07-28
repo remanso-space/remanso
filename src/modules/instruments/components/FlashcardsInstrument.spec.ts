@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it, vi } from "vitest"
 
 import FlashcardsInstrument from "@/modules/instruments/components/FlashcardsInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 vi.mock("@/modules/instruments/shuffle", () => ({
   shuffle: <T>(items: T[]): T[] => [...items]
@@ -18,7 +19,11 @@ const twoColumnTable: InstrumentTable = {
 
 const mountFlashcards = (props: { args?: string; table?: InstrumentTable }) =>
   mount(FlashcardsInstrument, {
-    props: { args: props.args ?? "", name: "flashcards", table: props.table }
+    props: {
+      args: props.args ?? "",
+      name: "flashcards",
+      sibling: props.table ? tableSibling(props.table) : undefined
+    }
   })
 
 type Wrapper = ReturnType<typeof mountFlashcards>
@@ -103,7 +108,11 @@ describe("FlashcardsInstrument", () => {
 
   it("flashcard (singular) shows one card without deck mechanics", async () => {
     const wrapper = mount(FlashcardsInstrument, {
-      props: { args: "", name: "flashcard", table: twoColumnTable }
+      props: {
+        args: "",
+        name: "flashcard",
+        sibling: tableSibling(twoColumnTable)
+      }
     })
     expect(question(wrapper)).toBe("Comment dire « bleu » ?")
     expect(wrapper.find(".flashcard-progress").exists()).toBe(false)

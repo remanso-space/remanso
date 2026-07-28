@@ -1,16 +1,6 @@
 import { type App, createApp } from "vue"
 
-import {
-  instrumentLoaders,
-  type InstrumentName,
-  instrumentWantsList,
-  instrumentWantsTable
-} from "./registry"
-
-export interface InstrumentTable {
-  header: string[]
-  rows: string[][]
-}
+import { instrumentLoaders, type InstrumentName } from "./registry"
 
 const mounted: { app: App; el: HTMLElement }[] = []
 
@@ -27,51 +17,12 @@ const unmountDisconnected = (): void => {
 }
 
 /**
- * For table-fed instruments: read the markdown table rendered right after
- * the placeholder (tables are wrapped in div.overflow-x-auto by the
- * renderer), hide it, and return its cells. The table stays the single
- * source in the note — and the plain-text GitHub fallback.
- */
-const extractSiblingTable = (el: HTMLElement): InstrumentTable | undefined => {
-  const sibling = el.nextElementSibling
-  if (!(sibling instanceof HTMLElement)) return undefined
-  const table = sibling.matches("table")
-    ? sibling
-    : sibling.querySelector(":scope > table")
-  if (!table) return undefined
-
-  const cellsOf = (row: Element) =>
-    Array.from(row.querySelectorAll("th,td")).map(
-      (cell) => cell.textContent?.trim() ?? ""
-    )
-  const headerRow = table.querySelector("thead tr")
-  const rows = Array.from(table.querySelectorAll("tbody tr")).map(cellsOf)
-  if (rows.length === 0) return undefined
-
-  sibling.style.display = "none"
-  return { header: headerRow ? cellsOf(headerRow) : [], rows }
-}
-
-/**
- * For list-fed instruments with no inline args: read the `<ul>`/`<ol>`
- * rendered right after the placeholder and return its item texts. The list
- * stays visible — a readable overview in Remanso and the GitHub fallback.
- */
-const extractSiblingList = (el: HTMLElement): string[] | undefined => {
-  const sibling = el.nextElementSibling
-  if (!(sibling instanceof HTMLElement) || !sibling.matches("ul,ol")) {
-    return undefined
-  }
-  const items = Array.from(sibling.querySelectorAll(":scope > li")).map(
-    (li) => li.textContent?.trim() ?? ""
-  )
-  return items.length > 0 ? items : undefined
-}
-
-/**
  * Mount an instrument component onto every :::name::: placeholder in scope.
  * Components only load when a placeholder actually exists, so notes without
  * instruments pay nothing.
+ *
+ * Every instrument gets the next sibling element as-is; reading it (or
+ * ignoring it) is the instrument's own job — see ./sibling.
  */
 export const runInstruments = async (querySelector: string): Promise<void> => {
   unmountDisconnected()
@@ -88,15 +39,12 @@ export const runInstruments = async (querySelector: string): Promise<void> => {
       if (!loader) return
       el.dataset.instrumentMounted = "true"
       const args = el.dataset.args ?? ""
-      const table = instrumentWantsTable[name]
-        ? extractSiblingTable(el)
-        : undefined
-      const list =
-        instrumentWantsList[name] && !args.trim()
-          ? extractSiblingList(el)
+      const sibling =
+        el.nextElementSibling instanceof HTMLElement
+          ? el.nextElementSibling
           : undefined
       const component = await loader()
-      const app = createApp(component, { args, name, table, list })
+      const app = createApp(component, { args, name, sibling })
       app.mount(el)
       mounted.push({ app, el })
     })

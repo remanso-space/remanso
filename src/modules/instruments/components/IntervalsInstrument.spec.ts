@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { beep, primeAudio } from "@/modules/instruments/audio"
 import IntervalsInstrument from "@/modules/instruments/components/IntervalsInstrument.vue"
+import { listSibling } from "@/test/instrumentSibling"
 
 vi.mock("@/modules/instruments/audio", () => ({
   beep: vi.fn(),
@@ -34,12 +35,15 @@ describe("IntervalsInstrument", () => {
     expect(wrapper.get("progress").attributes("max")).toBe("270")
   })
 
-  it("reads steps from the list prop when args are empty", () => {
+  it("reads steps from the sibling list when args are empty", () => {
     const wrapper = mount(IntervalsInstrument, {
       props: {
         args: "",
         name: "intervals",
-        list: ["support à cheval | 30s", "marche de l'éléphant | 45s"]
+        sibling: listSibling([
+          "support à cheval | 30s",
+          "marche de l'éléphant | 45s"
+        ])
       }
     })
     expect(display(wrapper)).toBe("00:30")
@@ -48,9 +52,13 @@ describe("IntervalsInstrument", () => {
     expect(wrapper.text()).toContain("next: marche de l'éléphant 45s")
   })
 
-  it("prefers inline args over the list prop", () => {
+  it("prefers inline args over the sibling list", () => {
     const wrapper = mount(IntervalsInstrument, {
-      props: { args: "1m plank", name: "intervals", list: ["burpees | 30s"] }
+      props: {
+        args: "1m plank",
+        name: "intervals",
+        sibling: listSibling(["burpees | 30s"])
+      }
     })
     expect(display(wrapper)).toBe("01:00")
     expect(wrapper.text()).toContain("plank")

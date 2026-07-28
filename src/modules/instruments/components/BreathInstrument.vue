@@ -2,8 +2,9 @@
 import { computed, onUnmounted, ref } from "vue"
 
 import { breathPhaseLabel, breathScale, parseBreath } from "../breath"
+import type { InstrumentProps } from "../sibling"
 
-const props = defineProps<{ args: string; name: string }>()
+const props = defineProps<InstrumentProps>()
 
 const pattern = parseBreath(props.args)
 const phases = pattern?.phases ?? []

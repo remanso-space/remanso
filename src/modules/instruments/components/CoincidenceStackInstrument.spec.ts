@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 
 import CoincidenceStackInstrument from "@/modules/instruments/components/CoincidenceStackInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Institution", "Ce qu'on sait", "Bénéfice du doute"],
@@ -16,7 +17,11 @@ const table: InstrumentTable = {
 
 const mountStack = () =>
   mount(CoincidenceStackInstrument, {
-    props: { args: "", name: "coincidence-stack", table }
+    props: {
+      args: "",
+      name: "coincidence-stack",
+      sibling: tableSibling(table)
+    }
   })
 
 type Wrapper = ReturnType<typeof mountStack>

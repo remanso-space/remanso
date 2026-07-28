@@ -1,4 +1,4 @@
-import type { InstrumentTable } from "./runInstruments"
+import type { InstrumentTable } from "./sibling"
 
 export interface Toll {
   /** What kills, in the words the world uses for it. */

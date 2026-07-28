@@ -2,8 +2,9 @@
 import { onUnmounted, ref } from "vue"
 
 import { formatMs } from "../duration"
+import type { InstrumentProps } from "../sibling"
 
-defineProps<{ args: string }>()
+defineProps<InstrumentProps>()
 
 const elapsed = ref(0)
 const running = ref(false)

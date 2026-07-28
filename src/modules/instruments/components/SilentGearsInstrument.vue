@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from "vue"
 
-import type { InstrumentTable } from "../runInstruments"
+import { consumeTable, type InstrumentProps } from "../sibling"
 import {
   formatCount,
   formatElapsed,
@@ -13,14 +13,12 @@ import {
   unnamedPerNamed
 } from "../silentGears"
 
-const props = defineProps<{
-  args: string
-  name: string
-  table?: InstrumentTable
-}>()
+const props = defineProps<InstrumentProps>()
+
+const table = consumeTable(props.sibling)
 
 const params = parseGearsArgs(props.args)
-const tolls = parseTolls(props.table)
+const tolls = parseTolls(table)
 const silent = tolls.filter((toll) => !toll.named)
 const named = tolls.filter((toll) => toll.named)
 

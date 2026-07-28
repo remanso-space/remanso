@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 
 import ColorblindResortInstrument from "@/modules/instruments/components/ColorblindResortInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Personne", "Couleur", "Où"],
@@ -16,7 +17,11 @@ const table: InstrumentTable = {
 
 const mountResort = () =>
   mount(ColorblindResortInstrument, {
-    props: { args: "", name: "colorblind-resort", table }
+    props: {
+      args: "",
+      name: "colorblind-resort",
+      sibling: tableSibling(table)
+    }
   })
 
 type Wrapper = ReturnType<typeof mountResort>

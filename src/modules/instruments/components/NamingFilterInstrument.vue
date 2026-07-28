@@ -9,15 +9,13 @@ import {
   parseEvents,
   tallyAt
 } from "../namingFilter"
-import type { InstrumentTable } from "../runInstruments"
+import { consumeTable, type InstrumentProps } from "../sibling"
 
-const props = defineProps<{
-  args: string
-  name: string
-  table?: InstrumentTable
-}>()
+const props = defineProps<InstrumentProps>()
 
-const events = parseEvents(props.table)
+const table = consumeTable(props.sibling)
+
+const events = parseEvents(table)
 
 const position = ref(0)
 const lensIndex = computed(() => clampLens(position.value))

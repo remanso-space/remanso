@@ -8,15 +8,13 @@ import {
   type Institution,
   parseInstitutions
 } from "../coincidenceStack"
-import type { InstrumentTable } from "../runInstruments"
+import { consumeTable, type InstrumentProps } from "../sibling"
 
-const props = defineProps<{
-  args: string
-  name: string
-  table?: InstrumentTable
-}>()
+const props = defineProps<InstrumentProps>()
 
-const institutions = parseInstitutions(props.table)
+const table = consumeTable(props.sibling)
+
+const institutions = parseInstitutions(table)
 const counted = ref<boolean[]>(institutions.map(() => false))
 
 const countedInstitutions = computed<Institution[]>(() =>

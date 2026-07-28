@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import SilentGearsInstrument from "@/modules/instruments/components/SilentGearsInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Cause", "Deaths per year", "Called violence"],
@@ -15,7 +16,7 @@ const table: InstrumentTable = {
 
 const mountGears = (args = "") =>
   mount(SilentGearsInstrument, {
-    props: { args, name: "silent-gears", table }
+    props: { args, name: "silent-gears", sibling: tableSibling(table) }
   })
 
 type Wrapper = ReturnType<typeof mountGears>

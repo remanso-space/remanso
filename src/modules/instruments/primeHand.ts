@@ -1,4 +1,4 @@
-import type { InstrumentTable } from "./runInstruments"
+import type { InstrumentTable } from "./sibling"
 
 export interface Person {
   /** Column 1 — the name the ledger keeps. */

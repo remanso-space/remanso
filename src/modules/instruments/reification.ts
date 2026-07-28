@@ -1,4 +1,4 @@
-import type { InstrumentTable } from "./runInstruments"
+import type { InstrumentTable } from "./sibling"
 
 export interface Stage {
   /** Miles between the owner and the row of cotton. */

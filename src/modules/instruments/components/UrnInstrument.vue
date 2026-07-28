@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 
-const props = defineProps<{ args: string; name: string }>()
+import type { InstrumentProps } from "../sibling"
+
+const props = defineProps<InstrumentProps>()
 
 const parseArgs = (args: string): { black: number; total: number } | null => {
   const trimmed = args.trim()

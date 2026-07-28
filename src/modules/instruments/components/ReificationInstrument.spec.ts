@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 
 import ReificationInstrument from "@/modules/instruments/components/ReificationInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Miles", "What reaches the owner"],
@@ -15,7 +16,11 @@ const table: InstrumentTable = {
 
 const mountReification = (props: { table?: InstrumentTable } = {}) =>
   mount(ReificationInstrument, {
-    props: { args: "", name: "reification", table: props.table ?? table }
+    props: {
+      args: "",
+      name: "reification",
+      sibling: tableSibling(props.table ?? table)
+    }
   })
 
 type Wrapper = ReturnType<typeof mountReification>

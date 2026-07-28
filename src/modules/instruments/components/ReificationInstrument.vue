@@ -7,15 +7,13 @@ import {
   sliderToMiles,
   stageIndexAt
 } from "../reification"
-import type { InstrumentTable } from "../runInstruments"
+import { consumeTable, type InstrumentProps } from "../sibling"
 
-const props = defineProps<{
-  args: string
-  name: string
-  table?: InstrumentTable
-}>()
+const props = defineProps<InstrumentProps>()
 
-const stages = parseStages(props.table)
+const table = consumeTable(props.sibling)
+
+const stages = parseStages(table)
 
 const position = ref(0)
 const miles = computed(() => sliderToMiles(position.value))

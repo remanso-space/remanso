@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils"
 import { describe, expect, it } from "vitest"
 
 import PrimeHandInstrument from "@/modules/instruments/components/PrimeHandInstrument.vue"
-import type { InstrumentTable } from "@/modules/instruments/runInstruments"
+import type { InstrumentTable } from "@/modules/instruments/sibling"
+import { tableSibling } from "@/test/instrumentSibling"
 
 const table: InstrumentTable = {
   header: ["Person", "Between the lines", "Picked"],
@@ -14,7 +15,11 @@ const table: InstrumentTable = {
 
 const mountPrimeHand = (props: { table?: InstrumentTable } = {}) =>
   mount(PrimeHandInstrument, {
-    props: { args: "", name: "prime-hand", table: props.table ?? table }
+    props: {
+      args: "",
+      name: "prime-hand",
+      sibling: tableSibling(props.table ?? table)
+    }
   })
 
 type Wrapper = ReturnType<typeof mountPrimeHand>

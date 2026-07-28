@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { differenceInCalendarDays, isValid, parseISO } from "date-fns"
 
-const props = defineProps<{ args: string; name: string }>()
+import type { InstrumentProps } from "../sibling"
+
+const props = defineProps<InstrumentProps>()
 
 const ARGS_RE = /^(\d{4}-\d{2}-\d{2})(?:\s+(.+))?$/
 

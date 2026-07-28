@@ -1,4 +1,4 @@
-import type { InstrumentTable } from "./runInstruments"
+import type { InstrumentTable } from "./sibling"
 
 /**
  * One person taking one action, in one colour, and where the institution places

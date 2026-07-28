@@ -1,4 +1,4 @@
-import type { InstrumentTable } from "./runInstruments"
+import type { InstrumentTable } from "./sibling"
 
 /** Camara's three violences, in the order he numbers them. */
 export type HarmKind = "institutional" | "revolutionary" | "repressive"

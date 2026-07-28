@@ -2,8 +2,9 @@
 import { computed, ref } from "vue"
 
 import { parseBayesArgs, population, posterior } from "../bayes"
+import type { InstrumentProps } from "../sibling"
 
-const props = defineProps<{ args: string; name: string }>()
+const props = defineProps<InstrumentProps>()
 
 const COLUMNS = 40
 const ROWS = 25
