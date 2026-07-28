@@ -35,7 +35,15 @@ const loaders = {
   "silent-gears": () =>
     import("./components/SilentGearsInstrument.vue").then((m) => m.default),
   "naming-filter": () =>
-    import("./components/NamingFilterInstrument.vue").then((m) => m.default)
+    import("./components/NamingFilterInstrument.vue").then((m) => m.default),
+  "coincidence-stack": () =>
+    import("./components/CoincidenceStackInstrument.vue").then(
+      (m) => m.default
+    ),
+  "colorblind-resort": () =>
+    import("./components/ColorblindResortInstrument.vue").then(
+      (m) => m.default
+    )
 } satisfies Record<string, () => Promise<Component>>
 
 export type InstrumentName = keyof typeof loaders
@@ -59,7 +67,9 @@ export const instrumentWantsTable: Partial<Record<InstrumentName, true>> = {
   "prime-hand": true,
   reification: true,
   "silent-gears": true,
-  "naming-filter": true
+  "naming-filter": true,
+  "coincidence-stack": true,
+  "colorblind-resort": true
 }
 
 /**
