@@ -95,8 +95,12 @@ const step = (filter: Biquad, state: BiquadState, x: number): number => {
 }
 
 export interface LoudnessEstimator {
-  /** Feed one window of time-domain samples, -1 to 1. */
-  push: (window: Float32Array) => void
+  /**
+   * Feed one window of time-domain samples per channel, -1 to 1. Channels are
+   * summed the way BS.1770 does it, at unity weight — which is right for left,
+   * right and centre, and this is not going to meet a surround feed.
+   */
+  push: (...channels: Float32Array[]) => void
   /** Windows loud enough to count as speech. */
   readonly speechWindows: number
   /** Estimated loudness in LUFS, or null before any speech was heard. */
@@ -107,11 +111,12 @@ export const createLoudnessEstimator = (
   sampleRate: number
 ): LoudnessEstimator => {
   const [shelf, highpass] = kWeighting(sampleRate)
-  // Filter state persists across windows. The windows are not contiguous, so
-  // each carries a small discontinuity — negligible against a window of
-  // thousands of samples, and cheaper than warming the filter up every time.
-  const shelfState = freshState()
-  const highpassState = freshState()
+  // Filter state persists across windows, and each channel needs its own. The
+  // windows may not be contiguous, in which case each carries a small
+  // discontinuity — negligible against a window of thousands of samples, and
+  // cheaper than warming the filter up every time.
+  const shelfStates: BiquadState[] = []
+  const highpassStates: BiquadState[] = []
 
   const kept: number[] = []
 
@@ -122,20 +127,28 @@ export const createLoudnessEstimator = (
     loudnessOf(squares.reduce((sum, value) => sum + value, 0) / squares.length)
 
   return {
-    push(window) {
-      if (!window.length) return
+    push(...channels) {
+      let meanSquare = 0
 
-      let sum = 0
-      for (const sample of window) {
-        const filtered = step(
-          highpass,
-          highpassState,
-          step(shelf, shelfState, sample)
-        )
-        sum += filtered * filtered
-      }
+      channels.forEach((window, channel) => {
+        if (!window.length) return
 
-      const meanSquare = sum / window.length
+        shelfStates[channel] ??= freshState()
+        highpassStates[channel] ??= freshState()
+
+        let sum = 0
+        for (const sample of window) {
+          const filtered = step(
+            highpass,
+            highpassStates[channel],
+            step(shelf, shelfStates[channel], sample)
+          )
+          sum += filtered * filtered
+        }
+
+        meanSquare += sum / window.length
+      })
+
       if (meanSquare <= 0) return
       if (loudnessOf(meanSquare) < SILENCE_GATE_LUFS) return
 

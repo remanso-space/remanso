@@ -224,7 +224,10 @@ const onRecordingAttached = async ({
   if (!path.value) return
   isUploading.value = true
   try {
-    const result = await attachAudio(file, { durationSec })
+    const result = await attachAudio(file, {
+      durationSec,
+      source: "recording"
+    })
     if (!result) return
     insertAtCaret(result.markdown)
     recorderOpen.value = false

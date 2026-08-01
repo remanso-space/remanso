@@ -47,6 +47,7 @@
     "markdown-it-github-alerts": "^1.0.0",
     "markdown-it-iframe": "^1.0.0",
     "markdown-it-shikiji": "^0.10.2",
+    "mediabunny": "^1.52.2",
     "mermaid": "^11.12.1",
     "nanoid": "^5.1.6",
     "node-diff3": "^3.2.1",

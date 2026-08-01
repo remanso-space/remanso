@@ -2,10 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { useAudioUpload } from "@/hooks/useAudioUpload.hook"
 import { uploadRecording } from "@/modules/atproto/uploadRecording"
+import { normalizeAudioFile } from "@/utils/normalizeAudioFile"
 import { errorMessage } from "@/utils/notif"
 
 vi.mock("@/modules/atproto/uploadRecording", () => ({
   uploadRecording: vi.fn()
+}))
+// The real module pulls in mediabunny, which has no business being loaded to
+// test the orchestration around it.
+vi.mock("@/utils/normalizeAudioFile", () => ({
+  normalizeAudioFile: vi.fn()
 }))
 vi.mock("@/utils/notif", () => ({
   errorMessage: vi.fn(),
@@ -36,6 +42,8 @@ describe("useAudioUpload", () => {
   beforeEach(() => {
     vi.mocked(uploadRecording).mockReset()
     vi.mocked(errorMessage).mockReset()
+    vi.mocked(normalizeAudioFile).mockReset()
+    vi.mocked(normalizeAudioFile).mockResolvedValue(null)
 
     vi.stubGlobal(
       "Audio",
@@ -160,7 +168,11 @@ describe("useAudioUpload", () => {
   it.each([
     [{ ok: false, reason: "no-session" } as const, /session expired/i],
     [
-      { ok: false, reason: "upload-failed", detail: "413 BlobTooLarge" } as const,
+      {
+        ok: false,
+        reason: "upload-failed",
+        detail: "413 BlobTooLarge"
+      } as const,
       /PDS rejected the audio.*BlobTooLarge/i
     ],
     [
@@ -209,6 +221,77 @@ describe("useAudioUpload", () => {
 
     expect(result).toBeNull()
     expect(uploadRecording).not.toHaveBeenCalled()
+  })
+
+  describe("levelling an attached file", () => {
+    const normalized = (size = 2000) => {
+      const file = new File([new Uint8Array(1)], "episode.weba", {
+        type: "audio/webm"
+      })
+      Object.defineProperty(file, "size", { value: size })
+      return { file, durationSec: 1800, lufsBefore: -27.4, gainDb: 11.4 }
+    }
+
+    beforeEach(() => {
+      vi.mocked(uploadRecording).mockResolvedValue({
+        ok: true,
+        uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+      })
+    })
+
+    it("uploads the levelled file rather than the original", async () => {
+      const result = normalized()
+      vi.mocked(normalizeAudioFile).mockResolvedValue(result)
+
+      await subject().attachAudio(makeFile(9_000_000))
+
+      const call = vi.mocked(uploadRecording).mock.calls[0][0]
+      expect(call.file).toBe(result.file)
+      expect(call.mimeType).toBe("audio/webm")
+      expect(call.durationSec).toBe(1800)
+    })
+
+    it("falls back to the original when levelling declines", async () => {
+      vi.mocked(normalizeAudioFile).mockResolvedValue(null)
+      const original = makeFile(9_000_000)
+
+      await subject().attachAudio(original)
+
+      expect(vi.mocked(uploadRecording).mock.calls[0][0].file).toBe(original)
+    })
+
+    // Re-encoding is what can bring an oversized episode under the ceiling, so
+    // the size check has to judge the output, not the input.
+    it("accepts an oversized file that levelling brought under the ceiling", async () => {
+      vi.mocked(normalizeAudioFile).mockResolvedValue(normalized(20_000_000))
+
+      const result = await subject().attachAudio(makeFile(80_000_000))
+
+      expect(result).not.toBeNull()
+      expect(uploadRecording).toHaveBeenCalled()
+    })
+
+    it("still rejects a file too long for any acceptable bitrate", async () => {
+      vi.mocked(normalizeAudioFile).mockResolvedValue(null)
+
+      const result = await subject().attachAudio(makeFile(80_000_000))
+
+      expect(result).toBeNull()
+      expect(uploadRecording).not.toHaveBeenCalled()
+      expect(vi.mocked(errorMessage).mock.calls[0][0]).toMatch(/over the/i)
+    })
+
+    // A recording is already levelled by the capture graph; putting it through
+    // the encoder again would cost a generation for nothing.
+    it("leaves a microphone take out of the encoder", async () => {
+      await subject().attachAudio(makeFile(1000), {
+        durationSec: 12,
+        source: "recording"
+      })
+
+      expect(normalizeAudioFile).not.toHaveBeenCalled()
+      expect(vi.mocked(uploadRecording).mock.calls[0][0].durationSec).toBe(12)
+    })
   })
 
   it("returns null when the ATProto session has not restored yet", async () => {

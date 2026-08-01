@@ -5,6 +5,7 @@ import {
   uploadRecording,
   type UploadRecordingResult
 } from "@/modules/atproto/uploadRecording"
+import { normalizeAudioFile } from "@/utils/normalizeAudioFile"
 import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
 import { errorMessage } from "@/utils/notif"
 
@@ -113,7 +114,7 @@ export const useAudioUpload = ({
    */
   const attachAudio = async (
     file: File,
-    options?: { durationSec?: number }
+    options?: { durationSec?: number; source?: "file" | "recording" }
   ): Promise<{ markdown: string } | null> => {
     const path = toValue(notePath)
     if (!path) {
@@ -127,15 +128,32 @@ export const useAudioUpload = ({
       return null
     }
 
-    const mimeType = audioMimeType(file)
+    let mimeType = audioMimeType(file)
     if (!mimeType) {
       errorMessage("❌ That file isn't audio")
       return null
     }
 
-    if (file.size > MAX_RECORDING_BYTES) {
+    let upload = file
+    let durationSec = options?.durationSec
+
+    // A recording arrives already levelled by the capture graph, and putting it
+    // through the encoder again would cost a generation for no gain. An
+    // attached file has had nothing done to it at all, so this is its only
+    // chance — and the re-encode is also what can bring an oversized episode
+    // under the blob ceiling.
+    if (options?.source !== "recording") {
+      const normalized = await normalizeAudioFile(file)
+      if (normalized) {
+        upload = normalized.file
+        durationSec = normalized.durationSec
+        mimeType = "audio/webm"
+      }
+    }
+
+    if (upload.size > MAX_RECORDING_BYTES) {
       errorMessage(
-        `❌ Audio is ${megabytes(file.size)}MB, over the ${megabytes(
+        `❌ Audio is ${megabytes(upload.size)}MB, over the ${megabytes(
           MAX_RECORDING_BYTES
         )}MB limit. Re-encode it: ffmpeg -i in.wav -c:a aac -b:a 64k -ac 1 out.m4a`
       )
@@ -143,11 +161,11 @@ export const useAudioUpload = ({
     }
 
     const title = noteTitleForAlt(toValue(noteContent) ?? "", path)
-    const durationSec = options?.durationSec || (await readDuration(file))
+    durationSec = durationSec || (await readDuration(upload))
 
     const result = await uploadRecording({
       did: authorDid,
-      file,
+      file: upload,
       title,
       durationSec,
       mimeType
