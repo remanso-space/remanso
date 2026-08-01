@@ -146,7 +146,6 @@ const pick = (event: Event, emitFile: (file: File) => void) => {
   z-index: 1;
   padding: 0.25rem 0;
   background-color: var(--color-base-100);
-  border-bottom: 1px solid var(--color-base-300);
 }
 
 .hidden-input {
