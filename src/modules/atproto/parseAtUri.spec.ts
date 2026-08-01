@@ -8,6 +8,7 @@ describe("parseAtUri", () => {
       parseAtUri("at://did:plc:abc123/app.bsky.feed.post/rkey-xyz")
     ).toEqual({
       did: "did:plc:abc123",
+      collection: "app.bsky.feed.post",
       rkey: "rkey-xyz"
     })
   })
@@ -17,6 +18,7 @@ describe("parseAtUri", () => {
       parseAtUri("at://did:web:example.com/space.remanso.note/note-1")
     ).toEqual({
       did: "did:web:example.com",
+      collection: "space.remanso.note",
       rkey: "note-1"
     })
   })
@@ -26,7 +28,16 @@ describe("parseAtUri", () => {
       parseAtUri("at://did:plc:abc/space.remanso.note/multi/segment")
     ).toEqual({
       did: "did:plc:abc",
+      collection: "space.remanso.note",
       rkey: "multi/segment"
+    })
+  })
+
+  it("returns the collection segment", () => {
+    expect(parseAtUri("at://did:plc:abc/space.remanso.recording/3xyz")).toEqual({
+      did: "did:plc:abc",
+      collection: "space.remanso.recording",
+      rkey: "3xyz"
     })
   })
 
