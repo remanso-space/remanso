@@ -58,9 +58,10 @@ describe("useAudioUpload", () => {
   })
 
   it("returns the finished markdown line on success", async () => {
-    vi.mocked(uploadRecording).mockResolvedValue(
-      "at://did:plc:abc/space.remanso.recording/3xyz"
-    )
+    vi.mocked(uploadRecording).mockResolvedValue({
+      ok: true,
+      uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+    })
 
     const result = await subject().attachAudio(makeFile(1000))
 
@@ -100,9 +101,10 @@ describe("useAudioUpload", () => {
     ["an uppercase extension", "", "RECORDING.MP3"],
     ["an amr recording", "", "voice.amr"]
   ])("accepts %s when the extension is audio", async (_label, type, name) => {
-    vi.mocked(uploadRecording).mockResolvedValue(
-      "at://did:plc:abc/space.remanso.recording/3xyz"
-    )
+    vi.mocked(uploadRecording).mockResolvedValue({
+      ok: true,
+      uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+    })
 
     const result = await subject().attachAudio(makeFile(1000, type, name))
 
@@ -119,9 +121,10 @@ describe("useAudioUpload", () => {
     ["voice.amr", "audio/amr"],
     ["RECORDING.WAV", "audio/wav"]
   ])("derives an audio mimeType for %s", async (name, expected) => {
-    vi.mocked(uploadRecording).mockResolvedValue(
-      "at://did:plc:abc/space.remanso.recording/3xyz"
-    )
+    vi.mocked(uploadRecording).mockResolvedValue({
+      ok: true,
+      uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+    })
 
     await subject().attachAudio(makeFile(1000, "", name))
 
@@ -129,9 +132,10 @@ describe("useAudioUpload", () => {
   })
 
   it("keeps the browser-reported mimeType when there is one", async () => {
-    vi.mocked(uploadRecording).mockResolvedValue(
-      "at://did:plc:abc/space.remanso.recording/3xyz"
-    )
+    vi.mocked(uploadRecording).mockResolvedValue({
+      ok: true,
+      uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+    })
 
     await subject().attachAudio(makeFile(1000, "audio/mp4", "stream.m4a"))
 
@@ -150,11 +154,50 @@ describe("useAudioUpload", () => {
     expect(errorMessage).toHaveBeenCalled()
   })
 
-  it("returns null and warns when the upload fails", async () => {
-    vi.mocked(uploadRecording).mockResolvedValue(null)
+  // A single "upload failed" string covered an expired session, a PDS size
+  // rejection and a lexicon validation error alike, which made the feature
+  // undebuggable from a phone. Each cause now names itself.
+  it.each([
+    [{ ok: false, reason: "no-session" } as const, /session expired/i],
+    [
+      { ok: false, reason: "upload-failed", detail: "413 BlobTooLarge" } as const,
+      /PDS rejected the audio.*BlobTooLarge/i
+    ],
+    [
+      {
+        ok: false,
+        reason: "record-failed",
+        detail: "400 InvalidRequest: wrong mimetype"
+      } as const,
+      /recording record failed.*InvalidRequest/i
+    ],
+    [
+      { ok: false, reason: "exception", detail: "Failed to fetch" } as const,
+      /Failed to fetch/
+    ]
+  ])("surfaces the %o failure to the user", async (failure, expected) => {
+    vi.mocked(uploadRecording).mockResolvedValue(failure)
 
     expect(await subject().attachAudio(makeFile(1000))).toBeNull()
-    expect(errorMessage).toHaveBeenCalled()
+    expect(vi.mocked(errorMessage).mock.calls[0][0]).toMatch(expected)
+  })
+
+  it("distinguishes a missing note from a missing session", async () => {
+    await useAudioUpload({
+      did: "did:plc:abc",
+      notePath: undefined,
+      noteContent: NOTE
+    }).attachAudio(makeFile(1000))
+    expect(vi.mocked(errorMessage).mock.calls[0][0]).toMatch(/No note/i)
+
+    vi.mocked(errorMessage).mockReset()
+
+    await useAudioUpload({
+      did: () => undefined,
+      notePath: "japonais/ma.pub.md",
+      noteContent: NOTE
+    }).attachAudio(makeFile(1000))
+    expect(vi.mocked(errorMessage).mock.calls[0][0]).toMatch(/Sign in/i)
   })
 
   it("returns null when the note path is unknown", async () => {

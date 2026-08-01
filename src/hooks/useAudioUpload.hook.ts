@@ -1,7 +1,10 @@
 import { type Ref, toValue } from "vue"
 
 import { MAX_RECORDING_BYTES } from "@/modules/atproto/recording.types"
-import { uploadRecording } from "@/modules/atproto/uploadRecording"
+import {
+  uploadRecording,
+  type UploadRecordingResult
+} from "@/modules/atproto/uploadRecording"
 import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
 import { errorMessage } from "@/utils/notif"
 
@@ -73,6 +76,26 @@ const readDuration = (file: File): Promise<number | undefined> =>
     audio.src = url
   })
 
+/**
+ * One message per cause. A single "upload failed" string covered an expired
+ * OAuth session, a PDS size rejection and a lexicon validation error alike,
+ * which made the feature undebuggable from a phone.
+ */
+const failureMessage = (
+  failure: Extract<UploadRecordingResult, { ok: false }>
+): string => {
+  switch (failure.reason) {
+    case "no-session":
+      return "❌ ATProto session expired — sign out and back in"
+    case "upload-failed":
+      return `❌ The PDS rejected the audio (${failure.detail})`
+    case "record-failed":
+      return `❌ Audio uploaded but the recording record failed (${failure.detail})`
+    case "exception":
+      return `❌ Audio upload failed: ${failure.detail}`
+  }
+}
+
 export const useAudioUpload = ({
   did,
   notePath,
@@ -86,9 +109,14 @@ export const useAudioUpload = ({
     file: File
   ): Promise<{ markdown: string } | null> => {
     const path = toValue(notePath)
+    if (!path) {
+      errorMessage("❌ No note to attach the audio to")
+      return null
+    }
+
     const authorDid = toValue(did)
-    if (!path || !authorDid) {
-      errorMessage("❌ Audio upload failed")
+    if (!authorDid) {
+      errorMessage("❌ Sign in to ATProto first")
       return null
     }
 
@@ -110,19 +138,20 @@ export const useAudioUpload = ({
     const title = noteTitleForAlt(toValue(noteContent) ?? "", path)
     const durationSec = await readDuration(file)
 
-    const atUri = await uploadRecording({
+    const result = await uploadRecording({
       did: authorDid,
       file,
       title,
       durationSec,
       mimeType
     })
-    if (!atUri) {
-      errorMessage("❌ Audio upload failed")
+
+    if (!result.ok) {
+      errorMessage(failureMessage(result))
       return null
     }
 
-    return { markdown: `![${title}](${atUri})` }
+    return { markdown: `![${title}](${result.uri})` }
   }
 
   return { attachAudio }

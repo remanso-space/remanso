@@ -43,7 +43,10 @@ describe("uploadRecording", () => {
       durationSec: 3600
     })
 
-    expect(uri).toBe("at://did:plc:abc/space.remanso.recording/3xyz")
+    expect(uri).toEqual({
+      ok: true,
+      uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+    })
 
     const [uploadPath, uploadInit] = fetchHandler.mock.calls[0]
     expect(uploadPath).toBe("/xrpc/com.atproto.repo.uploadBlob")
@@ -103,7 +106,7 @@ describe("uploadRecording", () => {
     expect(body.record).not.toHaveProperty("durationSec")
   })
 
-  it("returns null when there is no session", async () => {
+  it("reports no-session when the OAuth session cannot be restored", async () => {
     vi.mocked(getActiveSession).mockResolvedValue(null)
 
     expect(
@@ -112,7 +115,46 @@ describe("uploadRecording", () => {
         file: makeFile(),
         title: "t"
       })
-    ).toBeNull()
+    ).toEqual({ ok: false, reason: "no-session" })
+  })
+
+  // The XRPC error body is the only thing that distinguishes BlobTooLarge from
+  // an expired token, so it has to survive back to the caller.
+  it("carries the XRPC error body into the failure detail", async () => {
+    const fetchHandler = vi.fn().mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({
+        error: "InvalidMimeType",
+        message: "Wrong type of file"
+      })
+    } as unknown as Response)
+    vi.mocked(getActiveSession).mockResolvedValue({ fetchHandler } as never)
+
+    expect(
+      await uploadRecording({
+        did: "did:plc:abc",
+        file: makeFile(),
+        title: "t"
+      })
+    ).toEqual({
+      ok: false,
+      reason: "upload-failed",
+      detail: "400 InvalidMimeType: Wrong type of file"
+    })
+  })
+
+  it("reports an exception when the request throws", async () => {
+    const fetchHandler = vi.fn().mockRejectedValue(new Error("Failed to fetch"))
+    vi.mocked(getActiveSession).mockResolvedValue({ fetchHandler } as never)
+
+    expect(
+      await uploadRecording({
+        did: "did:plc:abc",
+        file: makeFile(),
+        title: "t"
+      })
+    ).toEqual({ ok: false, reason: "exception", detail: "Failed to fetch" })
   })
 
   it("returns null and skips createRecord when the upload fails", async () => {
@@ -127,11 +169,11 @@ describe("uploadRecording", () => {
         file: makeFile(),
         title: "t"
       })
-    ).toBeNull()
+    ).toEqual({ ok: false, reason: "upload-failed", detail: "HTTP 413" })
     expect(fetchHandler).toHaveBeenCalledTimes(1)
   })
 
-  it("returns null when createRecord fails", async () => {
+  it("reports record-failed when createRecord fails", async () => {
     const fetchHandler = vi
       .fn()
       .mockResolvedValueOnce(okJson({ blob: blobRef }))
@@ -144,6 +186,6 @@ describe("uploadRecording", () => {
         file: makeFile(),
         title: "t"
       })
-    ).toBeNull()
+    ).toEqual({ ok: false, reason: "record-failed", detail: "HTTP 400" })
   })
 })

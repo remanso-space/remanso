@@ -15,6 +15,30 @@ interface UploadRecordingParams {
   mimeType?: string
 }
 
+export type UploadRecordingResult =
+  | { ok: true; uri: string }
+  | { ok: false; reason: "no-session" }
+  | { ok: false; reason: "upload-failed"; detail: string }
+  | { ok: false; reason: "record-failed"; detail: string }
+  | { ok: false; reason: "exception"; detail: string }
+
+/**
+ * XRPC errors come back as `{ error, message }`. That body is the only thing
+ * that distinguishes BlobTooLarge from InvalidMimeType from an expired token,
+ * so it gets surfaced to the user rather than swallowed into a console warning
+ * nobody reads on a phone.
+ */
+const describeFailure = async (response: Response): Promise<string> => {
+  const status = response.status
+  try {
+    const body = (await response.json()) as { error?: string; message?: string }
+    const parts = [body.error, body.message].filter(Boolean)
+    return parts.length ? `${status} ${parts.join(": ")}` : `HTTP ${status}`
+  } catch {
+    return `HTTP ${status}`
+  }
+}
+
 /**
  * Put an audio file in the author's PDS and return the at-uri that the note
  * markdown will point at.
@@ -23,8 +47,8 @@ interface UploadRecordingParams {
  * unreferenced blob is temporary and gets garbage collected, with roughly an
  * hour of grace. The reference cannot wait for the publish cycle.
  *
- * Returns null on any failure. A failed upload leaves nothing behind; a failed
- * createRecord leaves an orphan blob that the PDS collects on its own.
+ * A failed upload leaves nothing behind; a failed createRecord leaves an orphan
+ * blob that the PDS collects on its own.
  */
 export const uploadRecording = async ({
   did,
@@ -32,9 +56,9 @@ export const uploadRecording = async ({
   title,
   durationSec,
   mimeType
-}: UploadRecordingParams): Promise<string | null> => {
+}: UploadRecordingParams): Promise<UploadRecordingResult> => {
   const session = await getActiveSession(did)
-  if (!session) return null
+  if (!session) return { ok: false, reason: "no-session" }
 
   try {
     const uploaded = await session.fetchHandler(
@@ -47,8 +71,9 @@ export const uploadRecording = async ({
     )
 
     if (!uploaded.ok) {
-      console.warn("uploadRecording: uploadBlob failed", uploaded.status)
-      return null
+      const detail = await describeFailure(uploaded)
+      console.warn("uploadRecording: uploadBlob failed", detail)
+      return { ok: false, reason: "upload-failed", detail }
     }
 
     const { blob } = (await uploaded.json()) as { blob: PublicNoteBlob }
@@ -72,14 +97,19 @@ export const uploadRecording = async ({
     )
 
     if (!created.ok) {
-      console.warn("uploadRecording: createRecord failed", created.status)
-      return null
+      const detail = await describeFailure(created)
+      console.warn("uploadRecording: createRecord failed", detail)
+      return { ok: false, reason: "record-failed", detail }
     }
 
     const { uri } = (await created.json()) as { uri: string }
-    return uri ?? null
+    if (!uri) {
+      return { ok: false, reason: "record-failed", detail: "no uri returned" }
+    }
+    return { ok: true, uri }
   } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error)
     console.warn("uploadRecording: failed", error)
-    return null
+    return { ok: false, reason: "exception", detail }
   }
 }
