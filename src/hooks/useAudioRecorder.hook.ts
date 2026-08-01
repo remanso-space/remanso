@@ -32,7 +32,20 @@ const AUDIO_BITS_PER_SECOND = 32_000
  */
 export const MAX_RECORDING_SEC = 60 * 60
 
-const TICK_MS = 250
+// Fast enough that the bars track speech rather than smearing it, slow enough
+// that the whole loop costs nothing. elapsedSec is written on the same tick and
+// simply doesn't change on most of them.
+const TICK_MS = 50
+
+/** Bars in the rolling level window, oldest first. */
+export const LEVEL_BARS = 48
+
+/**
+ * Speech sits low in the RMS range — a normal voice lands near 0.05-0.2, which
+ * would draw as a flat line against a 0-1 scale. The square root opens up the
+ * quiet end, and the gain puts a conversational level around two thirds height.
+ */
+const levelFromRms = (rms: number) => Math.min(1, Math.sqrt(rms) * 1.8)
 
 export type RecorderState =
   | "idle"
@@ -73,12 +86,18 @@ export const useAudioRecorder = () => {
   const elapsedSec = ref(0)
   const previewUrl = ref<string | null>(null)
   const take = shallowRef<File | null>(null)
+  const levels = ref<number[]>(new Array(LEVEL_BARS).fill(0))
 
   let recorder: MediaRecorder | null = null
   let stream: MediaStream | null = null
   let chunks: Blob[] = []
   let ticker: ReturnType<typeof setInterval> | null = null
   let mimeType = ""
+  let audioContext: AudioContext | null = null
+  let analyser: AnalyserNode | null = null
+  // Explicitly backed by an ArrayBuffer: the bare Uint8Array default widens to
+  // ArrayBufferLike, which getByteTimeDomainData will not accept.
+  let samples: Uint8Array<ArrayBuffer> | null = null
   // Wall-clock rather than a tick count: a throttled background tab fires the
   // interval late and often, and the timer must still match the audio.
   let resumedAt = 0
@@ -93,6 +112,26 @@ export const useAudioRecorder = () => {
     ticker = null
   }
 
+  /**
+   * One RMS sample pushed onto the rolling window. Silence still pushes a zero,
+   * so the bars scroll steadily and a dead microphone reads as a flat line
+   * rather than a frozen one.
+   */
+  const sampleLevel = () => {
+    if (!analyser || !samples) return
+    analyser.getByteTimeDomainData(samples)
+
+    let sum = 0
+    for (const value of samples) {
+      // Byte time-domain data is unsigned, centred on 128.
+      const centred = (value - 128) / 128
+      sum += centred * centred
+    }
+
+    const next = levelFromRms(Math.sqrt(sum / samples.length))
+    levels.value = [...levels.value.slice(1), next]
+  }
+
   const startTicker = () => {
     stopTicker()
     resumedAt = Date.now()
@@ -100,8 +139,42 @@ export const useAudioRecorder = () => {
       elapsedSec.value = Math.floor(
         (accumulatedMs + Date.now() - resumedAt) / 1000
       )
+      sampleLevel()
       if (elapsedSec.value >= MAX_RECORDING_SEC) stop()
     }, TICK_MS)
+  }
+
+  /**
+   * The analyser only taps the stream — it is deliberately never connected to
+   * the context destination, which would play the microphone back through the
+   * speakers and feed back.
+   */
+  const startMetering = (source: MediaStream) => {
+    if (typeof AudioContext === "undefined") return
+    try {
+      audioContext = new AudioContext()
+      // Safari starts a context suspended unless it was created in a gesture;
+      // start() always runs from a click, but resuming costs nothing.
+      void audioContext.resume?.()
+      analyser = audioContext.createAnalyser()
+      analyser.fftSize = 1024
+      audioContext.createMediaStreamSource(source).connect(analyser)
+      samples = new Uint8Array(analyser.fftSize)
+    } catch (error) {
+      // Metering is decoration. A context the browser refuses to open must not
+      // cost the user their recording.
+      console.warn("useAudioRecorder: level metering unavailable", error)
+      analyser = null
+      samples = null
+    }
+  }
+
+  const stopMetering = () => {
+    analyser = null
+    samples = null
+    void audioContext?.close?.()
+    audioContext = null
+    levels.value = new Array(LEVEL_BARS).fill(0)
   }
 
   // Releasing the tracks is what clears the browser's recording indicator. Skip
@@ -113,6 +186,7 @@ export const useAudioRecorder = () => {
 
   const finish = () => {
     stopTicker()
+    stopMetering()
     releaseStream()
 
     const blob = new Blob(chunks, { type: mimeType })
@@ -136,6 +210,7 @@ export const useAudioRecorder = () => {
 
   const reset = () => {
     stopTicker()
+    stopMetering()
     if (recorder && recorder.state !== "inactive") {
       // Drop the handler first so a discard doesn't produce a take.
       recorder.onstop = null
@@ -190,6 +265,7 @@ export const useAudioRecorder = () => {
     chunks = []
     accumulatedMs = 0
     elapsedSec.value = 0
+    startMetering(stream)
 
     recorder.ondataavailable = (event) => {
       if (event.data.size) chunks.push(event.data)
@@ -250,6 +326,7 @@ export const useAudioRecorder = () => {
     elapsedSec,
     previewUrl,
     take,
+    levels,
     isCapturing,
     start,
     pause,

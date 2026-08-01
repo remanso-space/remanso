@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { effectScope } from "vue"
 
-import { pickMimeType, useAudioRecorder } from "@/hooks/useAudioRecorder.hook"
+import {
+  LEVEL_BARS,
+  pickMimeType,
+  useAudioRecorder
+} from "@/hooks/useAudioRecorder.hook"
 
 class FakeMediaRecorder {
   static supported: string[] = []
@@ -40,6 +44,41 @@ class FakeMediaRecorder {
   }
 }
 
+/** Amplitude the fake analyser writes, as a byte offset from the 128 centre. */
+let fakeAmplitude = 0
+const closedContexts: string[] = []
+
+class FakeAudioContext {
+  static connected: unknown[] = []
+
+  createAnalyser() {
+    return {
+      fftSize: 0,
+      getByteTimeDomainData: (target: Uint8Array) => {
+        // A square wave: every sample sits at the amplitude, so the RMS is the
+        // amplitude and the expected level is arithmetic rather than a guess.
+        target.fill(128 + fakeAmplitude)
+      }
+    }
+  }
+
+  createMediaStreamSource(stream: unknown) {
+    return {
+      connect: (node: unknown) =>
+        FakeAudioContext.connected.push([stream, node])
+    }
+  }
+
+  resume() {
+    return Promise.resolve()
+  }
+
+  close() {
+    closedContexts.push("closed")
+    return Promise.resolve()
+  }
+}
+
 const stoppedTracks: string[] = []
 
 const fakeStream = () => ({
@@ -58,12 +97,16 @@ const mount = () => {
 describe("useAudioRecorder", () => {
   beforeEach(() => {
     stoppedTracks.length = 0
+    closedContexts.length = 0
+    FakeAudioContext.connected.length = 0
+    fakeAmplitude = 0
     FakeMediaRecorder.last = null
     FakeMediaRecorder.supported = ["audio/webm;codecs=opus", "audio/webm"]
     getUserMedia.mockReset()
     getUserMedia.mockResolvedValue(fakeStream())
 
     vi.stubGlobal("MediaRecorder", FakeMediaRecorder)
+    vi.stubGlobal("AudioContext", FakeAudioContext)
     vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } })
     vi.stubGlobal("URL", {
       createObjectURL: () => "blob:take",
@@ -209,6 +252,113 @@ describe("useAudioRecorder", () => {
     expect(stoppedTracks).toHaveLength(1)
 
     dispose()
+  })
+
+  describe("level metering", () => {
+    it("starts as a flat window of the expected width", () => {
+      const { recorder, dispose } = mount()
+
+      expect(recorder.levels.value).toHaveLength(LEVEL_BARS)
+      expect(recorder.levels.value.every((level) => level === 0)).toBe(true)
+
+      dispose()
+    })
+
+    it("scrolls the measured amplitude in from the right", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      // A square wave at 32/128 gives an RMS of 0.25, so the curve lands on
+      // sqrt(0.25) * 1.8 = 0.9.
+      fakeAmplitude = 32
+      await vi.advanceTimersByTimeAsync(150)
+
+      const window = recorder.levels.value
+      expect(window).toHaveLength(LEVEL_BARS)
+      expect(window.at(-1)).toBeCloseTo(0.9, 5)
+      // Silence before the tone is still scrolling through the left side.
+      expect(window[0]).toBe(0)
+
+      recorder.reset()
+      dispose()
+      vi.useRealTimers()
+    })
+
+    it("keeps pushing zeroes for a silent microphone", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      await vi.advanceTimersByTimeAsync(150)
+
+      expect(recorder.levels.value.at(-1)).toBe(0)
+
+      recorder.reset()
+      dispose()
+      vi.useRealTimers()
+    })
+
+    it("freezes the window while paused", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      fakeAmplitude = 32
+      await vi.advanceTimersByTimeAsync(150)
+      recorder.pause()
+
+      const frozen = recorder.levels.value
+      fakeAmplitude = 100
+      await vi.advanceTimersByTimeAsync(500)
+
+      expect(recorder.levels.value).toBe(frozen)
+
+      recorder.reset()
+      dispose()
+      vi.useRealTimers()
+    })
+
+    // Connecting the analyser to the context destination would play the
+    // microphone back through the speakers and feed back.
+    it("taps the stream without routing it to the speakers", async () => {
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      expect(FakeAudioContext.connected).toHaveLength(1)
+
+      recorder.reset()
+      dispose()
+    })
+
+    it("closes the audio context and clears the window on stop", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      fakeAmplitude = 32
+      await vi.advanceTimersByTimeAsync(150)
+      recorder.stop()
+
+      expect(closedContexts).toHaveLength(1)
+      expect(recorder.levels.value.every((level) => level === 0)).toBe(true)
+
+      dispose()
+      vi.useRealTimers()
+    })
+
+    // Metering is decoration. A browser that refuses an AudioContext must still
+    // record.
+    it("records anyway when AudioContext is missing", async () => {
+      vi.stubGlobal("AudioContext", undefined)
+      const { recorder, dispose } = mount()
+
+      expect(await recorder.start()).toBe(true)
+      recorder.stop()
+      expect(recorder.take.value).toBeInstanceOf(File)
+
+      dispose()
+    })
   })
 
   it("guards against navigating away mid-take", async () => {

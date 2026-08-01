@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 
+import AudioLevels from "@/components/AudioLevels.vue"
 import {
   MAX_RECORDING_SEC,
   useAudioRecorder
@@ -19,6 +20,7 @@ const {
   elapsedSec,
   previewUrl,
   take,
+  levels,
   isCapturing,
   start,
   pause,
@@ -91,6 +93,12 @@ watch(
         The recording is attached to this note and uploaded to your PDS. Keep
         this tab in the foreground — a backgrounded tab can lose the take.
       </p>
+
+      <audio-levels
+        v-if="isCapturing"
+        :levels="levels"
+        :paused="state === 'paused'"
+      />
 
       <div class="readout">
         <span
