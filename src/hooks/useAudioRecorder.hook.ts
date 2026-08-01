@@ -1,5 +1,12 @@
 import { computed, onScopeDispose, ref, shallowRef, watch } from "vue"
 
+import {
+  createLoudnessEstimator,
+  dbToAmplitude,
+  type LoudnessEstimator,
+  nextGainDb
+} from "@/utils/loudness"
+
 /**
  * Ordered by playback reach, not by encoder quality. Safari below 18.4 cannot
  * play WebM/Opus, so an MP4/AAC take is the one that plays on every browser —
@@ -20,9 +27,18 @@ const EXTENSION_BY_CONTAINER: Record<string, string> = {
   ogg: "ogg"
 }
 
-// 32 kbps mono is more than enough for speech and keeps an hour of audio near
-// 14MB, well inside the 50MB blob ceiling.
-const AUDIO_BITS_PER_SECOND = 32_000
+// 48 kbps mono is transparent enough for speech to survive being re-encoded by
+// a podcast host later, and still puts a full hour near 22MB — comfortably
+// inside the 50MB blob ceiling.
+const AUDIO_BITS_PER_SECOND = 48_000
+
+const GAIN_STORAGE_KEY = "remanso:audio:gain"
+
+/**
+ * Enough sampled windows to trust the loudness estimate. Below this the take
+ * was mostly silence and would teach the calibration the wrong level.
+ */
+const MIN_SPEECH_WINDOWS = 40
 
 /**
  * A browser tab is not a field recorder: backgrounding it on mobile can kill
@@ -62,6 +78,41 @@ const errorName = (error: unknown): string =>
   typeof error === "object" && error !== null && "name" in error
     ? String((error as { name: unknown }).name)
     : ""
+
+/**
+ * Capture gain learned per microphone, in dB.
+ *
+ * Level is a property of the microphone and how far away you sit, not of any
+ * one take, so it carries across recordings. Keyed by device so a headset and a
+ * desk mic do not fight over one number; the empty key is the system default.
+ */
+const readGainTable = (): Record<string, number> => {
+  try {
+    const raw = localStorage.getItem(GAIN_STORAGE_KEY)
+    const parsed: unknown = raw ? JSON.parse(raw) : null
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, number>)
+      : {}
+  } catch {
+    return {}
+  }
+}
+
+const readGainDb = (device: string): number => {
+  const value = readGainTable()[device]
+  return typeof value === "number" && Number.isFinite(value) ? value : 0
+}
+
+const writeGainDb = (device: string, db: number) => {
+  try {
+    localStorage.setItem(
+      GAIN_STORAGE_KEY,
+      JSON.stringify({ ...readGainTable(), [device]: db })
+    )
+  } catch (error) {
+    console.warn("useAudioRecorder: could not persist the capture gain", error)
+  }
+}
 
 export type RecorderState =
   | "idle"
@@ -115,6 +166,12 @@ export const useAudioRecorder = () => {
   let mimeType = ""
   let audioContext: AudioContext | null = null
   let analyser: AnalyserNode | null = null
+  let estimator: LoudnessEstimator | null = null
+  // The gain this take is being recorded with, and the device it was learned
+  // for — both needed to fold the measurement back into the stored offset.
+  let appliedGainDb = 0
+  let calibratingDevice = ""
+  let weighted: Float32Array<ArrayBuffer> | null = null
   // Explicitly backed by an ArrayBuffer: the bare Uint8Array default widens to
   // ArrayBufferLike, which getByteTimeDomainData will not accept.
   let samples: Uint8Array<ArrayBuffer> | null = null
@@ -150,6 +207,13 @@ export const useAudioRecorder = () => {
 
     const next = levelFromRms(Math.sqrt(sum / samples.length))
     levels.value = [...levels.value.slice(1), next]
+
+    // The same poll feeds the loudness estimate, off the float view of the
+    // signal — the byte data above is too coarse for a K-weighted measurement.
+    if (estimator && weighted) {
+      analyser.getFloatTimeDomainData(weighted)
+      estimator.push(weighted)
+    }
   }
 
   const startTicker = () => {
@@ -165,33 +229,90 @@ export const useAudioRecorder = () => {
   }
 
   /**
-   * The analyser only taps the stream — it is deliberately never connected to
-   * the context destination, which would play the microphone back through the
-   * speakers and feed back.
+   * Build the capture graph and return the stream to record.
+   *
+   * mic → gain → limiter → recorder, with an analyser tapped off the end so the
+   * bars and the loudness estimate both see what is actually being written.
+   *
+   * The gain is the level learned from previous takes on this microphone, held
+   * constant for the whole recording — a value that moved during the take would
+   * be automatic gain control, which pumps and is exactly what we turn off. The
+   * limiter is a safety net for the gain overshooting, nothing more; on a
+   * correctly calibrated take it never engages.
+   *
+   * Nothing reaches the context destination, which would play the microphone
+   * back through the speakers and feed back.
+   *
+   * Returns the original stream unchanged if the browser has no AudioContext:
+   * levelling is a nicety, and must not cost the user their recording.
    */
-  const startMetering = (source: MediaStream) => {
-    if (typeof AudioContext === "undefined") return
+  const buildGraph = (source: MediaStream): MediaStream => {
+    if (typeof AudioContext === "undefined") return source
+
     try {
       audioContext = new AudioContext()
       // Safari starts a context suspended unless it was created in a gesture;
       // start() always runs from a click, but resuming costs nothing.
       void audioContext.resume?.()
+
+      calibratingDevice = deviceId.value
+      appliedGainDb = readGainDb(calibratingDevice)
+
+      const gain = audioContext.createGain()
+      gain.gain.value = dbToAmplitude(appliedGainDb)
+
+      const limiter = audioContext.createDynamicsCompressor()
+      limiter.threshold.value = -3
+      limiter.knee.value = 0
+      limiter.ratio.value = 20
+      limiter.attack.value = 0.003
+      limiter.release.value = 0.1
+
       analyser = audioContext.createAnalyser()
-      analyser.fftSize = 1024
-      audioContext.createMediaStreamSource(source).connect(analyser)
+      analyser.fftSize = 2048
+
+      const destination = audioContext.createMediaStreamDestination()
+
+      audioContext.createMediaStreamSource(source).connect(gain)
+      gain.connect(limiter)
+      limiter.connect(analyser)
+      analyser.connect(destination)
+
       samples = new Uint8Array(analyser.fftSize)
+      weighted = new Float32Array(analyser.fftSize)
+      estimator = createLoudnessEstimator(audioContext.sampleRate)
+
+      return destination.stream
     } catch (error) {
-      // Metering is decoration. A context the browser refuses to open must not
-      // cost the user their recording.
-      console.warn("useAudioRecorder: level metering unavailable", error)
+      console.warn("useAudioRecorder: capture graph unavailable", error)
       analyser = null
       samples = null
+      weighted = null
+      estimator = null
+      return source
     }
   }
 
-  const stopMetering = () => {
+  /**
+   * Fold what this take actually measured back into the stored gain, so the
+   * next recording on this microphone starts at the right level.
+   *
+   * A take that was mostly silence teaches nothing and is ignored.
+   */
+  const learnFromTake = () => {
+    if (!estimator || estimator.speechWindows < MIN_SPEECH_WINDOWS) return
+
+    const measured = estimator.lufs()
+    if (measured === null) return
+
+    writeGainDb(calibratingDevice, nextGainDb(measured, appliedGainDb))
+  }
+
+  const teardownGraph = () => {
     analyser = null
     samples = null
+    weighted = null
+    estimator = null
     void audioContext?.close?.()
     audioContext = null
     levels.value = new Array(LEVEL_BARS).fill(0)
@@ -206,7 +327,8 @@ export const useAudioRecorder = () => {
 
   const finish = () => {
     stopTicker()
-    stopMetering()
+    learnFromTake()
+    teardownGraph()
     releaseStream()
 
     const blob = new Blob(chunks, { type: mimeType })
@@ -230,7 +352,11 @@ export const useAudioRecorder = () => {
 
   const reset = () => {
     stopTicker()
-    stopMetering()
+    // Deliberately no learnFromTake: a discarded take is still a real
+    // measurement of the microphone, and throwing away the recording is no
+    // reason to throw away what it taught us. finish() already ran for a
+    // completed take; a reset mid-recording has nothing reliable to learn.
+    teardownGraph()
     if (recorder && recorder.state !== "inactive") {
       // Drop the handler first so a discard doesn't produce a take.
       recorder.onstop = null
@@ -334,12 +460,17 @@ export const useAudioRecorder = () => {
     // picker is only genuinely readable from here on.
     void refreshDevices()
 
+    // The recorder reads the end of the capture graph, so the file on disk is
+    // the levelled signal rather than the raw microphone.
+    const captured = buildGraph(stream)
+
     try {
-      recorder = new MediaRecorder(stream, {
+      recorder = new MediaRecorder(captured, {
         mimeType: type,
         audioBitsPerSecond: AUDIO_BITS_PER_SECOND
       })
     } catch (error) {
+      teardownGraph()
       releaseStream()
       state.value = "unsupported"
       console.warn("useAudioRecorder: MediaRecorder rejected", type, error)
@@ -350,7 +481,6 @@ export const useAudioRecorder = () => {
     chunks = []
     accumulatedMs = 0
     elapsedSec.value = 0
-    startMetering(stream)
 
     recorder.ondataavailable = (event) => {
       if (event.data.size) chunks.push(event.data)

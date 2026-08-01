@@ -48,18 +48,61 @@ class FakeMediaRecorder {
 let fakeAmplitude = 0
 const closedContexts: string[] = []
 
+/** Tone written into the float view, as an amplitude. Drives the loudness. */
+let fakeTone = 0
+
 class FakeAudioContext {
   static connected: unknown[] = []
+  static lastGain = 1
+  static destinationStream = { id: "graph-output" }
+
+  sampleRate = 48_000
 
   createAnalyser() {
     return {
       fftSize: 0,
+      connect: () => {},
       getByteTimeDomainData: (target: Uint8Array) => {
         // A square wave: every sample sits at the amplitude, so the RMS is the
         // amplitude and the expected level is arithmetic rather than a guess.
         target.fill(128 + fakeAmplitude)
+      },
+      getFloatTimeDomainData: (target: Float32Array) => {
+        for (let i = 0; i < target.length; i += 1) {
+          target[i] = fakeTone * Math.sin((2 * Math.PI * 1000 * i) / 48_000)
+        }
       }
     }
+  }
+
+  createGain() {
+    const node = {
+      gain: {
+        get value() {
+          return FakeAudioContext.lastGain
+        },
+        set value(next: number) {
+          FakeAudioContext.lastGain = next
+        }
+      },
+      connect: () => {}
+    }
+    return node
+  }
+
+  createDynamicsCompressor() {
+    return {
+      threshold: { value: 0 },
+      knee: { value: 0 },
+      ratio: { value: 0 },
+      attack: { value: 0 },
+      release: { value: 0 },
+      connect: () => {}
+    }
+  }
+
+  createMediaStreamDestination() {
+    return { stream: FakeAudioContext.destinationStream }
   }
 
   createMediaStreamSource(stream: unknown) {
@@ -106,7 +149,9 @@ describe("useAudioRecorder", () => {
     stoppedTracks.length = 0
     closedContexts.length = 0
     FakeAudioContext.connected.length = 0
+    FakeAudioContext.lastGain = 1
     fakeAmplitude = 0
+    fakeTone = 0
     FakeMediaRecorder.last = null
     FakeMediaRecorder.supported = ["audio/webm;codecs=opus", "audio/webm"]
     getUserMedia.mockReset()
@@ -418,6 +463,142 @@ describe("useAudioRecorder", () => {
       await recorder.refreshDevices()
 
       expect(recorder.deviceId.value).toBe("usb-42")
+
+      dispose()
+    })
+  })
+
+  describe("loudness calibration", () => {
+    const storedGain = () =>
+      JSON.parse(localStorage.getItem("remanso:audio:gain") ?? "{}")
+
+    /** Records long enough for the estimator to trust the measurement. */
+    const recordTone = async (
+      recorder: ReturnType<typeof mount>["recorder"],
+      amplitude: number
+    ) => {
+      await recorder.start()
+      fakeTone = amplitude
+      await vi.advanceTimersByTimeAsync(3000)
+      recorder.stop()
+    }
+
+    it("learns the microphone's level from a take", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      // A quiet take: the stored gain should come out positive.
+      await recordTone(recorder, 0.02)
+
+      expect(storedGain()[""]).toBeGreaterThan(5)
+
+      dispose()
+      vi.useRealTimers()
+    })
+
+    it("turns a hot microphone down", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recordTone(recorder, 0.9)
+
+      expect(storedGain()[""]).toBeLessThan(0)
+
+      dispose()
+      vi.useRealTimers()
+    })
+
+    it("applies what it learned to the next take", async () => {
+      vi.useFakeTimers()
+      const first = mount()
+      await recordTone(first.recorder, 0.02)
+      const learned = storedGain()[""]
+      first.dispose()
+
+      FakeAudioContext.lastGain = 1
+      const second = mount()
+      await second.recorder.start()
+
+      // Gain is set as an amplitude, so compare against the dB conversion.
+      expect(FakeAudioContext.lastGain).toBeCloseTo(
+        Math.pow(10, learned / 20),
+        5
+      )
+
+      second.recorder.reset()
+      second.dispose()
+      vi.useRealTimers()
+    })
+
+    it("keeps a separate level per microphone", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      recorder.selectDevice("usb-42")
+      await recordTone(recorder, 0.02)
+
+      expect(storedGain()["usb-42"]).toBeGreaterThan(5)
+      expect(storedGain()[""]).toBeUndefined()
+
+      dispose()
+      vi.useRealTimers()
+    })
+
+    // A take that is all room tone measures the noise floor, and learning from
+    // it would tell the next recording to amplify silence.
+    it("learns nothing from a take with no speech in it", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      await vi.advanceTimersByTimeAsync(3000)
+      recorder.stop()
+
+      expect(storedGain()).toEqual({})
+
+      dispose()
+      vi.useRealTimers()
+    })
+
+    it("learns nothing from a take too short to measure", async () => {
+      vi.useFakeTimers()
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+      fakeTone = 0.02
+      await vi.advanceTimersByTimeAsync(200)
+      recorder.stop()
+
+      expect(storedGain()).toEqual({})
+
+      dispose()
+      vi.useRealTimers()
+    })
+
+    it("records the levelled signal rather than the raw microphone", async () => {
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+
+      expect(FakeMediaRecorder.last?.stream).toBe(
+        FakeAudioContext.destinationStream
+      )
+
+      recorder.reset()
+      dispose()
+    })
+
+    it("records the raw stream when there is no AudioContext", async () => {
+      vi.stubGlobal("AudioContext", undefined)
+      const { recorder, dispose } = mount()
+
+      expect(await recorder.start()).toBe(true)
+      expect(FakeMediaRecorder.last?.stream).not.toBe(
+        FakeAudioContext.destinationStream
+      )
+
+      recorder.stop()
+      expect(recorder.take.value).toBeInstanceOf(File)
 
       dispose()
     })
