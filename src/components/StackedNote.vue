@@ -58,6 +58,10 @@ const AudioRecorderModal = defineAsyncComponent(
   () => import("@/components/AudioRecorderModal.vue")
 )
 
+const NoteEditToolbar = defineAsyncComponent(
+  () => import("@/components/NoteEditToolbar.vue")
+)
+
 const props = defineProps<{
   user: string
   repo: string
@@ -147,7 +151,6 @@ const { uploadImage } = useImageUpload({
   notePath: path
 })
 
-const fileInput = ref<HTMLInputElement | null>(null)
 const editKey = ref(0)
 const isUploading = ref(false)
 
@@ -163,11 +166,8 @@ const insertAtCaret = (block: string) => {
   editKey.value++
 }
 
-const onImagePicked = async (e: Event) => {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ""
-  if (!file || !path.value) return
+const onImagePicked = async (file: File) => {
+  if (!path.value) return
   isUploading.value = true
   try {
     const result = await uploadImage(file)
@@ -197,14 +197,10 @@ const { attachAudio } = useAudioUpload({
   noteContent: rawContent
 })
 
-const audioInput = ref<HTMLInputElement | null>(null)
 const recorderOpen = ref(false)
 
-const onAudioPicked = async (e: Event) => {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ""
-  if (!file || !path.value) return
+const onAudioPicked = async (file: File) => {
+  if (!path.value) return
   isUploading.value = true
   try {
     const result = await attachAudio(file)
@@ -581,114 +577,6 @@ const onBadgeClick = async () => {
             <path d="M14 4l0 4l-6 0l0 -4" />
           </svg>
         </button>
-        <button
-          v-if="isMarkdown && mode === 'edit' && canPush"
-          class="action button is-text is-light"
-          :title="isUploading ? 'Uploading…' : 'Upload image'"
-          :disabled="isUploading"
-          @click="fileInput?.click()"
-        >
-          <span
-            v-if="isUploading"
-            class="loading loading-spinner loading-sm"
-          ></span>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-photo-plus"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M15 8h.01" />
-            <path
-              d="M12.5 21h-6.5a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v6.5"
-            />
-            <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l4 4" />
-            <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l2 2" />
-            <path d="M16 19h6" />
-            <path d="M19 16v6" />
-          </svg>
-        </button>
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/*"
-          class="hidden-input"
-          @change="onImagePicked"
-        />
-        <button
-          v-if="isMarkdown && mode === 'edit' && canPush && canAttachAudio"
-          class="action button is-text is-light"
-          :title="isUploading ? 'Uploading…' : 'Attach audio'"
-          :disabled="isUploading"
-          @click="audioInput?.click()"
-        >
-          <span
-            v-if="isUploading"
-            class="loading loading-spinner loading-sm"
-          ></span>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-music-plus"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M12 17a3 3 0 1 0 -6 0a3 3 0 0 0 6 0" />
-            <path d="M12 17v-13h7v4h-7" />
-            <path d="M16 19h6" />
-            <path d="M19 16v6" />
-          </svg>
-        </button>
-        <input
-          ref="audioInput"
-          type="file"
-          accept="audio/*"
-          class="hidden-input"
-          @change="onAudioPicked"
-        />
-        <button
-          v-if="isMarkdown && mode === 'edit' && canPush && canAttachAudio"
-          class="action button is-text is-light"
-          title="Record audio"
-          :disabled="isUploading"
-          @click="recorderOpen = true"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-microphone"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path
-              d="M9 2m0 3a3 3 0 0 1 3 -3h0a3 3 0 0 1 3 3v5a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3z"
-            />
-            <path d="M5 10a7 7 0 0 0 14 0" />
-            <path d="M8 21l8 0" />
-            <path d="M12 17l0 4" />
-          </svg>
-        </button>
       </div>
       <a
         class="title-stacked-note-link"
@@ -703,6 +591,14 @@ const onBadgeClick = async () => {
     </div>
     <section class="text-content">
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
+        <note-edit-toolbar
+          v-if="canPush"
+          :can-attach-audio="canAttachAudio"
+          :busy="isUploading"
+          @image="onImagePicked"
+          @audio="onAudioPicked"
+          @record="recorderOpen = true"
+        />
         <edit-note
           :key="editKey"
           v-model="rawContent"
@@ -795,6 +691,19 @@ $border-color: rgba(18, 19, 58, 0.2);
   > .note-content {
     height: 100%;
   }
+
+  // The toolbar sits above the editor, so the editor takes what's left rather
+  // than its own full height and pushing the note out of the pane.
+  > .edit {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    > :last-child {
+      flex: 1;
+      min-height: 0;
+    }
+  }
 }
 
 .action-bar {
@@ -802,10 +711,6 @@ $border-color: rgba(18, 19, 58, 0.2);
   align-items: center;
   justify-content: flex-end;
   gap: 0.25rem;
-}
-
-.hidden-input {
-  display: none;
 }
 
 .snapshot-banner {
