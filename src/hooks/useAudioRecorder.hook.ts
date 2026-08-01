@@ -47,6 +47,22 @@ export const LEVEL_BARS = 48
  */
 const levelFromRms = (rms: number) => Math.min(1, Math.sqrt(rms) * 1.8)
 
+const MIC_STORAGE_KEY = "remanso:audio:device"
+
+export interface AudioInput {
+  deviceId: string
+  label: string
+}
+
+/**
+ * `name` off anything thrown by getUserMedia. OverconstrainedError is not an
+ * Error subclass in every browser, so `instanceof` would miss it.
+ */
+const errorName = (error: unknown): string =>
+  typeof error === "object" && error !== null && "name" in error
+    ? String((error as { name: unknown }).name)
+    : ""
+
 export type RecorderState =
   | "idle"
   | "requesting"
@@ -87,6 +103,10 @@ export const useAudioRecorder = () => {
   const previewUrl = ref<string | null>(null)
   const take = shallowRef<File | null>(null)
   const levels = ref<number[]>(new Array(LEVEL_BARS).fill(0))
+  const devices = ref<AudioInput[]>([])
+  // Restored so a chosen microphone survives a reload — picking it again on
+  // every note would make an external mic more work than the built-in one.
+  const deviceId = ref(localStorage.getItem(MIC_STORAGE_KEY) ?? "")
 
   let recorder: MediaRecorder | null = null
   let stream: MediaStream | null = null
@@ -228,6 +248,67 @@ export const useAudioRecorder = () => {
     state.value = "idle"
   }
 
+  const selectDevice = (id: string) => {
+    deviceId.value = id
+    if (id) localStorage.setItem(MIC_STORAGE_KEY, id)
+    else localStorage.removeItem(MIC_STORAGE_KEY)
+  }
+
+  /**
+   * List the microphones the browser will admit to.
+   *
+   * Labels are blank until a mic has been granted at least once on the origin,
+   * and a browser with no permission reports a single anonymous entry. Numbered
+   * placeholders keep the picker usable in that state, and the stale-device
+   * prune is held back until the labels prove a grant has happened — otherwise
+   * the first call would throw away a perfectly good saved choice.
+   */
+  const refreshDevices = async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) return
+
+    try {
+      const all = await navigator.mediaDevices.enumerateDevices()
+      const inputs = all.filter((device) => device.kind === "audioinput")
+
+      devices.value = inputs.map((device, index) => ({
+        deviceId: device.deviceId,
+        label: device.label || `Microphone ${index + 1}`
+      }))
+
+      const labelled = inputs.some((device) => device.label)
+      const stillThere = inputs.some(
+        (device) => device.deviceId === deviceId.value
+      )
+      if (labelled && deviceId.value && !stillThere) selectDevice("")
+    } catch (error) {
+      console.warn("useAudioRecorder: could not list microphones", error)
+    }
+  }
+
+  /**
+   * `exact` rather than `ideal`: silently recording off the phone's built-in
+   * mic when the chosen one is busy would be worse than failing. The one case
+   * worth absorbing is a saved mic that is simply not plugged in any more.
+   */
+  const openStream = async (): Promise<MediaStream> => {
+    const constraint: MediaTrackConstraints | true = deviceId.value
+      ? { deviceId: { exact: deviceId.value } }
+      : true
+
+    try {
+      return await navigator.mediaDevices.getUserMedia({ audio: constraint })
+    } catch (error) {
+      const name = errorName(error)
+      const missing =
+        name === "OverconstrainedError" || name === "NotFoundError"
+      if (!deviceId.value || !missing) throw error
+
+      console.warn("useAudioRecorder: saved microphone is gone, using default")
+      selectDevice("")
+      return navigator.mediaDevices.getUserMedia({ audio: true })
+    }
+  }
+
   const start = async (): Promise<boolean> => {
     const type = pickMimeType()
     if (!type) {
@@ -239,15 +320,19 @@ export const useAudioRecorder = () => {
     state.value = "requesting"
 
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream = await openStream()
     } catch (error) {
-      const name = error instanceof Error ? error.name : ""
       // NotAllowedError is a refused prompt or a blocked origin; anything else
       // (NotFoundError, insecure context) means the mic isn't usable at all.
-      state.value = name === "NotAllowedError" ? "denied" : "unsupported"
+      state.value =
+        errorName(error) === "NotAllowedError" ? "denied" : "unsupported"
       console.warn("useAudioRecorder: getUserMedia failed", error)
       return false
     }
+
+    // The grant that just happened is what fills in the device labels, so the
+    // picker is only genuinely readable from here on.
+    void refreshDevices()
 
     try {
       recorder = new MediaRecorder(stream, {
@@ -315,9 +400,18 @@ export const useAudioRecorder = () => {
     else window.removeEventListener("beforeunload", warnBeforeUnload)
   })
 
+  // Plugging the microphone in while the modal is already open should populate
+  // the picker without a reopen.
+  const onDeviceChange = () => void refreshDevices()
+  navigator.mediaDevices?.addEventListener?.("devicechange", onDeviceChange)
+
   onScopeDispose(() => {
     stopGuard()
     window.removeEventListener("beforeunload", warnBeforeUnload)
+    navigator.mediaDevices?.removeEventListener?.(
+      "devicechange",
+      onDeviceChange
+    )
     reset()
   })
 
@@ -327,7 +421,11 @@ export const useAudioRecorder = () => {
     previewUrl,
     take,
     levels,
+    devices,
+    deviceId,
     isCapturing,
+    selectDevice,
+    refreshDevices,
     start,
     pause,
     resume,

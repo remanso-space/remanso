@@ -86,6 +86,13 @@ const fakeStream = () => ({
 })
 
 const getUserMedia = vi.fn()
+const enumerateDevices = vi.fn()
+
+const overconstrained = () => {
+  // Not an Error subclass in every browser — the hook must read `name` off a
+  // plain object too.
+  return { name: "OverconstrainedError", constraint: "deviceId" }
+}
 
 /** Runs the hook inside a scope so onScopeDispose is exercised on teardown. */
 const mount = () => {
@@ -104,10 +111,20 @@ describe("useAudioRecorder", () => {
     FakeMediaRecorder.supported = ["audio/webm;codecs=opus", "audio/webm"]
     getUserMedia.mockReset()
     getUserMedia.mockResolvedValue(fakeStream())
+    enumerateDevices.mockReset()
+    enumerateDevices.mockResolvedValue([])
+    localStorage.clear()
 
     vi.stubGlobal("MediaRecorder", FakeMediaRecorder)
     vi.stubGlobal("AudioContext", FakeAudioContext)
-    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } })
+    vi.stubGlobal("navigator", {
+      mediaDevices: {
+        getUserMedia,
+        enumerateDevices,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn()
+      }
+    })
     vi.stubGlobal("URL", {
       createObjectURL: () => "blob:take",
       revokeObjectURL: vi.fn()
@@ -252,6 +269,158 @@ describe("useAudioRecorder", () => {
     expect(stoppedTracks).toHaveLength(1)
 
     dispose()
+  })
+
+  describe("microphone selection", () => {
+    const GRANTED = [
+      { kind: "audioinput", deviceId: "built-in", label: "Built-in Mic" },
+      { kind: "audioinput", deviceId: "usb-42", label: "Yeti" },
+      { kind: "audiooutput", deviceId: "speaker", label: "Speakers" },
+      { kind: "videoinput", deviceId: "cam", label: "Camera" }
+    ]
+
+    it("lists only audio inputs", async () => {
+      enumerateDevices.mockResolvedValue(GRANTED)
+      const { recorder, dispose } = mount()
+
+      await recorder.refreshDevices()
+
+      expect(recorder.devices.value).toEqual([
+        { deviceId: "built-in", label: "Built-in Mic" },
+        { deviceId: "usb-42", label: "Yeti" }
+      ])
+
+      dispose()
+    })
+
+    // Labels are blank until a mic has been granted once on the origin.
+    it("numbers unlabelled devices so the picker stays usable", async () => {
+      enumerateDevices.mockResolvedValue([
+        { kind: "audioinput", deviceId: "a", label: "" },
+        { kind: "audioinput", deviceId: "b", label: "" }
+      ])
+      const { recorder, dispose } = mount()
+
+      await recorder.refreshDevices()
+
+      expect(recorder.devices.value.map((d) => d.label)).toEqual([
+        "Microphone 1",
+        "Microphone 2"
+      ])
+
+      dispose()
+    })
+
+    it("constrains capture to the chosen microphone", async () => {
+      const { recorder, dispose } = mount()
+
+      recorder.selectDevice("usb-42")
+      await recorder.start()
+
+      expect(getUserMedia).toHaveBeenCalledWith({
+        audio: { deviceId: { exact: "usb-42" } }
+      })
+
+      recorder.reset()
+      dispose()
+    })
+
+    it("asks for the system default when nothing is chosen", async () => {
+      const { recorder, dispose } = mount()
+
+      await recorder.start()
+
+      expect(getUserMedia).toHaveBeenCalledWith({ audio: true })
+
+      recorder.reset()
+      dispose()
+    })
+
+    it("remembers the choice across a remount", () => {
+      const first = mount()
+      first.recorder.selectDevice("usb-42")
+      first.dispose()
+
+      const second = mount()
+      expect(second.recorder.deviceId.value).toBe("usb-42")
+      second.dispose()
+    })
+
+    it("clears the stored choice when the default is picked back", () => {
+      const { recorder, dispose } = mount()
+
+      recorder.selectDevice("usb-42")
+      recorder.selectDevice("")
+
+      expect(localStorage.getItem("remanso:audio:device")).toBeNull()
+
+      dispose()
+    })
+
+    // A mic left at home would otherwise make every recording fail with an
+    // error the user cannot act on from the modal.
+    it("falls back to the default when the saved microphone is gone", async () => {
+      getUserMedia.mockRejectedValueOnce(overconstrained())
+      const { recorder, dispose } = mount()
+
+      recorder.selectDevice("usb-42")
+      expect(await recorder.start()).toBe(true)
+
+      expect(getUserMedia).toHaveBeenNthCalledWith(1, {
+        audio: { deviceId: { exact: "usb-42" } }
+      })
+      expect(getUserMedia).toHaveBeenNthCalledWith(2, { audio: true })
+      expect(recorder.deviceId.value).toBe("")
+
+      recorder.reset()
+      dispose()
+    })
+
+    it("does not retry a refused permission as a missing device", async () => {
+      const denied = new Error("denied")
+      denied.name = "NotAllowedError"
+      getUserMedia.mockRejectedValue(denied)
+
+      const { recorder, dispose } = mount()
+      recorder.selectDevice("usb-42")
+
+      expect(await recorder.start()).toBe(false)
+      expect(recorder.state.value).toBe("denied")
+      expect(getUserMedia).toHaveBeenCalledTimes(1)
+      // The choice is still valid — the user refused the prompt, the mic is
+      // not missing.
+      expect(recorder.deviceId.value).toBe("usb-42")
+
+      dispose()
+    })
+
+    it("drops a vanished device once labels prove a grant happened", async () => {
+      enumerateDevices.mockResolvedValue(GRANTED)
+      const { recorder, dispose } = mount()
+
+      recorder.selectDevice("unplugged")
+      await recorder.refreshDevices()
+
+      expect(recorder.deviceId.value).toBe("")
+
+      dispose()
+    })
+
+    // Before any grant the browser reports one anonymous entry. Pruning then
+    // would throw away a perfectly good saved choice.
+    it("keeps the saved choice while labels are still blank", async () => {
+      enumerateDevices.mockResolvedValue([
+        { kind: "audioinput", deviceId: "", label: "" }
+      ])
+      const { recorder, dispose } = mount()
+
+      recorder.selectDevice("usb-42")
+      await recorder.refreshDevices()
+
+      expect(recorder.deviceId.value).toBe("usb-42")
+
+      dispose()
+    })
   })
 
   describe("level metering", () => {

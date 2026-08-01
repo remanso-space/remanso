@@ -21,7 +21,11 @@ const {
   previewUrl,
   take,
   levels,
+  devices,
+  deviceId,
   isCapturing,
+  selectDevice,
+  refreshDevices,
   start,
   pause,
   resume,
@@ -43,6 +47,12 @@ const showCapWarning = computed(
 // explicitly stopped and then attached or discarded.
 const canClose = computed(() => !isCapturing.value && !props.busy)
 
+// One microphone is not a choice, and before the first grant the browser
+// reports a single anonymous entry — a picker there would be noise.
+const canPickDevice = computed(
+  () => devices.value.length > 1 && !isCapturing.value
+)
+
 const close = () => {
   if (!canClose.value) return
   reset()
@@ -63,6 +73,7 @@ watch(
     if (!el) return
     if (open && !el.open) {
       reset()
+      void refreshDevices()
       el.showModal()
     } else if (!open && el.open) {
       el.close()
@@ -93,6 +104,24 @@ watch(
         The recording is attached to this note and uploaded to your PDS. Keep
         this tab in the foreground — a backgrounded tab can lose the take.
       </p>
+
+      <label v-if="canPickDevice" class="device-picker form-control">
+        <span class="label-text text-sm">Microphone</span>
+        <select
+          class="select select-sm select-bordered"
+          :value="deviceId"
+          @change="selectDevice(($event.target as HTMLSelectElement).value)"
+        >
+          <option value="">System default</option>
+          <option
+            v-for="device in devices"
+            :key="device.deviceId"
+            :value="device.deviceId"
+          >
+            {{ device.label }}
+          </option>
+        </select>
+      </label>
 
       <audio-levels
         v-if="isCapturing"
@@ -215,6 +244,13 @@ watch(
 </template>
 
 <style lang="scss" scoped>
+.device-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
 .readout {
   display: flex;
   align-items: center;
