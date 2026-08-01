@@ -5,7 +5,6 @@ import {
   uploadRecording,
   type UploadRecordingResult
 } from "@/modules/atproto/uploadRecording"
-import { normalizeAudioFile } from "@/utils/normalizeAudioFile"
 import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
 import { errorMessage } from "@/utils/notif"
 
@@ -143,6 +142,11 @@ export const useAudioUpload = ({
     // chance — and the re-encode is also what can bring an oversized episode
     // under the blob ceiling.
     if (options?.source !== "recording") {
+      // Imported here rather than at the top so the levelling code — and the
+      // demuxers behind it — stay out of the note view chunk. Every reader pays
+      // for what this module imports; almost none of them attach audio.
+      const { normalizeAudioFile } = await import("@/utils/normalizeAudioFile")
+
       const normalized = await normalizeAudioFile(file)
       if (normalized) {
         upload = normalized.file
