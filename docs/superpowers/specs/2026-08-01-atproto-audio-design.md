@@ -56,7 +56,7 @@ New file `remanso-jetstream/lexicons/space/remanso/recording.json`:
         "properties": {
           "audio": {
             "type": "blob",
-            "accept": ["audio/*"],
+            "accept": ["audio/*", "video/mp4"],
             "maxSize": 50000000
           },
           "title": { "type": "string", "maxLength": 1000 },
@@ -77,9 +77,15 @@ New file `remanso-jetstream/lexicons/space/remanso/recording.json`:
 }
 ```
 
-`accept` is `audio/*` rather than an explicit list, mirroring `image/*` in
+`accept` is a wildcard rather than an explicit list, mirroring `image/*` in
 `note.json`. An explicit list would reject `audio/x-m4a`, which real tools emit
 for m4a files. `maxSize` is the constraint that matters.
+
+`video/mp4` sits alongside `audio/*` because the PDS sniffs the blob's
+container instead of trusting the upload's `Content-Type`, and an audio-only
+MP4 or M4A sniffs as `video/mp4`. Confirmed against a real upload on
+2026-08-01: the app sent `audio/mp4` and eurosky.social stored and serves the
+blob as `video/mp4`.
 
 No `note` back-pointer field. At record-creation time the note usually is not
 published yet, so the field would sit empty and go stale.
