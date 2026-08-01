@@ -94,24 +94,34 @@ today:
 _lexicon.remanso.space   TXT   "did=did:plc:4m3kouplb7s7xozjd3whinvl"
 ```
 
-`space.remanso.note` has never been published to the network either — it is a
-local schema file only. One TXT record covers both NSIDs, so publish them
-together:
+`space.remanso.note` was already published as a
+`com.atproto.lexicon.schema` record; only the DNS TXT was missing, which left
+it unresolvable rather than absent. One TXT record covers both NSIDs.
 
 ```bash
 go install github.com/bluesky-social/goat@latest
-cd /home/jean/projects/remanso-jetstream
+cd /home/jean/projects/remanso-jetstream/lexicons
 goat account login -u <handle> -p <app-password>
-goat lex lint
-goat lex check-dns
-goat lex publish
-goat lex status
+goat lex publish space/remanso/recording.json
 goat account logout
 ```
 
+`publish` takes a path relative to the lexicons root. Its output symbols
+(`lex_publish.go`):
+
+| Symbol | Meaning |
+| --- | --- |
+| 🟢 | Published — no remote record existed |
+| 🟠 | Skipped — a remote record already exists; pass `--update` to overwrite |
+| 🟣 | Updated an existing record |
+| ⭕ | DNS check failed — the authority does not resolve to your DID |
+
 Use an app password. `goat` stores credentials in cleartext under the home
-directory, and `goat account logout` removes them. Confirm whether `publish` and
-`check-dns` take a path or scan `lexicons/` with `goat lex publish -h`.
+directory, and `goat account logout` removes them.
+
+**Done, 2026-08-01.** `space.remanso.recording` published 🟢.
+`space.remanso.note` returned 🟠, and a diff of the remote record against the
+local file confirmed they are identical, so the skip cost nothing.
 
 ## The link
 
