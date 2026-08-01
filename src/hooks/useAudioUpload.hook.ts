@@ -105,8 +105,15 @@ export const useAudioUpload = ({
   notePath: MaybeRef
   noteContent: MaybeRef
 }) => {
+  /**
+   * `durationSec` overrides the metadata probe. A MediaRecorder take has no
+   * duration in its container header, so an in-app recording reports Infinity
+   * and would lose its length — the recorder's own elapsed count is the only
+   * reliable source there.
+   */
   const attachAudio = async (
-    file: File
+    file: File,
+    options?: { durationSec?: number }
   ): Promise<{ markdown: string } | null> => {
     const path = toValue(notePath)
     if (!path) {
@@ -136,7 +143,7 @@ export const useAudioUpload = ({
     }
 
     const title = noteTitleForAlt(toValue(noteContent) ?? "", path)
-    const durationSec = await readDuration(file)
+    const durationSec = options?.durationSec || (await readDuration(file))
 
     const result = await uploadRecording({
       did: authorDid,

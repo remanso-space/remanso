@@ -54,6 +54,10 @@ const NoteState = defineAsyncComponent(
   () => import("@/components/NoteState.vue")
 )
 
+const AudioRecorderModal = defineAsyncComponent(
+  () => import("@/components/AudioRecorderModal.vue")
+)
+
 const props = defineProps<{
   user: string
   repo: string
@@ -151,6 +155,14 @@ const isUploading = ref(false)
 // editor never had focus, in which case the block is appended.
 const caretOffset = ref<number | null>(null)
 
+const insertAtCaret = (block: string) => {
+  rawContent.value = insertBlockAt(rawContent.value, caretOffset.value, block)
+  // The editor remounts on editKey, which drops the selection, so the stored
+  // offset is stale from here on.
+  caretOffset.value = null
+  editKey.value++
+}
+
 const onImagePicked = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -160,15 +172,7 @@ const onImagePicked = async (e: Event) => {
   try {
     const result = await uploadImage(file)
     if (!result) return
-    rawContent.value = insertBlockAt(
-      rawContent.value,
-      caretOffset.value,
-      `![](${result.filename})`
-    )
-    // The editor remounts on editKey, which drops the selection, so the stored
-    // offset is stale from here on.
-    caretOffset.value = null
-    editKey.value++
+    insertAtCaret(`![](${result.filename})`)
   } finally {
     isUploading.value = false
   }
@@ -194,6 +198,7 @@ const { attachAudio } = useAudioUpload({
 })
 
 const audioInput = ref<HTMLInputElement | null>(null)
+const recorderOpen = ref(false)
 
 const onAudioPicked = async (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -204,15 +209,29 @@ const onAudioPicked = async (e: Event) => {
   try {
     const result = await attachAudio(file)
     if (!result) return
-    rawContent.value = insertBlockAt(
-      rawContent.value,
-      caretOffset.value,
-      result.markdown
-    )
-    // The editor remounts on editKey, which drops the selection, so the stored
-    // offset is stale from here on.
-    caretOffset.value = null
-    editKey.value++
+    insertAtCaret(result.markdown)
+  } finally {
+    isUploading.value = false
+  }
+}
+
+// A MediaRecorder take has no duration in its container header, so the
+// recorder's elapsed count is passed through rather than probed back off the
+// blob, which would report Infinity.
+const onRecordingAttached = async ({
+  file,
+  durationSec
+}: {
+  file: File
+  durationSec: number
+}) => {
+  if (!path.value) return
+  isUploading.value = true
+  try {
+    const result = await attachAudio(file, { durationSec })
+    if (!result) return
+    insertAtCaret(result.markdown)
+    recorderOpen.value = false
   } finally {
     isUploading.value = false
   }
@@ -642,6 +661,34 @@ const onBadgeClick = async () => {
           class="hidden-input"
           @change="onAudioPicked"
         />
+        <button
+          v-if="isMarkdown && mode === 'edit' && canPush && canAttachAudio"
+          class="action button is-text is-light"
+          title="Record audio"
+          :disabled="isUploading"
+          @click="recorderOpen = true"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-microphone"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M9 2m0 3a3 3 0 0 1 3 -3h0a3 3 0 0 1 3 3v5a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3z"
+            />
+            <path d="M5 10a7 7 0 0 0 14 0" />
+            <path d="M8 21l8 0" />
+            <path d="M12 17l0 4" />
+          </svg>
+        </button>
       </div>
       <a
         class="title-stacked-note-link"
@@ -687,6 +734,12 @@ const onBadgeClick = async () => {
       </template>
     </section>
     <linked-notes v-if="hasBacklinks && content" :sha="sha" />
+    <audio-recorder-modal
+      v-if="canAttachAudio"
+      v-model:open="recorderOpen"
+      :busy="isUploading"
+      @attach="onRecordingAttached"
+    />
     <note-conflict-modal
       v-model:open="conflictOpen"
       @discard="onConflictDiscard"

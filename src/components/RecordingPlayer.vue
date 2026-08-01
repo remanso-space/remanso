@@ -2,6 +2,7 @@
 import { computed } from "vue"
 
 import type { ResolvedRecording } from "@/modules/atproto/recording.types"
+import { formatDuration } from "@/utils/formatDuration"
 
 const props = defineProps<{
   atUri: string
@@ -11,19 +12,7 @@ const props = defineProps<{
 
 const label = computed(() => props.recording?.title || props.alt)
 
-const duration = computed(() => {
-  const total = props.recording?.durationSec
-  if (!total || total <= 0) return null
-
-  const hours = Math.floor(total / 3600)
-  const minutes = Math.floor((total % 3600) / 60)
-  const seconds = total % 60
-  const pad = (n: number) => String(n).padStart(2, "0")
-
-  return hours > 0
-    ? `${hours}:${pad(minutes)}:${pad(seconds)}`
-    : `${minutes}:${pad(seconds)}`
-})
+const duration = computed(() => formatDuration(props.recording?.durationSec))
 </script>
 
 <template>

@@ -40,8 +40,9 @@ Locked during brainstorming, 2026-08-01.
 **Phase 1 — file attach.** Pick an audio file from a published note in edit
 mode, upload it, get a player in the rendered note.
 
-**Phase 2 — in-app mic.** Same spine, capture instead of file picker. Specified
-here only far enough to confirm phase 1 does not block it.
+**Phase 2 — in-app mic.** Same spine, capture instead of file picker. Shipped;
+see "Phase 2 as built" below for the two design calls that differ from the
+sketch here.
 
 Out of scope: transcripts, chapters, waveform scrubbing, a recordings index
 view, jetstream indexing of recordings, orphan cleanup.
@@ -316,6 +317,31 @@ Manual smoke test, phase 1:
 3. Save, reload, confirm the player renders and plays.
 4. Publish the note, open `/notes/:did/:rkey`, confirm the same player.
 5. Check the record exists in a PDS viewer with the blob referenced.
+
+## Phase 2 as built
+
+`useAudioRecorder` wraps MediaRecorder and hands `useAudioUpload` a `File`, so
+everything from the size check onward is the phase 1 path unchanged. Two calls
+came out differently from the sketch:
+
+- **No IndexedDB chunk persistence.** The plan called for it as crash recovery.
+  It buys less than it looks like: a backgrounded mobile tab usually kills the
+  capture stream outright, so the failure it protects against mostly isn't
+  recoverable anyway, and a long recording is better captured by a real recorder
+  app and attached through the file picker — which is exactly what phase 1 is
+  for. What shipped instead is a `beforeunload` guard while capturing (the loss
+  a user can actually cause) and a one-hour auto-stop that bounds what a
+  forgotten tab can throw away. In-app mic is for voice notes, not for streams.
+- **Container is probed, not fixed.** `MIME_CANDIDATES` is ordered by playback
+  reach rather than encoder quality: MP4/AAC first because Safari below 18.4
+  cannot play WebM/Opus, then WebM/Opus for Chrome and Firefox. `durationSec` is
+  passed from the recorder's own elapsed count, because a MediaRecorder
+  container has no duration in its header and probing the blob returns Infinity.
+
+The lexicon's blob `accept` grew `video/webm` alongside `video/mp4`, for the
+same reason: a sniffer that reads no further than the EBML magic calls an
+audio-only WebM `video/webm`. Republish with
+`goat lex publish --update space/remanso/recording.json`.
 
 ## Known gaps
 
