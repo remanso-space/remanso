@@ -147,6 +147,10 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const editKey = ref(0)
 const isUploading = ref(false)
 
+// Last caret position the editor reported, captured on blur. Null when the
+// editor never had focus, in which case the block is appended.
+const caretOffset = ref<number | null>(null)
+
 const onImagePicked = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -156,9 +160,14 @@ const onImagePicked = async (e: Event) => {
   try {
     const result = await uploadImage(file)
     if (!result) return
-    const trimmed = rawContent.value.replace(/\n+$/, "")
-    const prefix = trimmed ? `${trimmed}\n\n` : ""
-    rawContent.value = `${prefix}![](${result.filename})\n`
+    rawContent.value = insertBlockAt(
+      rawContent.value,
+      caretOffset.value,
+      `![](${result.filename})`
+    )
+    // The editor remounts on editKey, which drops the selection, so the stored
+    // offset is stale from here on.
+    caretOffset.value = null
     editKey.value++
   } finally {
     isUploading.value = false
@@ -185,10 +194,6 @@ const { attachAudio } = useAudioUpload({
 })
 
 const audioInput = ref<HTMLInputElement | null>(null)
-
-// Last caret position the editor reported, captured on blur. Null when the
-// editor never had focus, in which case the block is appended.
-const caretOffset = ref<number | null>(null)
 
 const onAudioPicked = async (e: Event) => {
   const input = e.target as HTMLInputElement
