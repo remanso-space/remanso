@@ -388,6 +388,14 @@ export const useAudioRecorder = () => {
     recorder.stop()
   }
 
+  /**
+   * A finished take is exactly as lossy as one still running — it lives in
+   * memory until it is attached, so the guard has to outlast the stop.
+   */
+  const hasUnsavedTake = computed(
+    () => isCapturing.value || state.value === "ready"
+  )
+
   // Losing a take to a stray back-swipe is the one failure the user can't undo,
   // since the chunks never touch disk.
   const warnBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -395,8 +403,8 @@ export const useAudioRecorder = () => {
     event.returnValue = ""
   }
 
-  const stopGuard = watch(isCapturing, (capturing) => {
-    if (capturing) window.addEventListener("beforeunload", warnBeforeUnload)
+  const stopGuard = watch(hasUnsavedTake, (unsaved) => {
+    if (unsaved) window.addEventListener("beforeunload", warnBeforeUnload)
     else window.removeEventListener("beforeunload", warnBeforeUnload)
   })
 

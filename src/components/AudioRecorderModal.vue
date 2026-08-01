@@ -53,12 +53,39 @@ const canPickDevice = computed(
   () => devices.value.length > 1 && !isCapturing.value
 )
 
-const close = () => {
-  if (!canClose.value) return
+/**
+ * Discarding is the only irreversible action here — the chunks never touch
+ * disk, so an hour of recording goes with one tap. Every path that destroys a
+ * finished take routes through a confirmation: the two buttons, the backdrop
+ * and Escape.
+ */
+type DiscardIntent = "record-again" | "close"
+
+const pendingDiscard = ref<DiscardIntent | null>(null)
+
+const closeNow = () => {
   reset()
   if (dialogRef.value?.open) dialogRef.value.close()
   emit("update:open", false)
 }
+
+const discardNow = (intent: DiscardIntent) => {
+  pendingDiscard.value = null
+  if (intent === "record-again") reset()
+  else closeNow()
+}
+
+const requestDiscard = (intent: DiscardIntent) => {
+  if (!canClose.value) return
+  // Nothing recorded yet, nothing to protect.
+  if (state.value !== "ready") {
+    discardNow(intent)
+    return
+  }
+  pendingDiscard.value = intent
+}
+
+const close = () => requestDiscard("close")
 
 const onAttach = () => {
   const file = take.value
@@ -73,6 +100,7 @@ watch(
     if (!el) return
     if (open && !el.open) {
       reset()
+      pendingDiscard.value = null
       void refreshDevices()
       el.showModal()
     } else if (!open && el.open) {
@@ -150,7 +178,28 @@ watch(
         :src="previewUrl"
       ></audio>
 
-      <div class="modal-action">
+      <div v-if="pendingDiscard" class="modal-action discard-confirm">
+        <p class="warning text-sm">
+          Discard this {{ timer }} recording? It hasn't been uploaded, and
+          there's no undo.
+        </p>
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          @click="pendingDiscard = null"
+        >
+          Keep it
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-error btn-outline"
+          @click="discardNow(pendingDiscard)"
+        >
+          Discard
+        </button>
+      </div>
+
+      <div v-else class="modal-action">
         <button
           v-if="state === 'idle' || state === 'denied'"
           type="button"
@@ -206,32 +255,33 @@ watch(
         </button>
 
         <button
-          v-if="state === 'ready'"
-          type="button"
-          class="btn btn-ghost"
-          :disabled="busy"
-          @click="reset()"
-        >
-          Record again
-        </button>
-        <button
-          v-if="state === 'ready'"
-          type="button"
-          class="btn btn-primary"
-          :disabled="busy"
-          @click="onAttach()"
-        >
-          <span v-if="busy" class="loading loading-spinner loading-sm"></span>
-          {{ busy ? "Uploading…" : "Attach to note" }}
-        </button>
-
-        <button
           type="button"
           class="btn btn-ghost"
           :disabled="!canClose"
           @click="close()"
         >
           {{ state === "ready" ? "Discard" : "Close" }}
+        </button>
+        <button
+          v-if="state === 'ready'"
+          type="button"
+          class="btn btn-ghost"
+          :disabled="busy"
+          @click="requestDiscard('record-again')"
+        >
+          Record again
+        </button>
+
+        <!-- Pushed away from the two actions that destroy the take. -->
+        <button
+          v-if="state === 'ready'"
+          type="button"
+          class="btn btn-primary attach"
+          :disabled="busy"
+          @click="onAttach()"
+        >
+          <span v-if="busy" class="loading loading-spinner loading-sm"></span>
+          {{ busy ? "Uploading…" : "Attach to note" }}
         </button>
       </div>
     </div>
@@ -298,5 +348,20 @@ watch(
 
 .modal-action {
   flex-wrap: wrap;
+}
+
+.attach {
+  margin-left: auto;
+}
+
+.discard-confirm {
+  align-items: center;
+}
+
+.warning {
+  flex: 1;
+  min-width: 12rem;
+  margin-right: auto;
+  color: var(--color-error);
 }
 </style>

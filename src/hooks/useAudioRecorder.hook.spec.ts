@@ -530,7 +530,9 @@ describe("useAudioRecorder", () => {
     })
   })
 
-  it("guards against navigating away mid-take", async () => {
+  // A finished take is exactly as lossy as one still running — it lives in
+  // memory until it is attached, so the guard has to outlast the stop.
+  it("guards against navigating away until the take is gone", async () => {
     const add = vi.spyOn(window, "addEventListener")
     const remove = vi.spyOn(window, "removeEventListener")
 
@@ -541,6 +543,15 @@ describe("useAudioRecorder", () => {
     expect(add).toHaveBeenCalledWith("beforeunload", expect.any(Function))
 
     recorder.stop()
+    await Promise.resolve()
+
+    expect(recorder.state.value).toBe("ready")
+    expect(remove).not.toHaveBeenCalledWith(
+      "beforeunload",
+      expect.any(Function)
+    )
+
+    recorder.reset()
     await Promise.resolve()
 
     expect(remove).toHaveBeenCalledWith("beforeunload", expect.any(Function))
