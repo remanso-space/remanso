@@ -9,6 +9,8 @@ import {
   watch
 } from "vue"
 
+import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
+import { useAudioUpload } from "@/hooks/useAudioUpload.hook"
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
@@ -156,6 +158,45 @@ const onImagePicked = async (e: Event) => {
     const trimmed = rawContent.value.replace(/\n+$/, "")
     const prefix = trimmed ? `${trimmed}\n\n` : ""
     rawContent.value = `${prefix}![](${result.filename})\n`
+    editKey.value++
+  } finally {
+    isUploading.value = false
+  }
+}
+
+const { did: atprotoDid, isLoggedIn: isATProtoLoggedIn } = useATProtoLogin()
+
+// PDS blobs are served without auth and the recording record is broadcast on
+// the firehose, so audio attached to a private note would be public anyway.
+// Keeping the button on *.pub.md notes removes the trap instead of warning
+// about it.
+const isPublishedNote = computed(() => !!path.value?.endsWith(".pub.md"))
+const canAttachAudio = computed(
+  () => isPublishedNote.value && isATProtoLoggedIn.value
+)
+
+// Pass a getter, not a value: the ATProto session restores asynchronously
+// after mount, so a DID read here would still be empty at click time.
+const { attachAudio } = useAudioUpload({
+  did: () => atprotoDid.value ?? undefined,
+  notePath: path,
+  noteContent: rawContent
+})
+
+const audioInput = ref<HTMLInputElement | null>(null)
+
+const onAudioPicked = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ""
+  if (!file || !path.value) return
+  isUploading.value = true
+  try {
+    const result = await attachAudio(file)
+    if (!result) return
+    const trimmed = rawContent.value.replace(/\n+$/, "")
+    const prefix = trimmed ? `${trimmed}\n\n` : ""
+    rawContent.value = `${prefix}${result.markdown}\n`
     editKey.value++
   } finally {
     isUploading.value = false
@@ -547,6 +588,44 @@ const onBadgeClick = async () => {
           accept="image/*"
           class="hidden-input"
           @change="onImagePicked"
+        />
+        <button
+          v-if="isMarkdown && mode === 'edit' && canPush && canAttachAudio"
+          class="action button is-text is-light"
+          :title="isUploading ? 'Uploading…' : 'Attach audio'"
+          :disabled="isUploading"
+          @click="audioInput?.click()"
+        >
+          <span
+            v-if="isUploading"
+            class="loading loading-spinner loading-sm"
+          ></span>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-music-plus"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M12 17a3 3 0 1 0 -6 0a3 3 0 0 0 6 0" />
+            <path d="M12 17v-13h7v4h-7" />
+            <path d="M16 19h6" />
+            <path d="M19 16v6" />
+          </svg>
+        </button>
+        <input
+          ref="audioInput"
+          type="file"
+          accept="audio/*"
+          class="hidden-input"
+          @change="onAudioPicked"
         />
       </div>
       <a
