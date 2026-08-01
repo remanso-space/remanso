@@ -22,9 +22,18 @@ Locked during brainstorming, 2026-08-01.
   20-30 minutes and iOS Safari drops capture on screen lock.
 - **Alt text is the note title followed by ` - audio`.** For a note titled
   `Ma 間`, the inserted line reads `![Ma 間 - audio](at://…)`.
-- **`remanso-cli` is not touched.** Verified: `processImages` skips non-local
-  sources at `packages/remanso-cli/src/lib/note.ts:114`, so an `at://` media
-  link passes through publish untouched.
+- **`remanso-cli` needs no change for the link to survive**, but not for the
+  reason first recorded here. `isLocalPath`
+  (`packages/remanso-cli/src/lib/note.ts:37`) only excludes `http://`,
+  `https://`, `#` and `mailto:`, so an `at://` URI counts as *local* and
+  `processImages` does try to upload it. Every candidate path misses,
+  `uploadBlob` returns undefined, and the loop warns
+  `Could not upload image: at://…` and continues — leaving the markdown
+  untouched. The outcome is right by accident; each publish of a note with
+  audio logs a spurious warning. Adding `at://` to `isLocalPath` would make the
+  intent explicit and silence it.
+  `resolveInternalLinks` is safe regardless: its `(?<![!@])` lookbehind at
+  `note.ts:148` excludes image syntax.
 
 ## Scope
 
