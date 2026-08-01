@@ -42,21 +42,41 @@ const initializeAuth = async () => {
   }
 
   // Then restore OAuth session in the background (may involve network)
-  const session = await restoreSession()
-  if (session) {
-    const author = await getAuthor(session.did)
-    const resolvedHandle = author?.handle ?? ""
+  try {
+    const session = await restoreSession()
 
-    did.value = session.did
-    handle.value = resolvedHandle
-    await saveSession(session.did, resolvedHandle)
-    fetchAvatar(session.did)
+    if (session) {
+      const author = await getAuthor(session.did)
+      const resolvedHandle = author?.handle ?? ""
 
-    window.history.replaceState(
-      null,
-      "",
-      window.location.pathname + window.location.search
-    )
+      did.value = session.did
+      handle.value = resolvedHandle
+      await saveSession(session.did, resolvedHandle)
+      fetchAvatar(session.did)
+
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      )
+      return
+    }
+
+    if (stored?.did) {
+      // The client resolved with no session, so the stored OAuth grant is gone
+      // — revoked, or its refresh token expired. Drop the cached identity.
+      // Keeping it left isLoggedIn true against a dead session, so the UI
+      // offered actions that need to write to the PDS (attaching audio) and
+      // could only fail once the user tried.
+      await clearSession()
+      did.value = ""
+      handle.value = ""
+      avatarUrl.value = null
+    }
+  } catch (error) {
+    // A throw is a transport problem, not a revoked grant. Keep the cached
+    // identity so going offline doesn't look like being signed out.
+    console.warn("initializeAuth: could not restore the OAuth session", error)
   }
 }
 
