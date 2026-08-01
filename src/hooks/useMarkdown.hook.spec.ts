@@ -5,7 +5,7 @@ vi.mock("@/data/data", () => ({
   generateId: (type: string, id: string) => `${type}-${id}`
 }))
 
-import { renderCodeFile } from "@/hooks/useMarkdown.hook"
+import { markdownBuilder, renderCodeFile } from "@/hooks/useMarkdown.hook"
 
 describe("renderCodeFile", () => {
   it("wraps highlighted files in a code-file container with a sized gutter", async () => {
@@ -38,5 +38,30 @@ describe("renderCodeFile", () => {
     })
 
     expect(html).toContain("--line-number-width:3ch")
+  })
+})
+
+// The plugin's own spec builds an isolated MarkdownIt, so it cannot catch a
+// registration-order regression. These go through the shared `md` instance
+// that both note views actually render with.
+describe("markdownBuilder recording links", () => {
+  const { toHTML } = markdownBuilder()
+
+  it("renders a recording at-uri as a player placeholder", () => {
+    const html = toHTML(
+      "![Ma 間 - audio](at://did:plc:abc/space.remanso.recording/3xyz)"
+    )
+
+    expect(html).toContain('class="recording-block"')
+    expect(html).toContain(
+      'data-at-uri="at://did:plc:abc/space.remanso.recording/3xyz"'
+    )
+    expect(html).toContain('data-alt="Ma 間 - audio"')
+    expect(html).not.toContain("<img")
+  })
+
+  it("still renders ordinary images and audio files", () => {
+    expect(toHTML("![cat](cat.png)")).toContain("<img")
+    expect(toHTML("![](song.mp3)")).toContain("<audio")
   })
 })
