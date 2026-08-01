@@ -25,6 +25,7 @@ import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
+import { insertBlockAt } from "@/utils/insertBlockAt"
 import {
   findCheckboxIndex,
   setCheckboxInMarkdown
@@ -185,6 +186,10 @@ const { attachAudio } = useAudioUpload({
 
 const audioInput = ref<HTMLInputElement | null>(null)
 
+// Last caret position the editor reported, captured on blur. Null when the
+// editor never had focus, in which case the block is appended.
+const caretOffset = ref<number | null>(null)
+
 const onAudioPicked = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -194,9 +199,14 @@ const onAudioPicked = async (e: Event) => {
   try {
     const result = await attachAudio(file)
     if (!result) return
-    const trimmed = rawContent.value.replace(/\n+$/, "")
-    const prefix = trimmed ? `${trimmed}\n\n` : ""
-    rawContent.value = `${prefix}${result.markdown}\n`
+    rawContent.value = insertBlockAt(
+      rawContent.value,
+      caretOffset.value,
+      result.markdown
+    )
+    // The editor remounts on editKey, which drops the selection, so the stored
+    // offset is stale from here on.
+    caretOffset.value = null
     editKey.value++
   } finally {
     isUploading.value = false
@@ -641,7 +651,11 @@ const onBadgeClick = async () => {
     </div>
     <section class="text-content">
       <div v-if="mode === 'edit' && isMarkdown" class="edit">
-        <edit-note :key="editKey" v-model="rawContent" />
+        <edit-note
+          :key="editKey"
+          v-model="rawContent"
+          @caret="caretOffset = $event"
+        />
       </div>
       <template v-else-if="mode === 'read'">
         <div v-if="newerSha" class="snapshot-banner">
