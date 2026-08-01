@@ -2,6 +2,7 @@ import { nextTick, type Ref, toValue, watch } from "vue"
 
 import { useImages } from "@/hooks/useImages.hook"
 import { runMermaid, runTikz, useShikiji } from "@/hooks/useMarkdown.hook"
+import { runRecordings } from "@/modules/atproto/runRecordings"
 import { runInstruments } from "@/modules/instruments/runInstruments"
 import { runMacroplan } from "@/modules/macroplan/runMacroplan"
 import { attachSvgDownloads } from "@/utils/svgDownload"
@@ -50,6 +51,11 @@ export const useMarkdownPostRender = (
       // Unconditional: cost is one querySelectorAll when no blocks exist,
       // and every view (repo + public ATProto) gets instruments for free.
       renderJobs.push(runInstruments(`${scope} .instrument-block`))
+
+      // Unconditional for the same reason as instruments: one querySelectorAll
+      // when no recording exists, and both the repo and public views get
+      // players without another option flag.
+      renderJobs.push(runRecordings(`${scope} .recording-block`))
 
       if (options.shikiji?.()) {
         void useShikiji()

@@ -25,6 +25,7 @@ import {
 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItInstruments } from "@/utils/markdown/markdown-it-instruments"
+import { markdownItRecording } from "@/utils/markdown/markdown-it-recording"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
 import { renderFallback } from "@/utils/markdown/renderFallback"
 
@@ -142,6 +143,9 @@ const md = new MarkdownIt({
   .use(markdownItMacroplanExtractor)
   .use(markdownItInstruments)
   .use(html5Media)
+  // After html5Media: it installs the image tokenizer, and markdownItRecording
+  // captures whatever image renderer is in place when it runs.
+  .use(markdownItRecording)
   .use(blockEmbedPlugin, {
     youtube: {
       width: "100%",

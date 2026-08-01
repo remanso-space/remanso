@@ -219,7 +219,7 @@ This follows the pattern mermaid, tikz and macroplan already use:
 | `src/modules/atproto/recording.types.ts` | New. `Recording`, `RecordingRecord`, reusing `PublicNoteBlob` |
 | `src/modules/atproto/uploadRecording.ts` | New. `uploadBlob` + `createRecord` via the OAuth session fetch handler |
 | `src/modules/atproto/resolveRecording.ts` | New. at-uri → `{ blobUrl, title, durationSec }`, using existing `parseAtUri` and `getAuthor` |
-| `src/hooks/useATProtoLogin.hook.ts` | Expose the live `OAuthSession`. It currently keeps only `did`/`handle` and discards the session |
+| `src/modules/atproto/service/atprotoOAuth.ts` | New `getActiveSession(did)`, wrapping `BrowserOAuthClient.restore` |
 | `src/hooks/useAudioUpload.hook.ts` | New. Mirrors `useImageUpload.hook.ts`: validate, upload, return the at-uri |
 | `src/utils/markdown/markdown-it-recording.ts` | New plugin |
 | `src/hooks/useMarkdown.hook.ts` | Register the plugin |
@@ -230,6 +230,11 @@ This follows the pattern mermaid, tikz and macroplan already use:
 No new dependency. `@atproto/api` is not installed and is not needed — the
 codebase already calls XRPC endpoints with plain `fetch`, and the OAuth
 session's fetch handler adds DPoP.
+
+`useATProtoLogin.hook.ts` is untouched. An earlier draft of this spec claimed
+it had to expose the `OAuthSession` it discards; it does not.
+`BrowserOAuthClient.restore(sub)` re-derives the session from the DID the hook
+already exposes.
 
 ### `remanso-jetstream`
 
