@@ -35,3 +35,18 @@ export const sdkSignOut = async (sub: string): Promise<void> => {
   const client = await getOAuthClient()
   await client.revoke(sub)
 }
+
+/**
+ * Re-derive the live OAuth session for a DID. `init()` hands the session back
+ * only once, on the redirect that created it, so anything needing to write to
+ * the PDS later restores it from storage by DID instead.
+ */
+export const getActiveSession = async (did: string) => {
+  try {
+    const client = await getOAuthClient()
+    return await client.restore(did)
+  } catch (error) {
+    console.warn("getActiveSession: could not restore session", error)
+    return null
+  }
+}
