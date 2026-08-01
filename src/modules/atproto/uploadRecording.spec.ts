@@ -61,6 +61,29 @@ describe("uploadRecording", () => {
     expect(body.record.createdAt).toEqual(expect.any(String))
   })
 
+  it("uploads with an explicit mimeType when the file carries none", async () => {
+    const fetchHandler = vi
+      .fn()
+      .mockResolvedValueOnce(okJson({ blob: blobRef }))
+      .mockResolvedValueOnce(
+        okJson({ uri: "at://did:plc:abc/space.remanso.recording/3xyz" })
+      )
+    vi.mocked(getActiveSession).mockResolvedValue({ fetchHandler } as never)
+
+    const untyped = new File([new Uint8Array([1])], "voice.amr", { type: "" })
+
+    await uploadRecording({
+      did: "did:plc:abc",
+      file: untyped,
+      title: "t",
+      mimeType: "audio/amr"
+    })
+
+    expect(fetchHandler.mock.calls[0][1].headers["Content-Type"]).toBe(
+      "audio/amr"
+    )
+  })
+
   it("omits durationSec when it is unknown", async () => {
     const fetchHandler = vi
       .fn()

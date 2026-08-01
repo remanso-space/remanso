@@ -16,6 +16,38 @@ type MaybeRef =
 
 const megabytes = (bytes: number) => Math.round(bytes / 1_000_000)
 
+const AUDIO_MIME_BY_EXTENSION: Record<string, string> = {
+  aac: "audio/aac",
+  amr: "audio/amr",
+  awb: "audio/amr-wb",
+  flac: "audio/flac",
+  m4a: "audio/mp4",
+  mp3: "audio/mpeg",
+  oga: "audio/ogg",
+  ogg: "audio/ogg",
+  opus: "audio/ogg",
+  wav: "audio/wav",
+  weba: "audio/webm"
+}
+
+/**
+ * Settle on a MIME type for the upload.
+ *
+ * Android's Storage Access Framework reports an empty or generic MIME for
+ * several audio containers, so a file picked out of Downloads can arrive with
+ * no usable `type`. The lexicon's blob accept is ["audio/*"], so an untyped
+ * blob would fail record validation — fall back to the extension.
+ *
+ * Returns null when the file is not audio by either signal.
+ */
+const audioMimeType = (file: File): string | null => {
+  if (file.type.startsWith("audio/")) return file.type
+  if (file.type && file.type !== "application/octet-stream") return null
+
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? ""
+  return AUDIO_MIME_BY_EXTENSION[extension] ?? null
+}
+
 /**
  * Read the playback length without decoding the whole file. Best effort: some
  * browsers report Infinity for a streamed container, and the record simply
@@ -60,7 +92,8 @@ export const useAudioUpload = ({
       return null
     }
 
-    if (!file.type.startsWith("audio/")) {
+    const mimeType = audioMimeType(file)
+    if (!mimeType) {
       errorMessage("❌ That file isn't audio")
       return null
     }
@@ -81,7 +114,8 @@ export const useAudioUpload = ({
       did: authorDid,
       file,
       title,
-      durationSec
+      durationSec,
+      mimeType
     })
     if (!atUri) {
       errorMessage("❌ Audio upload failed")

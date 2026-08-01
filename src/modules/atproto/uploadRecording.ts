@@ -7,6 +7,12 @@ interface UploadRecordingParams {
   file: File
   title: string
   durationSec?: number
+  /**
+   * Overrides `file.type` for the upload. Android's file picker hands back an
+   * empty or generic MIME for some containers, and the lexicon's blob accept is
+   * ["audio/*"] — an untyped blob would fail record validation.
+   */
+  mimeType?: string
 }
 
 /**
@@ -24,7 +30,8 @@ export const uploadRecording = async ({
   did,
   file,
   title,
-  durationSec
+  durationSec,
+  mimeType
 }: UploadRecordingParams): Promise<string | null> => {
   const session = await getActiveSession(did)
   if (!session) return null
@@ -34,7 +41,7 @@ export const uploadRecording = async ({
       "/xrpc/com.atproto.repo.uploadBlob",
       {
         method: "POST",
-        headers: { "Content-Type": file.type },
+        headers: { "Content-Type": mimeType || file.type },
         body: file
       }
     )
