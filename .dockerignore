@@ -4,3 +4,11 @@ dist
 .gitignore
 *.md
 .env*
+.ai
+.claude
+.gitea
+.zed
+docs
+_scripts
+patches
+coverage

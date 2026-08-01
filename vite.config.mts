@@ -7,7 +7,8 @@ import { VitePWA } from "vite-plugin-pwa"
 export default defineConfig(({ command }) => {
   const config: UserConfigExport = {
     build: {
-      minify: "esbuild"
+      minify: "esbuild",
+      reportCompressedSize: false
     },
     test: {
       environment: "jsdom",
