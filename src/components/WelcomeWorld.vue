@@ -31,6 +31,16 @@ const isAnyUserLoggedIn = computed(
 )
 const displayUsername = computed(() => handle.value || username.value || "")
 
+// Remanso Studio is the sibling app that records audio into the same PDS. Carry the
+// signed-in handle so remanso.at can pre-fill sign-in — the session itself cannot be
+// shared across the origins (different client_id, DPoP-bound keys), so this is the
+// cheapest hand-off there is.
+const studioUrl = computed(() =>
+  handle.value
+    ? `https://remanso.at/?handle=${encodeURIComponent(handle.value)}`
+    : "https://remanso.at"
+)
+
 const openProfile = () => {
   ;(document.getElementById("profile_modal") as HTMLDialogElement)?.showModal()
 }
@@ -144,6 +154,7 @@ onMounted(() => {
       </div>
       <div class="topnav-right">
         <a href="#about" class="navlink">About</a>
+        <a :href="studioUrl" class="navlink">Studio&nbsp;↗</a>
         <router-link :to="{ name: 'PublicNoteListView' }" class="navlink"
           >Public&nbsp;notes</router-link
         >
