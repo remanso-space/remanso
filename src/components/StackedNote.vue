@@ -22,6 +22,7 @@ import { useNoteFreshness } from "@/hooks/useNoteFreshness.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
+import { RECORDING_COLLECTION } from "@/modules/atproto/recording.types"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
@@ -30,8 +31,10 @@ import {
   findCheckboxIndex,
   setCheckboxInMarkdown
 } from "@/utils/markdownCheckbox"
+import { noteRkeyFromFrontmatter } from "@/utils/noteRkeyFromFrontmatter"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
-import { errorMessage } from "@/utils/notif"
+import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
+import { confirmMessage, errorMessage } from "@/utils/notif"
 import { threeWayMerge } from "@/utils/threeWayMerge"
 import { extractYouTubeId, fetchYouTubeMeta } from "@/utils/youtube"
 
@@ -235,13 +238,22 @@ const { attachAudio } = useAudioUpload({
 
 const recorderOpen = ref(false)
 
+// A published note takes its recording by rkey, so there is no line to insert
+// and the file stays exactly as it was — which is silent feedback unless we
+// say so. A note that has never been published has no rkey to share and still
+// gets the markdown embed at the caret.
+const onAudioAttached = (markdown: string | null) => {
+  if (markdown) return insertAtCaret(markdown)
+  confirmMessage("Recording attached to this note")
+}
+
 const onAudioPicked = async (file: File) => {
   if (!path.value) return
   isUploading.value = true
   try {
     const result = await attachAudio(file)
     if (!result) return
-    insertAtCaret(result.markdown)
+    onAudioAttached(result.markdown)
   } finally {
     isUploading.value = false
   }
@@ -265,7 +277,7 @@ const onRecordingAttached = async ({
       source: "recording"
     })
     if (!result) return
-    insertAtCaret(result.markdown)
+    onAudioAttached(result.markdown)
     recorderOpen.value = false
   } finally {
     isUploading.value = false
@@ -327,8 +339,29 @@ watch(
 
 const { mode, toggleMode } = useEditionMode()
 
+/**
+ * The recording attached to this note, if the file has been published and the
+ * note is not already carrying the same at-uri inline — in which case
+ * markdown-it-recording places a player of its own and this one would be the
+ * second copy of the same audio.
+ *
+ * Read mode only: in edit mode the pane is a textarea, and there is no
+ * rendered title to sit under.
+ */
+const attachedRecording = computed(() => {
+  const noteRkey = noteRkeyFromFrontmatter(rawContent.value)
+  const authorDid = atprotoDid.value
+  if (!noteRkey || !authorDid || mode.value !== "read") return null
+
+  const atUri = `at://${authorDid}/${RECORDING_COLLECTION}/${noteRkey}`
+  if (rawContent.value.includes(atUri)) return null
+
+  return { atUri, alt: noteTitleForAlt(rawContent.value, path.value ?? "") }
+})
+
 useMarkdownPostRender(content, () => `.note-${sha.value}`, {
   onReady: () => listenToClick(),
+  noteRecording: () => attachedRecording.value,
   tikz: true,
   macroplan: true,
   mermaid: () => rawContent.value.includes("```mermaid"),
@@ -730,6 +763,12 @@ $border-color: rgba(18, 19, 58, 0.2);
   > .edit,
   > .note-content {
     height: 100%;
+  }
+
+  // Same block of air the public view gives the slot: tied to the body it
+  // introduces rather than to the title above it.
+  .note-recording-slot .recording-player {
+    margin: 2rem 0 1.5rem;
   }
 
   // The toolbar sits above the editor, so the editor takes what's left rather

@@ -188,4 +188,53 @@ describe("uploadRecording", () => {
       })
     ).toEqual({ ok: false, reason: "record-failed", detail: "HTTP 400" })
   })
+
+  it("puts the record at the note's rkey when one is given", async () => {
+    const fetchHandler = vi
+      .fn()
+      .mockResolvedValueOnce(okJson({ blob: blobRef }))
+      .mockResolvedValueOnce(
+        okJson({ uri: "at://did:plc:abc/space.remanso.recording/3labc" })
+      )
+    vi.mocked(getActiveSession).mockResolvedValue({ fetchHandler } as never)
+
+    expect(
+      await uploadRecording({
+        did: "did:plc:abc",
+        file: makeFile(),
+        title: "Ma 間 - audio",
+        rkey: "3labc"
+      })
+    ).toEqual({
+      ok: true,
+      uri: "at://did:plc:abc/space.remanso.recording/3labc"
+    })
+
+    const [writePath, writeInit] = fetchHandler.mock.calls[1]
+    expect(writePath).toBe("/xrpc/com.atproto.repo.putRecord")
+    const body = JSON.parse(writeInit.body)
+    expect(body.rkey).toBe("3labc")
+    expect(body.collection).toBe("space.remanso.recording")
+    expect(body.record.audio).toEqual(blobRef)
+  })
+
+  it("sends no rkey at all when there is none, so the PDS assigns a TID", async () => {
+    const fetchHandler = vi
+      .fn()
+      .mockResolvedValueOnce(okJson({ blob: blobRef }))
+      .mockResolvedValueOnce(
+        okJson({ uri: "at://did:plc:abc/space.remanso.recording/3xyz" })
+      )
+    vi.mocked(getActiveSession).mockResolvedValue({ fetchHandler } as never)
+
+    await uploadRecording({
+      did: "did:plc:abc",
+      file: makeFile(),
+      title: "t"
+    })
+
+    const [writePath, writeInit] = fetchHandler.mock.calls[1]
+    expect(writePath).toBe("/xrpc/com.atproto.repo.createRecord")
+    expect(JSON.parse(writeInit.body)).not.toHaveProperty("rkey")
+  })
 })

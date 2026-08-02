@@ -3,11 +3,13 @@ import { computedAsync } from "@vueuse/core"
 import { computed, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 
+import RecordingPlayer from "@/components/RecordingPlayer.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
+import { useNoteRecording } from "@/hooks/useNoteRecording.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
 import { getUrl } from "@/modules/atproto/getUrl"
@@ -77,6 +79,18 @@ const content = computed(() =>
     : ""
 )
 
+const { atUri: recordingAtUri, recording } = useNoteRecording(did, rkey)
+
+// Same slot as the main note view, same guard: a note written under the old
+// model carries the at-uri in its markdown and markdown-it-recording already
+// mounts a player there, so the fixed slot would play the same audio twice.
+const showRecording = computed(
+  () =>
+    !!recording.value &&
+    !!content.value &&
+    !noteRecord.value?.value.content.includes(recordingAtUri.value)
+)
+
 useMarkdownPostRender(content, () => `.note-${classNameId.value}`, {
   onReady: () => listenToClick(),
   tikz: true,
@@ -105,6 +119,15 @@ useMarkdownPostRender(content, () => `.note-${classNameId.value}`, {
       </div>
     </a>
     <section class="text-content">
+      <!-- Inside the section rather than above it so the player lines up with
+           the body's padding, and ahead of the content chain so it stays
+           between the title and the body without breaking the v-else-if. -->
+      <recording-player
+        v-if="showRecording"
+        :at-uri="recordingAtUri"
+        :alt="title ?? ''"
+        :recording="recording"
+      />
       <div v-if="noteNotFound" class="alert alert-error">
         This note no longer exists.
       </div>

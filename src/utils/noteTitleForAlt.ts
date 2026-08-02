@@ -1,8 +1,6 @@
-const FRONTMATTER = /^\s*---\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n/
-const FRONTMATTER_TITLE = /^title:[ \t]*(.+?)[ \t]*$/m
-const LEADING_H1 = /^[ \t]*#[ \t]+(.+?)[ \t]*$/m
+import { FRONTMATTER, frontmatterField } from "@/utils/frontmatter"
 
-const unquote = (value: string) => value.replace(/^['"]|['"]$/g, "").trim()
+const LEADING_H1 = /^[ \t]*#[ \t]+(.+?)[ \t]*$/m
 
 const fromFilename = (path: string): string => {
   const filename = path.split("/").pop() ?? ""
@@ -23,11 +21,10 @@ const fromFilename = (path: string): string => {
  * requires it), then the leading H1, then the filename.
  */
 export const noteTitleForAlt = (content: string, path: string): string => {
+  const frontmatterTitle = frontmatterField(content, "title")
+  if (frontmatterTitle) return `${frontmatterTitle} - audio`
+
   const frontmatter = content.match(FRONTMATTER)
-
-  const frontmatterTitle = frontmatter?.[1]?.match(FRONTMATTER_TITLE)?.[1]
-  if (frontmatterTitle) return `${unquote(frontmatterTitle)} - audio`
-
   const body = frontmatter ? content.slice(frontmatter[0].length) : content
   const heading = body.match(LEADING_H1)?.[1]
   if (heading) return `${heading.trim()} - audio`

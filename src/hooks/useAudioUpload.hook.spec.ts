@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { useAudioUpload } from "@/hooks/useAudioUpload.hook"
+import { resolveRecording } from "@/modules/atproto/resolveRecording"
 import { uploadRecording } from "@/modules/atproto/uploadRecording"
 import { normalizeAudioFile } from "@/utils/normalizeAudioFile"
 import { errorMessage } from "@/utils/notif"
 
 vi.mock("@/modules/atproto/uploadRecording", () => ({
   uploadRecording: vi.fn()
+}))
+vi.mock("@/modules/atproto/resolveRecording", () => ({
+  resolveRecording: vi.fn()
 }))
 // The real module pulls in mediabunny, which has no business being loaded to
 // test the orchestration around it.
@@ -303,5 +307,79 @@ describe("useAudioUpload", () => {
 
     expect(result).toBeNull()
     expect(uploadRecording).not.toHaveBeenCalled()
+  })
+
+  // A published note carries `atUri` in its frontmatter, and the note record
+  // shares that rkey — which is the whole attachment.
+  describe("a published note", () => {
+    const PUBLISHED = `---
+title: Ma 間
+atUri: at://did:plc:abc/site.standard.document/3labc
+---
+
+# Ma 間
+`
+
+    const published = () =>
+      useAudioUpload({
+        did: "did:plc:abc",
+        notePath: "japonais/ma.pub.md",
+        noteContent: PUBLISHED
+      })
+
+    beforeEach(() => {
+      vi.mocked(resolveRecording).mockReset()
+      vi.mocked(resolveRecording).mockResolvedValue(null)
+      vi.mocked(uploadRecording).mockResolvedValue({
+        ok: true,
+        uri: "at://did:plc:abc/space.remanso.recording/3labc"
+      })
+    })
+
+    it("writes the recording at the note's rkey and inserts nothing", async () => {
+      expect(await published().attachAudio(makeFile(1000))).toEqual({
+        markdown: null
+      })
+      expect(vi.mocked(uploadRecording).mock.calls[0][0].rkey).toBe("3labc")
+    })
+
+    it("still hands back markdown for a note that was never published", async () => {
+      vi.mocked(uploadRecording).mockResolvedValue({
+        ok: true,
+        uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+      })
+
+      const result = await subject().attachAudio(makeFile(1000))
+
+      expect(result?.markdown).toBe(
+        "![Ma 間 - audio](at://did:plc:abc/space.remanso.recording/3xyz)"
+      )
+      expect(vi.mocked(uploadRecording).mock.calls[0][0].rkey).toBeUndefined()
+      expect(resolveRecording).not.toHaveBeenCalled()
+    })
+
+    it("asks before replacing a recording already at that rkey", async () => {
+      vi.mocked(resolveRecording).mockResolvedValue({
+        blobUrl: "https://pds/blob",
+        title: "Ma 間 - audio"
+      })
+      vi.stubGlobal("confirm", vi.fn().mockReturnValue(true))
+
+      expect(await published().attachAudio(makeFile(1000))).toEqual({
+        markdown: null
+      })
+      expect(confirm).toHaveBeenCalled()
+    })
+
+    it("uploads nothing when the replace is cancelled", async () => {
+      vi.mocked(resolveRecording).mockResolvedValue({
+        blobUrl: "https://pds/blob"
+      })
+      vi.stubGlobal("confirm", vi.fn().mockReturnValue(false))
+
+      expect(await published().attachAudio(makeFile(1000))).toBeNull()
+      expect(uploadRecording).not.toHaveBeenCalled()
+      expect(normalizeAudioFile).not.toHaveBeenCalled()
+    })
   })
 })

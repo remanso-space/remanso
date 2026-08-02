@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
+import RecordingPlayer from "@/components/RecordingPlayer.vue"
 import SharePublicNote from "@/components/SharePublicNote.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
@@ -12,6 +13,7 @@ import ThemeSwap from "@/components/ThemeSwap.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
+import { useNoteRecording } from "@/hooks/useNoteRecording.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { getAuthor } from "@/modules/atproto/getAuthor"
@@ -94,6 +96,22 @@ const content = computed(() =>
     : ""
 )
 
+const { atUri: recordingAtUri, recording } = useNoteRecording(did, rkey)
+
+/**
+ * The recording takes its slot only once the note is here and only if the note
+ * does not already place it itself: a note written under the old model carries
+ * the at-uri inline in its markdown, where markdown-it-recording mounts a
+ * player of its own. Waiting for the content also avoids showing the slot above
+ * the skeleton and then moving it when the inline copy turns up.
+ */
+const showRecording = computed(
+  () =>
+    !!recording.value &&
+    !!content.value &&
+    !noteRecord.value?.value.content.includes(recordingAtUri.value)
+)
+
 const breadcrumb = computed(() =>
   title.value
     ? author.value?.handle
@@ -171,6 +189,13 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
         </div>
         <div class="skeleton h-4 w-50" v-else-if="!noteNotFound"></div>
       </div>
+
+      <recording-player
+        v-if="showRecording"
+        :at-uri="recordingAtUri"
+        :alt="title ?? ''"
+        :recording="recording"
+      />
 
       <article class="note-display" v-if="content" v-html="content"></article>
       <skeleton-loader v-else-if="!noteNotFound" />
@@ -254,6 +279,16 @@ useMarkdownPostRender(content, () => ".public-note-view .note-display", {
     scrollbar-width: none;
     left: 0;
     top: 0;
+
+    // The recording is data attached to the note, not a paragraph of it, so it
+    // gets a block of its own: more air above than below, which ties it to the
+    // body it introduces rather than to the meta. Selector sits inside .article
+    // on purpose — the player's own scoped margin would otherwise outweigh it.
+    // Nothing is rendered at all when there is no recording, so notes without
+    // audio keep the body exactly where it was.
+    .recording-player {
+      margin: 2rem 0 1.5rem;
+    }
   }
 
   &.content {

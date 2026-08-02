@@ -1,10 +1,15 @@
 import { type Ref, toValue } from "vue"
 
-import { MAX_RECORDING_BYTES } from "@/modules/atproto/recording.types"
+import {
+  MAX_RECORDING_BYTES,
+  RECORDING_COLLECTION
+} from "@/modules/atproto/recording.types"
+import { resolveRecording } from "@/modules/atproto/resolveRecording"
 import {
   uploadRecording,
   type UploadRecordingResult
 } from "@/modules/atproto/uploadRecording"
+import { noteRkeyFromFrontmatter } from "@/utils/noteRkeyFromFrontmatter"
 import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
 import { errorMessage } from "@/utils/notif"
 
@@ -110,11 +115,15 @@ export const useAudioUpload = ({
    * duration in its container header, so an in-app recording reports Infinity
    * and would lose its length — the recorder's own elapsed count is the only
    * reliable source there.
+   *
+   * Returns null on failure or a cancelled replace. On success `markdown` is
+   * the line to insert at the caret, or null when the recording attached
+   * itself to the note's rkey and there is nothing to write into the file.
    */
   const attachAudio = async (
     file: File,
     options?: { durationSec?: number; source?: "file" | "recording" }
-  ): Promise<{ markdown: string } | null> => {
+  ): Promise<{ markdown: string | null } | null> => {
     const path = toValue(notePath)
     if (!path) {
       errorMessage("❌ No note to attach the audio to")
@@ -131,6 +140,26 @@ export const useAudioUpload = ({
     if (!mimeType) {
       errorMessage("❌ That file isn't audio")
       return null
+    }
+
+    // A published note carries its rkey in the frontmatter, and the recording
+    // goes there rather than into the prose. Attaching is a put, so it
+    // replaces whatever is already at that rkey — the wanted behaviour for a
+    // second take, a surprise otherwise. Checked before the levelling pass so
+    // a cancelled replace costs no encode.
+    const noteRkey = noteRkeyFromFrontmatter(toValue(noteContent) ?? "")
+    if (noteRkey) {
+      const existing = await resolveRecording(
+        `at://${authorDid}/${RECORDING_COLLECTION}/${noteRkey}`
+      )
+      if (
+        existing &&
+        !confirm(
+          "This note already has a recording. Attaching replaces it. Continue?"
+        )
+      ) {
+        return null
+      }
     }
 
     let upload = file
@@ -172,7 +201,8 @@ export const useAudioUpload = ({
       file: upload,
       title,
       durationSec,
-      mimeType
+      mimeType,
+      rkey: noteRkey ?? undefined
     })
 
     if (!result.ok) {
@@ -180,7 +210,9 @@ export const useAudioUpload = ({
       return null
     }
 
-    return { markdown: `![${title}](${result.uri})` }
+    // Attached: the note already points at the recording by sharing its rkey,
+    // so writing a link into the body would only render the same audio twice.
+    return { markdown: noteRkey ? null : `![${title}](${result.uri})` }
   }
 
   return { attachAudio }

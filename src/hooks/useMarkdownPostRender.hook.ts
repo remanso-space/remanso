@@ -2,6 +2,7 @@ import { nextTick, type Ref, toValue, watch } from "vue"
 
 import { useImages } from "@/hooks/useImages.hook"
 import { runMermaid, runTikz, useShikiji } from "@/hooks/useMarkdown.hook"
+import { mountNoteRecording } from "@/modules/atproto/mountNoteRecording"
 import { runRecordings } from "@/modules/atproto/runRecordings"
 import { runInstruments } from "@/modules/instruments/runInstruments"
 import { runMacroplan } from "@/modules/macroplan/runMacroplan"
@@ -14,6 +15,13 @@ interface MarkdownPostRenderOptions {
   mermaid?: () => boolean
   shikiji?: () => boolean
   images?: () => string | null | undefined
+  /**
+   * The at-uri of the recording attached to this note, for views whose title
+   * is part of the rendered markdown rather than a field of its own. Returns
+   * null when there is nothing to attach, or when the note already embeds the
+   * recording inline and the placeholder handles it.
+   */
+  noteRecording?: () => { atUri: string; alt: string } | null
   triggers?: Ref<unknown>[]
 }
 
@@ -56,6 +64,17 @@ export const useMarkdownPostRender = (
       // when no recording exists, and both the repo and public views get
       // players without another option flag.
       renderJobs.push(runRecordings(`${scope} .recording-block`))
+
+      const attached = options.noteRecording?.()
+      if (attached) {
+        renderJobs.push(
+          mountNoteRecording(
+            `${scope} .note-content`,
+            attached.atUri,
+            attached.alt
+          )
+        )
+      }
 
       if (options.shikiji?.()) {
         void useShikiji()
