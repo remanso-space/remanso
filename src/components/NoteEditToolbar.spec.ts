@@ -15,17 +15,26 @@ const pickFile = (input: HTMLInputElement, file: File) => {
 }
 
 describe("NoteEditToolbar", () => {
-  it("offers image, audio and record when audio is available", () => {
-    expect(subject({}).findAll("button")).toHaveLength(3)
+  it("offers image, youtube, audio and record when audio is available", () => {
+    expect(subject({}).findAll("button")).toHaveLength(4)
   })
 
-  // Audio only makes sense on a published note with an ATProto session; the
-  // image button is the one that always applies.
+  // Audio only makes sense on a published note with an ATProto session; image
+  // and YouTube embeds always apply.
   it("drops both audio actions when audio is unavailable", () => {
     const buttons = subject({ canAttachAudio: false }).findAll("button")
 
-    expect(buttons).toHaveLength(1)
+    expect(buttons).toHaveLength(2)
     expect(buttons[0].attributes("title")).toMatch(/image/i)
+    expect(buttons[1].attributes("title")).toMatch(/youtube/i)
+  })
+
+  it("emits youtube when the embed button is clicked", async () => {
+    const wrapper = subject({})
+
+    await wrapper.findAll("button")[1].trigger("click")
+
+    expect(wrapper.emitted("youtube")).toHaveLength(1)
   })
 
   it("emits the picked image file", async () => {
@@ -69,7 +78,7 @@ describe("NoteEditToolbar", () => {
   it("asks to open the recorder rather than emitting a file", async () => {
     const wrapper = subject({})
 
-    await wrapper.findAll("button")[2].trigger("click")
+    await wrapper.findAll("button")[3].trigger("click")
 
     expect(wrapper.emitted("record")).toHaveLength(1)
   })

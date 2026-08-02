@@ -33,6 +33,7 @@ import {
 import { filenameToNoteTitle } from "@/utils/noteTitle"
 import { errorMessage } from "@/utils/notif"
 import { threeWayMerge } from "@/utils/threeWayMerge"
+import { extractYouTubeId } from "@/utils/youtube"
 
 const LinkedNotes = defineAsyncComponent(
   () => import("@/components/LinkedNotes.vue")
@@ -176,6 +177,32 @@ const onImagePicked = async (file: File) => {
   } finally {
     isUploading.value = false
   }
+}
+
+// Read the URL from the clipboard rather than a prompt: pasting a link is how
+// people carry a YouTube video over, and it mirrors the fleeting-note flow.
+const onYoutube = async () => {
+  if (typeof navigator === "undefined" || !navigator.clipboard?.readText) {
+    errorMessage("Clipboard access is not available.")
+    return
+  }
+
+  let clipboardText: string
+  try {
+    clipboardText = (await navigator.clipboard.readText()).trim()
+  } catch (err) {
+    console.warn(err)
+    errorMessage("Unable to read from the clipboard.")
+    return
+  }
+
+  const videoId = extractYouTubeId(clipboardText)
+  if (!videoId) {
+    errorMessage("The clipboard does not contain a valid YouTube link or id.")
+    return
+  }
+
+  insertAtCaret(`@[youtube](${videoId})`)
 }
 
 const { did: atprotoDid, isLoggedIn: isATProtoLoggedIn } = useATProtoLogin()
@@ -601,6 +628,7 @@ const onBadgeClick = async () => {
           @image="onImagePicked"
           @audio="onAudioPicked"
           @record="recorderOpen = true"
+          @youtube="onYoutube"
         />
         <edit-note
           :key="editKey"
