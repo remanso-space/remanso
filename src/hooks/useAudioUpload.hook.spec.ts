@@ -371,6 +371,27 @@ atUri: at://did:plc:abc/site.standard.document/3labc
       expect(confirm).toHaveBeenCalled()
     })
 
+    // A write only ever lands in our own repo, so a recording at that rkey
+    // would be invisible to a reader resolving against the author's DID.
+    it("embeds inline instead when the note belongs to another repo", async () => {
+      vi.mocked(uploadRecording).mockResolvedValue({
+        ok: true,
+        uri: "at://did:plc:abc/space.remanso.recording/3xyz"
+      })
+
+      const result = await useAudioUpload({
+        did: "did:plc:abc",
+        notePath: "japonais/ma.pub.md",
+        noteContent: PUBLISHED.replace("did:plc:abc", "did:plc:someone-else")
+      }).attachAudio(makeFile(1000))
+
+      expect(result?.markdown).toContain(
+        "at://did:plc:abc/space.remanso.recording/3xyz"
+      )
+      expect(vi.mocked(uploadRecording).mock.calls[0][0].rkey).toBeUndefined()
+      expect(resolveRecording).not.toHaveBeenCalled()
+    })
+
     it("uploads nothing when the replace is cancelled", async () => {
       vi.mocked(resolveRecording).mockResolvedValue({
         blobUrl: "https://pds/blob"

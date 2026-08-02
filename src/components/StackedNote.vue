@@ -31,10 +31,10 @@ import {
   findCheckboxIndex,
   setCheckboxInMarkdown
 } from "@/utils/markdownCheckbox"
-import { noteRkeyFromFrontmatter } from "@/utils/noteRkeyFromFrontmatter"
 import { filenameToNoteTitle } from "@/utils/noteTitle"
 import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
 import { confirmMessage, errorMessage } from "@/utils/notif"
+import { publishedNoteRef } from "@/utils/publishedNoteRef"
 import { threeWayMerge } from "@/utils/threeWayMerge"
 import { extractYouTubeId, fetchYouTubeMeta } from "@/utils/youtube"
 
@@ -345,15 +345,18 @@ const { mode, toggleMode } = useEditionMode()
  * markdown-it-recording places a player of its own and this one would be the
  * second copy of the same audio.
  *
+ * Both halves of the at-uri come out of the frontmatter, so this works signed
+ * out and works on a note published from someone else's repo. Blobs are served
+ * without auth; nothing here needs a session.
+ *
  * Read mode only: in edit mode the pane is a textarea, and there is no
  * rendered title to sit under.
  */
 const attachedRecording = computed(() => {
-  const noteRkey = noteRkeyFromFrontmatter(rawContent.value)
-  const authorDid = atprotoDid.value
-  if (!noteRkey || !authorDid || mode.value !== "read") return null
+  const note = publishedNoteRef(rawContent.value)
+  if (!note || mode.value !== "read") return null
 
-  const atUri = `at://${authorDid}/${RECORDING_COLLECTION}/${noteRkey}`
+  const atUri = `at://${note.did}/${RECORDING_COLLECTION}/${note.rkey}`
   if (rawContent.value.includes(atUri)) return null
 
   return { atUri, alt: noteTitleForAlt(rawContent.value, path.value ?? "") }

@@ -9,9 +9,9 @@ import {
   uploadRecording,
   type UploadRecordingResult
 } from "@/modules/atproto/uploadRecording"
-import { noteRkeyFromFrontmatter } from "@/utils/noteRkeyFromFrontmatter"
 import { noteTitleForAlt } from "@/utils/noteTitleForAlt"
 import { errorMessage } from "@/utils/notif"
+import { publishedNoteRef } from "@/utils/publishedNoteRef"
 
 // A getter is in the union because the ATProto DID arrives as Ref<string | null>
 // from useATProtoLogin, and Ref is invariant — Ref<string | null> will not
@@ -142,12 +142,18 @@ export const useAudioUpload = ({
       return null
     }
 
-    // A published note carries its rkey in the frontmatter, and the recording
-    // goes there rather than into the prose. Attaching is a put, so it
-    // replaces whatever is already at that rkey — the wanted behaviour for a
-    // second take, a surprise otherwise. Checked before the levelling pass so
-    // a cancelled replace costs no encode.
-    const noteRkey = noteRkeyFromFrontmatter(toValue(noteContent) ?? "")
+    // A published note carries its at-uri in the frontmatter, and the
+    // recording goes to that rkey rather than into the prose — but only in the
+    // author's own repo. A note published by someone else resolves against
+    // *their* DID, and a write can only land in ours, so that pairing is
+    // impossible to make: fall back to the inline embed, which names the repo
+    // it points at.
+    const note = publishedNoteRef(toValue(noteContent) ?? "")
+    const noteRkey = note?.did === authorDid ? note.rkey : null
+
+    // Attaching is a put, so it replaces whatever is already at that rkey —
+    // the wanted behaviour for a second take, a surprise otherwise. Checked
+    // before the levelling pass so a cancelled replace costs no encode.
     if (noteRkey) {
       const existing = await resolveRecording(
         `at://${authorDid}/${RECORDING_COLLECTION}/${noteRkey}`
