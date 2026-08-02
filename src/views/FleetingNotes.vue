@@ -12,7 +12,7 @@ import { useFolderNotes } from "@/modules/note/hooks/useFolderNotes"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
 import { confirmMessage, errorMessage } from "@/utils/notif"
-import { extractYouTubeId } from "@/utils/youtube"
+import { extractYouTubeId, fetchYouTubeMeta } from "@/utils/youtube"
 
 const FLEETING_NOTES_FOLDER = ["inbox", "_inbox"]
 
@@ -46,8 +46,6 @@ const handleYouTube = async () => {
     return
   }
 
-  debugger
-
   if (!clipboardText) {
     errorMessage("Clipboard is empty.")
     return
@@ -60,7 +58,13 @@ const handleYouTube = async () => {
     return
   }
 
-  const snippet = `@[youtube](${videoId})`
+  const meta = await fetchYouTubeMeta(videoId)
+  const caption = meta
+    ? [meta.title, meta.author].filter(Boolean).join(" · ")
+    : ""
+  const snippet = caption
+    ? `@[youtube](${videoId})\n\n- ${caption}`
+    : `@[youtube](${videoId})`
   try {
     await navigator.clipboard.writeText(snippet)
   } catch {

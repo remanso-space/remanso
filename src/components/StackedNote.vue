@@ -33,7 +33,7 @@ import {
 import { filenameToNoteTitle } from "@/utils/noteTitle"
 import { errorMessage } from "@/utils/notif"
 import { threeWayMerge } from "@/utils/threeWayMerge"
-import { extractYouTubeId } from "@/utils/youtube"
+import { extractYouTubeId, fetchYouTubeMeta } from "@/utils/youtube"
 
 const LinkedNotes = defineAsyncComponent(
   () => import("@/components/LinkedNotes.vue")
@@ -202,7 +202,16 @@ const onYoutube = async () => {
     return
   }
 
-  insertAtCaret(`@[youtube](${videoId})`)
+  const meta = await fetchYouTubeMeta(videoId)
+  const caption = meta
+    ? [meta.title, meta.author].filter(Boolean).join(" · ")
+    : ""
+
+  insertAtCaret(
+    caption
+      ? `@[youtube](${videoId})\n\n- ${caption}`
+      : `@[youtube](${videoId})`
+  )
 }
 
 const { did: atprotoDid, isLoggedIn: isATProtoLoggedIn } = useATProtoLogin()
