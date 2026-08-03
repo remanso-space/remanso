@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, useTemplateRef } from "vue"
+import { computed, nextTick, onUnmounted, ref, useTemplateRef } from "vue"
 
 import type { ResolvedRecording } from "@/modules/atproto/recording.types"
 import { formatDuration } from "@/utils/formatDuration"
@@ -62,7 +62,15 @@ const playLocalCopy = async () => {
     console.warn("RecordingPlayer: could not download the recording", error)
   } finally {
     downloading = false
-    void player.value?.play()
+    // The src binding has to reach the element before playback resumes:
+    // play() on the URL we are replacing starts a load that the patch then
+    // cancels, leaving the element paused and the reader pressing play twice.
+    await nextTick()
+    void player.value
+      ?.play()
+      .catch((error: unknown) =>
+        console.warn("RecordingPlayer: could not resume playback", error)
+      )
   }
 }
 

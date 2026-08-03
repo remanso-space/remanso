@@ -136,6 +136,27 @@ describe("RecordingPlayer", () => {
       expect(play).toHaveBeenCalled()
     })
 
+    /**
+     * Calling play() before Vue has patched the src attribute restarts the load
+     * on the old URL and leaves the element paused — the reader has to press
+     * play a second time.
+     */
+    it("resumes only once the element carries the local copy", async () => {
+      vi.mocked(fetch).mockResolvedValue(new Response(new Blob(["a"])) as never)
+
+      let srcAtPlay: string | null = null
+      play.mockImplementation(function (this: HTMLAudioElement) {
+        srcAtPlay = this.getAttribute("src")
+        return Promise.resolve()
+      })
+
+      const audio = mountPlayer().find("audio")
+      await audio.trigger("play")
+      await flushPromises()
+
+      expect(srcAtPlay).toBe("blob:local-copy")
+    })
+
     it("downloads once however often playback restarts", async () => {
       vi.mocked(fetch).mockResolvedValue(new Response(new Blob(["a"])) as never)
 
