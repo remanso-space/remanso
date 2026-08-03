@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, onUnmounted, ref, useTemplateRef } from "vue"
 
 import type { ResolvedRecording } from "@/modules/atproto/recording.types"
 import { formatDuration } from "@/utils/formatDuration"
@@ -13,6 +13,60 @@ const props = defineProps<{
 const label = computed(() => props.recording?.title || props.alt)
 
 const duration = computed(() => formatDuration(props.recording?.durationSec))
+
+const player = useTemplateRef<HTMLAudioElement>("player")
+
+/**
+ * A `blob:` URL for the downloaded audio, once we have it.
+ *
+ * `com.atproto.sync.getBlob` does not honour Range: it answers a
+ * `Range: bytes=45274-465202` with 200 and the whole body from byte zero, no
+ * Content-Range. Chrome notices the 200 and re-reads from the start; WebKit
+ * trusts the offset it asked for and lays the opening bytes down at 45274, so
+ * the stream it decodes is garbage — playback fails with no sound on Safari the
+ * moment the element resumes or seeks rather than reading straight through.
+ *
+ * Downloading the blob ourselves and handing the element a local copy takes the
+ * element out of that negotiation entirely: a `blob:` URL is seekable, so
+ * scrubbing works too. The record already carries the title and the duration,
+ * so nothing is lost by loading no metadata up front.
+ */
+const localUrl = ref<string | null>(null)
+let downloading = false
+
+const source = computed(() => localUrl.value ?? props.recording?.blobUrl)
+
+const release = () => {
+  if (localUrl.value) URL.revokeObjectURL(localUrl.value)
+  localUrl.value = null
+}
+
+/**
+ * Pressing play is what asks for the bytes — a reader who never plays pays
+ * nothing. The element has just started its own doomed request; pausing aborts
+ * it, and play() resumes from the local copy once it is here. A failed download
+ * lets the element carry on with the remote URL: reading straight through from
+ * byte zero is the one case the PDS does serve correctly.
+ */
+const playLocalCopy = async () => {
+  if (!props.recording || localUrl.value || downloading) return
+  downloading = true
+  player.value?.pause()
+
+  try {
+    const response = await fetch(props.recording.blobUrl)
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    release()
+    localUrl.value = URL.createObjectURL(await response.blob())
+  } catch (error) {
+    console.warn("RecordingPlayer: could not download the recording", error)
+  } finally {
+    downloading = false
+    void player.value?.play()
+  }
+}
+
+onUnmounted(release)
 </script>
 
 <template>
@@ -39,7 +93,13 @@ const duration = computed(() => formatDuration(props.recording?.durationSec))
       <span class="recording-title">{{ label }}</span>
       <span v-if="duration" class="recording-duration">{{ duration }}</span>
     </figcaption>
-    <audio controls preload="metadata" :src="recording.blobUrl"></audio>
+    <audio
+      ref="player"
+      controls
+      preload="none"
+      :src="source"
+      @play="playLocalCopy()"
+    ></audio>
   </figure>
   <p v-else class="recording-unavailable">
     <a :href="atUri">{{ alt }}</a>
