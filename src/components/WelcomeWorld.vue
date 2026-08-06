@@ -154,7 +154,27 @@ onMounted(() => {
       </div>
       <div class="topnav-right">
         <a href="#about" class="navlink">About</a>
-        <a :href="studioUrl" class="navlink">Studio&nbsp;↗</a>
+        <a :href="studioUrl" class="navlink"
+          >Studio<svg
+            class="navlink-ext"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"
+            />
+            <path d="M11 13l9 -9" />
+            <path d="M15 4h5v5" />
+          </svg></a
+        >
         <router-link :to="{ name: 'PublicNoteListView' }" class="navlink"
           >Public&nbsp;notes</router-link
         >
@@ -1026,6 +1046,14 @@ main {
   &:hover {
     color: var(--hw-pink-deep);
   }
+}
+
+.navlink-ext {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.2em;
+  vertical-align: -0.05em;
 }
 
 /* ── GitHub form ────────────────────────────────────────────── */
