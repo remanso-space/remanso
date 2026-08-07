@@ -102,6 +102,15 @@ describe("RecordingPlayer", () => {
       vi.unstubAllGlobals()
     })
 
+    /**
+     * Only the two members the player reads. jsdom's Blob has no stream(), so
+     * wrapping one in a real Response throws on Node 22 ("object.stream is not
+     * a function") and passes on Node 24 — the test would be pinning undici's
+     * Blob interop rather than the player.
+     */
+    const audioResponse = (blob: Blob) =>
+      ({ ok: true, blob: () => Promise.resolve(blob) }) as Response
+
     const mountPlayer = () =>
       mount(RecordingPlayer, {
         props: {
@@ -121,9 +130,7 @@ describe("RecordingPlayer", () => {
 
     it("swaps in a downloaded copy on the first play", async () => {
       const blob = new Blob(["audio"], { type: "audio/webm" })
-      vi.mocked(fetch).mockResolvedValue(
-        new Response(blob, { status: 200 }) as never
-      )
+      vi.mocked(fetch).mockResolvedValue(audioResponse(blob))
 
       const wrapper = mountPlayer()
       const audio = wrapper.find("audio")
@@ -142,7 +149,7 @@ describe("RecordingPlayer", () => {
      * play a second time.
      */
     it("resumes only once the element carries the local copy", async () => {
-      vi.mocked(fetch).mockResolvedValue(new Response(new Blob(["a"])) as never)
+      vi.mocked(fetch).mockResolvedValue(audioResponse(new Blob(["a"])))
 
       let srcAtPlay: string | null = null
       play.mockImplementation(function (this: HTMLAudioElement) {
@@ -158,7 +165,7 @@ describe("RecordingPlayer", () => {
     })
 
     it("downloads once however often playback restarts", async () => {
-      vi.mocked(fetch).mockResolvedValue(new Response(new Blob(["a"])) as never)
+      vi.mocked(fetch).mockResolvedValue(audioResponse(new Blob(["a"])))
 
       const audio = mountPlayer().find("audio")
       await audio.trigger("play")
@@ -181,7 +188,7 @@ describe("RecordingPlayer", () => {
     })
 
     it("releases the copy when the player goes away", async () => {
-      vi.mocked(fetch).mockResolvedValue(new Response(new Blob(["a"])) as never)
+      vi.mocked(fetch).mockResolvedValue(audioResponse(new Blob(["a"])))
 
       const wrapper = mountPlayer()
       await wrapper.find("audio").trigger("play")
