@@ -1,11 +1,12 @@
 <script lang="ts" setup>
+import { useAtprotoLogin } from "vue-atproto-login"
+
 import ImageLightbox from "@/components/ImageLightbox.vue"
 import NewVersion from "@/components/NewVersion.vue"
-import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 
 const { isReady } = useGitHubLogin()
-const { isATProtoReady } = useATProtoLogin()
+const { isReady: isATProtoReady } = useAtprotoLogin()
 </script>
 
 <template>

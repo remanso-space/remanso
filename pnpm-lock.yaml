@@ -149,6 +149,9 @@ importers:
       vue:
         specifier: ^3.5.18
         version: 3.5.18(typescript@5.9.3)
+      vue-atproto-login:
+        specifier: ^0.2.0
+        version: 0.2.0(@atproto/oauth-client-browser@0.3.41)(vue@3.5.18(typescript@5.9.3))
       vue-i18n:
         specifier: ^11.1.11
         version: 11.1.11(vue@3.5.18(typescript@5.9.3))
@@ -6633,6 +6636,12 @@ packages:
 
   vscode-uri@3.0.8:
     resolution: {integrity: sha512-AyFQ0EVmsOZOlAnxoFOGOq1SQDWAB7C6aqMGS23svWAllfOaxbuFvcT8D1i8z3Gyn8fraVeZNNmN6e9bxxXkKw==}
+
+  vue-atproto-login@0.2.0:
+    resolution: {integrity: sha512-rHHnDJlk3WrJCZIop3QxZQkvlQUyXk13J5tnqc0O0SlsZaiNXEW0mDh21yc+4avT1YEvx9zyH3zs9moaP5ettA==}
+    peerDependencies:
+      '@atproto/oauth-client-browser': '>=0.3.40 <0.6.0'
+      vue: ^3.4.0
 
   vue-component-type-helpers@3.3.3:
     resolution: {integrity: sha512-x4nsFpy5Pe8fqPzp/5vkTPeTTDBpAx4WVtV47Ejt0+2FQrq4pRRsJs7JmYRqMFzTu/LW+pCWEjQ3YVCkPV7f9g==}
@@ -13715,6 +13724,11 @@ snapshots:
       vscode-languageserver-protocol: 3.17.5
 
   vscode-uri@3.0.8: {}
+
+  vue-atproto-login@0.2.0(@atproto/oauth-client-browser@0.3.41)(vue@3.5.18(typescript@5.9.3)):
+    dependencies:
+      '@atproto/oauth-client-browser': 0.3.41
+      vue: 3.5.18(typescript@5.9.3)
 
   vue-component-type-helpers@3.3.3: {}
 

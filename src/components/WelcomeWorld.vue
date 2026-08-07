@@ -2,12 +2,12 @@
 import fontColorContrast from "font-color-contrast"
 import { getHex } from "pastel-color"
 import { computed, onMounted, ref } from "vue"
+import { useAtprotoLogin } from "vue-atproto-login"
 import { useRouter } from "vue-router"
 
 import ProfileModal from "@/components/ProfileModal.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
 import UserPill from "@/components/UserPill.vue"
-import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useForm } from "@/hooks/useForm.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
@@ -18,7 +18,7 @@ import { useFavoriteRepos } from "@/modules/repo/hooks/useFavoriteRepos.hook"
 import { slugify } from "@/utils/slugify"
 
 const { username, accessToken } = useGitHubLogin()
-const { isLoggedIn: isATProtoLoggedIn, handle } = useATProtoLogin()
+const { isLoggedIn: isATProtoLoggedIn, handle } = useAtprotoLogin()
 const { userInput, repoInput, submit } = useForm()
 const { savedFavoriteRepos } = useFavoriteRepos()
 const { lastVisitedRepos } = useLastVisitedRepos()

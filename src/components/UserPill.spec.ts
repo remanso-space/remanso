@@ -15,11 +15,11 @@ vi.mock("@/hooks/useGitHubLogin.hook", () => ({
   })
 }))
 
-vi.mock("@/hooks/useATProtoLogin.hook", () => ({
-  useATProtoLogin: () => ({
+vi.mock("vue-atproto-login", () => ({
+  useAtprotoLogin: () => ({
     isLoggedIn: atIsLoggedIn,
     handle: atHandle,
-    avatarUrl: atAvatarUrl
+    avatar: atAvatarUrl
   })
 }))
 

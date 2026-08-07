@@ -5,3 +5,5 @@ allowBuilds:
   fsevents: true
   sharp: true
   vue-demi: true
+minimumReleaseAgeExclude:
+  - vue-atproto-login@0.2.0

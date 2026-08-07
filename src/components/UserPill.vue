@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useAtprotoLogin } from "vue-atproto-login"
 
-import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 
 const { username, accessToken } = useGitHubLogin()
-const { isLoggedIn: isATProtoLoggedIn, handle, avatarUrl } = useATProtoLogin()
+const {
+  isLoggedIn: isATProtoLoggedIn,
+  handle,
+  avatar: avatarUrl
+} = useAtprotoLogin()
 
 defineEmits<{
   click: []

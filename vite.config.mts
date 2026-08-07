@@ -13,7 +13,15 @@ export default defineConfig(({ command }) => {
     test: {
       environment: "jsdom",
       setupFiles: ["./src/test/setup.ts"],
-      globals: false
+      globals: false,
+      server: {
+        deps: {
+          // Externalised dependencies run outside the mock registry, so a test
+          // mocking the OAuth SDK would not reach the copy this package imports
+          // and a real BrowserOAuthClient would try to load in jsdom.
+          inline: ["vue-atproto-login"]
+        }
+      }
     },
     plugins: [
       vue(),

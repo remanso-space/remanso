@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useAtprotoLogin } from "vue-atproto-login"
 import { useRoute, useRouter } from "vue-router"
 
 import HomeButton from "@/components/HomeButton.vue"
 import ProfileModal from "@/components/ProfileModal.vue"
 import PublicNoteList from "@/components/PublicNoteList.vue"
 import UserPill from "@/components/UserPill.vue"
-import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useFollowingNoteList } from "@/hooks/useFollowingNoteList.hook"
 import { useFollows } from "@/hooks/useFollows.hook"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
@@ -15,7 +15,7 @@ import { toShortDid } from "@/modules/atproto/shortDid"
 const route = useRoute()
 const router = useRouter()
 
-const { did, isLoggedIn } = useATProtoLogin()
+const { did, isLoggedIn } = useAtprotoLogin()
 const { follows } = useFollows(did)
 
 const tab = computed<"all" | "following">({

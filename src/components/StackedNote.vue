@@ -8,8 +8,8 @@ import {
   ref,
   watch
 } from "vue"
+import { useAtprotoLogin } from "vue-atproto-login"
 
-import { useATProtoLogin } from "@/hooks/useATProtoLogin.hook"
 import { useAudioUpload } from "@/hooks/useAudioUpload.hook"
 import { useEditionMode } from "@/hooks/useEditionMode"
 import { useFile } from "@/hooks/useFile.hook"
@@ -217,7 +217,7 @@ const onYoutube = async () => {
   )
 }
 
-const { did: atprotoDid, isLoggedIn: isATProtoLoggedIn } = useATProtoLogin()
+const { did: atprotoDid, isLoggedIn: isATProtoLoggedIn } = useAtprotoLogin()
 
 // PDS blobs are served without auth and the recording record is broadcast on
 // the firehose, so audio attached to a private note would be public anyway.

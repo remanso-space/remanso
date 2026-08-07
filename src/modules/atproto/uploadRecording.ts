@@ -1,6 +1,7 @@
+import { getActiveSession } from "vue-atproto-login"
+
 import type { PublicNoteBlob } from "@/modules/atproto/publicNote.types"
 import { RECORDING_COLLECTION } from "@/modules/atproto/recording.types"
-import { getActiveSession } from "@/modules/atproto/service/atprotoOAuth"
 
 interface UploadRecordingParams {
   did: string
