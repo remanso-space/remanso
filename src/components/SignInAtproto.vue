@@ -14,19 +14,21 @@ withDefaults(
 <template>
   <!--
     `unstyled` drops every class the package would set, so the hooks below are the
-    only ones on the elements and daisyUI has nothing to fight. The rows come from
-    the slot rather than the defaults: slot markup compiles in this component, so
-    it carries this file's scope and the styles underneath keep working on it.
+    only ones on these elements and daisyUI has nothing to fight.
+
+    `not-prose` because the box renders inside `#main-app.prose`: Tailwind
+    typography gives every `img` a 2em vertical margin and every `li` a marker and
+    margins of its own, which is right for a note and wrong for an avatar in a row.
   -->
   <AtprotoLogin
     :with-sign-out="withSignOut"
     placeholder="alice.bsky.social"
     unstyled
     :ui="{
-      root: 'sign-in-atproto',
+      root: 'sign-in-atproto not-prose',
       loading: 'skeleton h-8 w-40',
-      signedIn: 'sign-in-atproto is-signed-in',
-      avatar: 'signed-in-avatar',
+      signedIn: 'sign-in-atproto-signed-in',
+      avatar: 'sign-in-atproto-avatar',
       signOut: 'btn btn-sm',
       form: 'join',
       input: 'input input-sm join-item',
@@ -35,18 +37,27 @@ withDefaults(
     }"
   >
     <template #suggestion="{ suggestion, active }">
-      <span class="suggestion" :class="{ active }">
+      <span class="sign-in-atproto-suggestion" :class="{ 'is-active': active }">
         <img
           v-if="suggestion.avatar"
-          class="suggestion-avatar"
+          class="sign-in-atproto-suggestion-avatar"
           :src="suggestion.avatar"
           alt=""
           loading="lazy"
         />
-        <span v-else class="suggestion-avatar placeholder" aria-hidden="true" />
-        <span class="suggestion-text">
-          <span class="suggestion-handle">{{ suggestion.handle }}</span>
-          <span v-if="suggestion.displayName" class="suggestion-name">
+        <span
+          v-else
+          class="sign-in-atproto-suggestion-avatar is-placeholder"
+          aria-hidden="true"
+        />
+        <span class="sign-in-atproto-suggestion-text">
+          <span class="sign-in-atproto-suggestion-handle">
+            {{ suggestion.handle }}
+          </span>
+          <span
+            v-if="suggestion.displayName"
+            class="sign-in-atproto-suggestion-name"
+          >
             {{ suggestion.displayName }}
           </span>
         </span>
@@ -55,30 +66,32 @@ withDefaults(
   </AtprotoLogin>
 </template>
 
-<style scoped>
+<!--
+  Not scoped. Vue writes a scope attribute onto a child component's *root element*
+  only, so scoped rules here would reach `.sign-in-atproto` and nothing under it —
+  every class below sits on DOM the package renders. Names are prefixed instead,
+  which is what keeps them from colliding.
+-->
+<style>
 .sign-in-atproto {
   position: relative;
 }
 
-.is-signed-in {
+.sign-in-atproto-signed-in {
   display: flex;
   gap: 1rem;
   align-items: center;
 }
 
-.signed-in-avatar {
+.sign-in-atproto-avatar {
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 50%;
   object-fit: cover;
+  flex: none;
 }
 
-/*
-  The listbox belongs to the package, and a scope attribute only lands on a
-  component's root element — so this one needs :deep() to reach past the wrapper.
-  The rows below do not: they come from the slot, which is our markup.
-*/
-:deep(.sign-in-atproto-suggestions) {
+.sign-in-atproto-suggestions {
   position: absolute;
   z-index: 20;
   top: calc(100% + 0.3rem);
@@ -95,22 +108,28 @@ withDefaults(
   box-shadow: 0 8px 24px color-mix(in oklch, var(--color-base-content) 18%, transparent);
 }
 
-.suggestion {
+.sign-in-atproto-suggestions li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sign-in-atproto-suggestion {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  width: 100%;
+  min-width: 0;
   padding: 0.4rem 0.5rem;
   border-radius: 0.375rem;
   cursor: pointer;
-  width: 100%;
-  min-width: 0;
 }
 
-.suggestion.active {
+.sign-in-atproto-suggestion.is-active {
   background: var(--link-accent);
 }
 
-.suggestion-avatar {
+.sign-in-atproto-suggestion-avatar {
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 50%;
@@ -118,25 +137,25 @@ withDefaults(
   flex: none;
 }
 
-.suggestion-avatar.placeholder {
+.sign-in-atproto-suggestion-avatar.is-placeholder {
   background: color-mix(in oklch, var(--color-base-content) 15%, transparent);
 }
 
-.suggestion-text {
+.sign-in-atproto-suggestion-text {
   min-width: 0;
   display: flex;
   flex-direction: column;
   line-height: 1.25;
 }
 
-.suggestion-handle {
+.sign-in-atproto-suggestion-handle {
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.suggestion-name {
+.sign-in-atproto-suggestion-name {
   font-size: 0.8rem;
   opacity: 0.7;
   overflow: hidden;
@@ -144,8 +163,8 @@ withDefaults(
   white-space: nowrap;
 }
 
-.suggestion.active .suggestion-handle,
-.suggestion.active .suggestion-name {
+.sign-in-atproto-suggestion.is-active .sign-in-atproto-suggestion-handle,
+.sign-in-atproto-suggestion.is-active .sign-in-atproto-suggestion-name {
   color: var(--color-base-100);
   opacity: 1;
 }

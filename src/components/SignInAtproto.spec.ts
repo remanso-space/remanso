@@ -66,6 +66,9 @@ describe("SignInAtproto", () => {
       "join-item"
     ])
     expect(wrapper.find(".join").exists()).toBe(true)
+    // The box sits inside #main-app.prose, which would otherwise give the avatar
+    // a 2em margin and the rows list markers.
+    expect(wrapper.find(".sign-in-atproto").classes()).toContain("not-prose")
 
     const everyClass = wrapper.findAll("[class]").flatMap((el) => el.classes())
     expect(everyClass.filter((name) => name.startsWith("atp-"))).toEqual([])
@@ -77,7 +80,7 @@ describe("SignInAtproto", () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain("alice.bsky.social")
-    expect(wrapper.find("img.signed-in-avatar").attributes("src")).toBe(
+    expect(wrapper.find("img.sign-in-atproto-avatar").attributes("src")).toBe(
       "avatar.png"
     )
     expect(wrapper.find(".btn").text()).toBe("Sign out")
@@ -97,16 +100,16 @@ describe("SignInAtproto", () => {
     await flushPromises()
     await typeAndDebounce(wrapper, "bo")
 
-    const row = wrapper.find('[role="option"] .suggestion')
+    const row = wrapper.find('[role="option"] .sign-in-atproto-suggestion')
     expect(row.exists()).toBe(true)
     expect(row.text()).toContain("bob.bsky.social")
     expect(row.text()).toContain("Bob")
-    expect(row.classes()).not.toContain("active")
+    expect(row.classes()).not.toContain("is-active")
 
     // Arrow-down highlights the first row, which is what paints --link-accent.
     await wrapper.find("input").trigger("keydown.down")
-    expect(wrapper.find('[role="option"] .suggestion').classes()).toContain(
-      "active"
-    )
+    expect(
+      wrapper.find('[role="option"] .sign-in-atproto-suggestion').classes()
+    ).toContain("is-active")
   })
 })
