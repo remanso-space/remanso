@@ -8,6 +8,9 @@
     "build": "vite build",
     "serve": "vite preview",
     "test": "vitest",
+    "test:browser": "vitest --config vitest.browser.config.mts",
+    "test:browser:update": "vitest --config vitest.browser.config.mts --run --update",
+    "browser:install": "bash _scripts/install-browser-deps.sh",
     "types": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
@@ -81,6 +84,7 @@
     "@types/sanitize-html": "^2.16.0",
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-vue": "^5.2.4",
+    "@vitest/browser-playwright": "^4.1.10",
     "@vue/compiler-sfc": "^3.5.28",
     "@vue/test-utils": "^2.4.11",
     "autoprefixer": "^10.4.24",
@@ -93,6 +97,7 @@
     "jsdom": "^29.1.1",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
+    "playwright": "^1.62.1",
     "prettier": "^3.8.1",
     "prettier-vue": "^1.1.2",
     "sass": "^1.98.0",
@@ -100,6 +105,7 @@
     "typescript": "~5.9.3",
     "vite": "^8.0.1",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10",
+    "vitest-browser-vue": "^2.1.0"
   }
 }

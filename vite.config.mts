@@ -13,6 +13,10 @@ export default defineConfig(({ command }) => {
     test: {
       environment: "jsdom",
       setupFiles: ["./src/test/setup.ts"],
+      // Browser-mode specs live next to their unit specs but need a browser to
+      // run, so they belong to vitest.browser.config.mts alone.
+      include: ["src/**/*.spec.ts"],
+      exclude: ["**/node_modules/**", "src/**/*.browser.spec.ts"],
       globals: false,
       server: {
         deps: {

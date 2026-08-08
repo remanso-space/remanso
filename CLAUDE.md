@@ -9,14 +9,35 @@ Remanso is a Vue 3 + TypeScript web app that displays markdown notes from GitHub
 ## Commands
 
 ```bash
-pnpm dev          # Start development server
-pnpm build        # Production build
-pnpm test         # Run Vitest tests (no config file, uses defaults)
-pnpm lint         # ESLint with auto-fix
-pnpm types        # TypeScript type-check
+pnpm dev              # Start development server
+pnpm build            # Production build
+pnpm test             # Vitest unit suite (jsdom, src/**/*.spec.ts)
+pnpm test:browser     # Vitest browser mode (chromium, src/**/*.browser.spec.ts)
+pnpm browser:install  # One-off: install the chromium the browser suite needs
+pnpm lint             # ESLint with auto-fix
+pnpm types            # TypeScript type-check
 ```
 
 Run a single test file: `pnpm test src/modules/repo/services/resolvePath.spec.ts`
+
+### Browser-mode tests
+
+`*.browser.spec.ts` files run in a real headless chromium (Vitest browser mode +
+Playwright, config in `vitest.browser.config.mts`), so they carry things jsdom
+cannot: computed CSS from Tailwind/DaisyUI variables, mermaid's measured layout,
+IndexedDB and Workers (PouchDB runs unmocked), real media elements, and
+screenshot comparisons through `toMatchScreenshot`.
+
+- `pnpm browser:install` once per machine. The dev container has no root and
+  none of chromium's shared libraries, so the script vendors them (plus fonts)
+  under `~/.local/share/chromium-deps`; elsewhere it just installs chromium.
+  Re-run it after a container rebuild — `~/.local/share` is not persisted.
+- Reference screenshots live in `__screenshots__/` next to the spec and are
+  committed. They only hold on the machine that took them (font rendering), so
+  CI skips the pixel comparisons and runs the behaviour; regenerate with
+  `pnpm test:browser:update` and review the diff.
+- Write a browser spec only for what needs a browser. Everything else stays in
+  the jsdom suite, which is far faster.
 
 ## Architecture
 

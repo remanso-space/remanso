@@ -38,3 +38,34 @@ jobs:
 
       - name: Test
         run: pnpm test --run
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The runner has root, so playwright installs chromium's shared libraries
+      # itself — _scripts/install-browser-deps.sh is only for machines without.
+      - name: Install chromium
+        run: pnpm exec playwright install --with-deps --only-shell chromium
+
+      # CI=1 skips the screenshot comparisons: reference images depend on the
+      # font stack of the machine that took them, and these were taken in the
+      # dev container.
+      - name: Browser tests
+        run: pnpm test:browser --run

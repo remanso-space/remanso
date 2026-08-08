@@ -24,3 +24,7 @@ pnpm-debug.log*
 # Local Netlify folder
 .netlify
 .ai/
+
+# Vitest browser mode writes failure screenshots here. The reference images in
+# __screenshots__/ are committed on purpose; these are run artefacts.
+.vitest-attachments/
