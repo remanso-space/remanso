@@ -65,6 +65,45 @@ if [ -n "$(missing_libs "$SHELL_BIN")" ]; then
     echo "$STILL_MISSING"
     exit 1
   fi
+
+  # Debian's dependency closure drags in perl, systemd, texmf, every locale and
+  # 14MB of changelogs — 248MB where the loader only ever opens 8MB of it. Keep
+  # the libraries the loader resolves, two font families, and fontconfig's own
+  # configuration; drop the rest.
+  KEEP=$(mktemp)
+  {
+    # ldd already prints the whole transitive closure, so the binary is the only
+    # seed needed — plus the NSS modules, which nothing links: NSS dlopens them
+    # by name when chromium first touches certificates.
+    LD_LIBRARY_PATH="$(vendored_ld_path)" ldd "$SHELL_BIN" | awk '{print $3}'
+    for dlopened in libsoftokn3 libfreebl3 libfreeblpriv3 libnssckbi libnsssysinit libnssdbm3; do
+      for so in "$LIB_DIR"/usr/lib/x86_64-linux-gnu/"$dlopened".so; do
+        [ -e "$so" ] || continue
+        echo "$so"
+        LD_LIBRARY_PATH="$(vendored_ld_path)" ldd "$so" 2>/dev/null | awk '{print $3}'
+      done
+    done
+  } | grep "^$LIB_DIR" | sort -u > "$KEEP"
+
+  # ldd prints whichever name it resolved, which is usually a symlink; the file
+  # it points at has to survive too.
+  while read -r lib; do
+    target=$(readlink -f "$lib" || true)
+    [ -n "$target" ] && echo "$target"
+  done < "$KEEP" | sort -u >> "$KEEP"
+
+  find "$LIB_DIR" \( -type f -o -type l \) \
+    -not -path "$LIB_DIR/usr/share/fonts/truetype/dejavu/*" \
+    -not -path "$LIB_DIR/usr/share/fonts/truetype/liberation2/*" \
+    -not -path "$LIB_DIR/etc/fonts/*" \
+    | grep -Fxvf "$KEEP" | xargs -r rm -f
+  find "$LIB_DIR" -type d -empty -delete
+  rm -f "$KEEP"
+
+  if [ -n "$(missing_libs "$SHELL_BIN")" ]; then
+    echo "Pruning removed a library chromium needs — delete $LIB_DIR and re-run."
+    exit 1
+  fi
 fi
 
 if [ -d "$LIB_DIR" ]; then

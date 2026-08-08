@@ -59,6 +59,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The headless shell is a ~260MB download, so it is worth keeping between
+      # runs: the key follows the playwright version in the lockfile.
+      - name: Cache chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ms-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
       # The runner has root, so playwright installs chromium's shared libraries
       # itself — _scripts/install-browser-deps.sh is only for machines without.
       - name: Install chromium
