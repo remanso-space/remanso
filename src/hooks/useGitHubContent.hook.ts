@@ -5,6 +5,19 @@ import { confirmMessage, errorMessage } from "@/utils/notif"
 const isConflictStatus = (status: number) => status === 409 || status === 422
 const isUnauthorizedStatus = (status: number | undefined) => status === 401
 
+/**
+ * An aborted request surfaces as a fetch error octokit wraps, so the name we
+ * are after can be one level down. Worth telling apart: "the connection died"
+ * and "GitHub said no" ask different things of the reader.
+ */
+const isTimeout = (error: unknown): boolean => {
+  const names = [
+    (error as { name?: string })?.name,
+    (error as { cause?: { name?: string } })?.cause?.name
+  ]
+  return names.some((name) => name === "TimeoutError" || name === "AbortError")
+}
+
 export type FetchShaResult =
   | { kind: "ok"; sha: string | null }
   | { kind: "unauthorized" }
@@ -44,7 +57,9 @@ export const useGitHubContent = ({
     message,
     successMessage,
     conflictMessage,
-    failureMessage
+    failureMessage,
+    timeoutMessage,
+    timeoutMs
   }: {
     contentBase64: string
     path: string
@@ -53,6 +68,8 @@ export const useGitHubContent = ({
     successMessage: string
     conflictMessage: string
     failureMessage: string
+    timeoutMessage?: string
+    timeoutMs?: number
   }): Promise<{ sha: string | null; conflict: boolean }> => {
     try {
       const octokit = await getOctokit()
@@ -65,7 +82,10 @@ export const useGitHubContent = ({
           path,
           message,
           content: contentBase64,
-          sha
+          sha,
+          request: timeoutMs
+            ? { signal: AbortSignal.timeout(timeoutMs) }
+            : undefined
         }
       )
 
@@ -79,7 +99,9 @@ export const useGitHubContent = ({
         console.warn(error)
         return { sha: null, conflict: true }
       }
-      errorMessage(failureMessage)
+      errorMessage(
+        timeoutMessage && isTimeout(error) ? timeoutMessage : failureMessage
+      )
       console.warn(error)
       return { sha: null, conflict: false }
     }
@@ -119,7 +141,11 @@ export const useGitHubContent = ({
       message: `Uploading ${path} from Remanso`,
       successMessage: "✅ Image uploaded",
       conflictMessage: "⚠ A file already exists at this path on GitHub",
-      failureMessage: "❌ Image could not be uploaded"
+      failureMessage: "❌ Image could not be uploaded",
+      timeoutMessage: "❌ Upload timed out — check your connection",
+      // A stalled mobile connection otherwise leaves the button spinning with
+      // nothing to report; the payload is small enough that this is generous.
+      timeoutMs: 60_000
     })
 
   return {
