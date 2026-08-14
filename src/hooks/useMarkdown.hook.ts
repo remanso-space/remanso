@@ -25,6 +25,7 @@ import {
 } from "@/utils/decodeBase64ToUTF8"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItComments } from "@/utils/markdown/markdown-it-comments"
+import { markdownItHtml } from "@/utils/markdown/markdown-it-html"
 import { markdownItInstruments } from "@/utils/markdown/markdown-it-instruments"
 import { markdownItRecording } from "@/utils/markdown/markdown-it-recording"
 import { markdownItTablerIcons } from "@/utils/markdown/markdown-it-tabler-icons"
@@ -140,6 +141,7 @@ const md = new MarkdownIt({
   quotes: ["«\xA0", "\xA0»", "‹\xA0", "\xA0›"]
 })
   .use(markdownItComments)
+  .use(markdownItHtml)
   .use(markdownItMermaidExtractor)
   .use(markdownItTikzExtractor)
   .use(markdownItMacroplanExtractor)
