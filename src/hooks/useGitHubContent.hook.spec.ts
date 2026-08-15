@@ -78,6 +78,40 @@ describe("useGitHubContent.fetchLatestSha", () => {
   })
 })
 
+describe("useGitHubContent.fetchFile", () => {
+  beforeEach(() => {
+    vi.mocked(runWithAuthRetry).mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("returns the sha with the decoded content", async () => {
+    vi.mocked(runWithAuthRetry).mockResolvedValue({
+      data: { sha: "abc123", content: btoa("call mum\n") }
+    } as never)
+
+    expect(await make().fetchFile("todo.txt")).toEqual({
+      kind: "ok",
+      sha: "abc123",
+      content: "call mum\n"
+    })
+  })
+
+  it("reports a missing file rather than failing", async () => {
+    vi.mocked(runWithAuthRetry).mockResolvedValue({ data: [] } as never)
+
+    expect(await make().fetchFile("dir/")).toEqual({ kind: "missing" })
+  })
+
+  it("returns kind=offline when the request fails", async () => {
+    vi.mocked(runWithAuthRetry).mockRejectedValue(new Error("network"))
+
+    expect(await make().fetchFile("todo.txt")).toEqual({ kind: "offline" })
+  })
+})
+
 describe("useGitHubContent.updateFile / createFile (putFile)", () => {
   const mockOctokitRequest = vi.fn()
 
@@ -138,6 +172,38 @@ describe("useGitHubContent.updateFile / createFile (putFile)", () => {
 
     expect(result).toEqual({ sha: null, conflict: false })
     expect(errorMessage).toHaveBeenCalledWith("❌ Note could not be saved")
+  })
+
+  it("stays quiet on success when silent", async () => {
+    mockOctokitRequest.mockResolvedValue({
+      data: { content: { sha: "new-sha" } }
+    })
+
+    await make().updateFile({
+      content: "x",
+      path: "todo.txt",
+      sha: "old",
+      silent: true
+    })
+
+    expect(confirmMessage).not.toHaveBeenCalled()
+  })
+
+  it("stays quiet on conflict when silent", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    mockOctokitRequest.mockRejectedValue(
+      Object.assign(new Error("Conflict"), { status: 409 })
+    )
+
+    const result = await make().updateFile({
+      content: "x",
+      path: "todo.txt",
+      sha: "old",
+      silent: true
+    })
+
+    expect(result).toEqual({ sha: null, conflict: true })
+    expect(errorMessage).not.toHaveBeenCalled()
   })
 })
 

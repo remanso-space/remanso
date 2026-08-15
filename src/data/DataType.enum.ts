@@ -8,5 +8,6 @@ export enum DataType {
   History = "History",
   UserSettings = "UserSettings",
   AtprotoSession = "AtprotoSession",
+  TodoQueue = "TodoQueue",
   TikzCache = "TikzCache"
 }

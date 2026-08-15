@@ -3,17 +3,13 @@ import { computed, defineAsyncComponent, Ref, ref, watch } from "vue"
 
 import TodoTxtItem from "@/components/TodoTxtItem.vue"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
-import { useTodoTxtCommit } from "@/hooks/useTodoTxtCommit.hook"
-import { queryFileContent } from "@/modules/repo/services/repo"
+import { TodoEntry, useTodoSync } from "@/hooks/useTodoSync.hook"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
-import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 import { errorMessage } from "@/utils/notif"
 import {
   applyFilterDefaults,
   applyRecurrence,
   contextsOf,
-  FileLine,
-  isBlank,
   parseLine,
   projectsOf,
   Task
@@ -33,106 +29,73 @@ const props = defineProps<Prop>()
 const store = useUserRepoStore()
 
 const todoFile = computed(() => store.files.find((f) => f.path === TODO_PATH))
-const sha = computed(() => todoFile.value?.sha ?? "")
 const canPush = computed(() => store.canPush)
 
 const path = computed(() =>
   todoFile.value?.path ? todoFile.value.path : TODO_PATH
 )
 
-const { items, syncContent, mutate, hasPendingChanges } = useTodoTxtCommit({
+const {
+  entries,
+  exists,
+  pendingCount,
+  syncState,
+  setTask,
+  addTask: queueTask,
+  deleteTask: queueDelete,
+  sync
+} = useTodoSync({
   user: props.user,
   repo: props.repo,
-  path,
-  initialContent: "",
-  initialSha: sha,
-  debounceMs: 1000
+  path
 })
 
-watch(
-  sha,
-  async (newSha) => {
-    if (!newSha || hasPendingChanges.value) return
-    const base64 = await queryFileContent(props.user, props.repo, newSha)
-    if (base64) {
-      syncContent(decodeBase64ToUTF8(base64), newSha)
-    }
-  },
-  { immediate: true }
-)
+// The repo tree may not have been fetched yet (or at all, offline), so a
+// locally known file counts as proof the file is there.
+const hasTodoFile = computed(() => Boolean(todoFile.value) || exists.value)
 
-const doneFile = computed(() => store.files.find((f) => f.path === DONE_PATH))
-const doneSha = computed(() => doneFile.value?.sha ?? "")
-const donePath = computed(() => doneFile.value?.path ?? DONE_PATH)
-
-// Reuse useTodoTxtCommit as a read-only loader. We never call its `mutate`,
-// so nothing is ever written to done.txt from this view — the file is
-// produced by an external tool.
-const { items: doneItems, syncContent: syncDoneContent } = useTodoTxtCommit({
+// done.txt is produced by an external tool; we only ever read it. Going
+// through the same hook means the archive is cached and readable offline too.
+const { entries: doneEntries } = useTodoSync({
   user: props.user,
   repo: props.repo,
-  path: donePath,
-  initialContent: "",
-  initialSha: doneSha,
-  debounceMs: 1000
+  path: DONE_PATH
 })
-
-watch(
-  doneSha,
-  async (newSha) => {
-    if (!newSha) return
-    const base64 = await queryFileContent(props.user, props.repo, newSha)
-    if (base64) {
-      syncDoneContent(decodeBase64ToUTF8(base64), newSha)
-    }
-  },
-  { immediate: true }
-)
 
 // Rank `A` = 65 .. `Z` = 90; absent priority is Infinity so it sorts last
 // regardless of locale collation quirks.
 const priorityRank = (p?: string): number =>
   p ? p.charCodeAt(0) : Number.POSITIVE_INFINITY
 
-const taskEntries = computed(() => {
-  const out: { line: Task; index: number }[] = []
-  items.value.forEach((line, index) => {
-    if (!isBlank(line)) out.push({ line, index })
-  })
+const taskEntries = computed(() =>
   // Stable sort: equal priorities preserve file order.
-  out.sort(
-    (a, b) => priorityRank(a.line.priority) - priorityRank(b.line.priority)
+  [...entries.value].sort(
+    (a, b) => priorityRank(a.task.priority) - priorityRank(b.task.priority)
   )
-  return out
-})
-
-const archivedTasks = computed(() =>
-  doneItems.value.filter((line): line is Task => !isBlank(line))
 )
+
+const archivedTasks = computed(() => doneEntries.value.map((e) => e.task))
 
 const allProjects = computed(() => {
   const set = new Set<string>()
-  items.value.forEach((line) => {
-    if (!isBlank(line)) projectsOf(line).forEach((p) => set.add(p))
-  })
+  entries.value.forEach(({ task }) =>
+    projectsOf(task).forEach((p) => set.add(p))
+  )
   return Array.from(set).sort()
 })
 
 const allContexts = computed(() => {
   const set = new Set<string>()
-  items.value.forEach((line) => {
-    if (!isBlank(line)) contextsOf(line).forEach((c) => set.add(c))
-  })
+  entries.value.forEach(({ task }) =>
+    contextsOf(task).forEach((c) => set.add(c))
+  )
   return Array.from(set).sort()
 })
 
 // "none" represents tasks without a priority.
 const allPriorities = computed<Array<string | "none">>(() => {
   const set = new Set<string | "none">()
-  items.value.forEach((line) => {
-    if (isBlank(line)) return
-    set.add(line.priority ?? "none")
-  })
+  entries.value.forEach(({ task }) => set.add(task.priority ?? "none"))
   return Array.from(set).sort((a, b) => {
     if (a === "none") return 1
     if (b === "none") return -1
@@ -219,9 +182,9 @@ const priorityBadgeFilterClass = (p: string | "none"): string => {
 
 const filteredEntries = computed(() => {
   if (!hasFilters.value) return taskEntries.value
-  return taskEntries.value.filter(({ line }) => {
-    const taskProjects = projectsOf(line)
-    const taskContexts = contextsOf(line)
+  return taskEntries.value.filter(({ task }) => {
+    const taskProjects = projectsOf(task)
+    const taskContexts = contextsOf(task)
     const projectsOk =
       activeProjects.value.size === 0 ||
       taskProjects.some((p) => activeProjects.value.has(p))
@@ -230,28 +193,24 @@ const filteredEntries = computed(() => {
       taskContexts.some((c) => activeContexts.value.has(c))
     const prioritiesOk =
       activePriorities.value.size === 0 ||
-      activePriorities.value.has(line.priority ?? "none")
+      activePriorities.value.has(task.priority ?? "none")
     const statusOk =
       statusFilter.value === "all" ||
-      (statusFilter.value === "done" ? line.completed : !line.completed)
+      (statusFilter.value === "done" ? task.completed : !task.completed)
     return projectsOk && contextsOk && prioritiesOk && statusOk
   })
 })
 
-const updateTask = (index: number, next: Task) => {
-  mutate((current) => {
-    const prev = current[index]
-    const updated = current.map((line, i) => (i === index ? next : line))
-    if (!isBlank(prev) && !prev.completed && next.completed) {
-      const recurring = applyRecurrence(next)
-      if (recurring) return [...updated, recurring]
-    }
-    return updated
-  })
+const updateTask = (entry: TodoEntry, next: Task) => {
+  setTask(entry.key, next)
+  if (!entry.task.completed && next.completed) {
+    const recurring = applyRecurrence(next)
+    if (recurring) queueTask(recurring)
+  }
 }
 
-const deleteTask = (index: number) => {
-  mutate((current) => current.filter((_, i) => i !== index))
+const deleteTask = (entry: TodoEntry) => {
+  queueDelete(entry.key)
 }
 
 const newTaskInput = ref("")
@@ -282,10 +241,7 @@ const addTask = () => {
     priority: inheritedPriority.value
   })
   newTaskInput.value = ""
-  mutate((current) => {
-    const next: FileLine[] = [...current, task]
-    return next
-  })
+  queueTask(task)
   // A new task is open, so a "done only" view would swallow it.
   if (statusFilter.value === "done") statusFilter.value = "all"
 }
@@ -329,7 +285,21 @@ const createTodoFile = async () => {
     sha: newSha,
     type: "blob"
   })
+  sync()
 }
+
+const syncLabel = computed(() => {
+  switch (syncState.value) {
+    case "syncing":
+      return "Saving…"
+    case "offline":
+      return `${pendingCount.value} waiting — offline`
+    case "conflict":
+      return `${pendingCount.value} waiting — retrying`
+    default:
+      return `${pendingCount.value} waiting`
+  }
+})
 </script>
 
 <template>
@@ -344,7 +314,57 @@ const createTodoFile = async () => {
     >
       <h3 class="subtitle">Todo</h3>
 
-      <div v-if="!todoFile" class="card bg-base-200">
+      <p
+        v-if="pendingCount > 0 || syncState === 'syncing'"
+        class="todo-sync-state"
+        :class="{ 'is-offline': syncState === 'offline' }"
+      >
+        <span
+          v-if="syncState === 'syncing'"
+          class="loading loading-spinner loading-xs"
+        />
+        <svg
+          v-else-if="syncState === 'offline'"
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M3 3l18 18M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 8.9 -1.7M18.7 10.7a4 4 0 0 1 -.7 7.3h-9"
+          />
+        </svg>
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 .5 6.95"
+          />
+          <path d="M12 21v-8" />
+          <path d="M9 16l3 -3l3 3" />
+        </svg>
+        {{ syncLabel }}
+      </p>
+
+      <div v-if="!hasTodoFile" class="card bg-base-200">
         <div class="card-body items-center text-center">
           <p>No <code>todo.txt</code> in this repo yet.</p>
           <div v-if="canPush" class="card-actions">
@@ -478,12 +498,12 @@ const createTodoFile = async () => {
           class="todo-list"
           @before-leave="lockLeavingPosition"
         >
-          <li v-for="entry in filteredEntries" :key="entry.index">
+          <li v-for="entry in filteredEntries" :key="entry.id">
             <todo-txt-item
-              :task="entry.line"
+              :task="entry.task"
               :can-edit="canPush"
-              @update="(t) => updateTask(entry.index, t)"
-              @delete="deleteTask(entry.index)"
+              @update="(t) => updateTask(entry, t)"
+              @delete="deleteTask(entry)"
             />
           </li>
         </TransitionGroup>
@@ -502,7 +522,7 @@ const createTodoFile = async () => {
           Your todo list is empty. Add a task above.
         </p>
 
-        <details v-if="doneFile" class="todo-archive">
+        <details v-if="archivedTasks.length" class="todo-archive">
           <summary>Archived ({{ archivedTasks.length }})</summary>
           <ul class="todo-archive-list">
             <li v-for="(task, i) in archivedTasks" :key="i">
@@ -566,6 +586,24 @@ const createTodoFile = async () => {
 
   .todo-move {
     transition: transform 220ms ease;
+  }
+
+  .todo-sync-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    margin: -0.25rem 0 0.75rem;
+    font-size: 0.75rem;
+    opacity: 0.65;
+
+    &.is-offline {
+      opacity: 0.85;
+    }
+
+    .icon {
+      flex: 0 0 auto;
+    }
   }
 
   .todo-inherited-hint {

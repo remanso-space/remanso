@@ -119,6 +119,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
 
       if (cachedSavedRepo) {
         this.files = cachedSavedRepo.files
+        this.canPush = cachedSavedRepo.canPush ?? false
       }
 
       if (cachedUserSettings) {
@@ -138,11 +139,18 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         .then((canPush) => {
           if (requestId !== this._requestId) return
           this.canPush = canPush
+          // Patch: the worker merges into the stored doc, so the cached file
+          // list is kept even though this write does not carry it.
+          data.update<DataType.SavedRepo, SavedRepo>({
+            _id: savedRepoId,
+            $type: DataType.SavedRepo,
+            canPush
+          } as SavedRepo)
         })
         .catch((error) => {
           if (requestId !== this._requestId) return
+          // Keep whatever the cache said: unreachable is not "read-only".
           console.warn("getRepoPermission failed", error)
-          this.canPush = false
         })
 
       getFiles(user, repo)

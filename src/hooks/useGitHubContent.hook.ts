@@ -1,5 +1,8 @@
 import { getOctokit, runWithAuthRetry } from "@/modules/repo/services/octo"
-import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
+import {
+  decodeBase64ToUTF8,
+  encodeUTF8ToBase64
+} from "@/utils/decodeBase64ToUTF8"
 import { confirmMessage, errorMessage } from "@/utils/notif"
 
 const isConflictStatus = (status: number) => status === 409 || status === 422
@@ -21,6 +24,11 @@ const isTimeout = (error: unknown): boolean => {
 export type FetchShaResult =
   | { kind: "ok"; sha: string | null }
   | { kind: "unauthorized" }
+  | { kind: "offline" }
+
+export type FetchFileResult =
+  | { kind: "ok"; sha: string; content: string }
+  | { kind: "missing" }
   | { kind: "offline" }
 
 export const useGitHubContent = ({
@@ -50,6 +58,35 @@ export const useGitHubContent = ({
     }
   }
 
+  /**
+   * Sha and content in a single contents call. The blob endpoint would need
+   * the sha we are trying to learn, so a sync that must know "what is on the
+   * remote right now" would otherwise pay two round trips.
+   */
+  const fetchFile = async (path: string): Promise<FetchFileResult> => {
+    try {
+      const response = await runWithAuthRetry((octokit) =>
+        octokit.request("GET /repos/{owner}/{repo}/contents/{+path}", {
+          owner: user,
+          repo,
+          path,
+          headers: { "X-GitHub-Api-Version": "2026-03-10" }
+        })
+      )
+      const file = response?.data
+      if (!file || Array.isArray(file) || !("content" in file)) {
+        return { kind: "missing" }
+      }
+      return {
+        kind: "ok",
+        sha: file.sha,
+        content: decodeBase64ToUTF8(file.content)
+      }
+    } catch {
+      return { kind: "offline" }
+    }
+  }
+
   const putRaw = async ({
     contentBase64,
     path,
@@ -59,7 +96,8 @@ export const useGitHubContent = ({
     conflictMessage,
     failureMessage,
     timeoutMessage,
-    timeoutMs
+    timeoutMs,
+    silent = false
   }: {
     contentBase64: string
     path: string
@@ -70,6 +108,7 @@ export const useGitHubContent = ({
     failureMessage: string
     timeoutMessage?: string
     timeoutMs?: number
+    silent?: boolean
   }): Promise<{ sha: string | null; conflict: boolean }> => {
     try {
       const octokit = await getOctokit()
@@ -89,19 +128,21 @@ export const useGitHubContent = ({
         }
       )
 
-      confirmMessage(successMessage)
+      if (!silent) confirmMessage(successMessage)
 
       return { sha: response?.data.content?.sha ?? null, conflict: false }
     } catch (error) {
       const status = (error as { status?: number })?.status
       if (status && isConflictStatus(status)) {
-        errorMessage(conflictMessage)
+        if (!silent) errorMessage(conflictMessage)
         console.warn(error)
         return { sha: null, conflict: true }
       }
-      errorMessage(
-        timeoutMessage && isTimeout(error) ? timeoutMessage : failureMessage
-      )
+      if (!silent) {
+        errorMessage(
+          timeoutMessage && isTimeout(error) ? timeoutMessage : failureMessage
+        )
+      }
       console.warn(error)
       return { sha: null, conflict: false }
     }
@@ -111,17 +152,20 @@ export const useGitHubContent = ({
     content,
     path,
     sha,
-    successMessage = "✅ Note saved"
+    successMessage = "✅ Note saved",
+    silent
   }: {
     content: string
     path: string
     sha?: string
     successMessage?: string
+    silent?: boolean
   }): Promise<{ sha: string | null; conflict: boolean }> =>
     putRaw({
       contentBase64: encodeUTF8ToBase64(content),
       path,
       sha,
+      silent,
       message: `Updating ${path} from Remanso`,
       successMessage,
       conflictMessage: "⚠ Conflict: this note changed on GitHub",
@@ -150,11 +194,13 @@ export const useGitHubContent = ({
 
   return {
     fetchLatestSha,
+    fetchFile,
     updateFile: async (props: {
       content: string
       path: string
       sha: string
       successMessage?: string
+      silent?: boolean
     }) => putFile(props),
     createFile: async (props: { content: string; path: string }) =>
       putFile(props),

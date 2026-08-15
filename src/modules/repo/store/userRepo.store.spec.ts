@@ -191,6 +191,34 @@ describe("userRepo store — setUserRepo", () => {
     expect(store.loadError).toBeNull()
   })
 
+  it("restores push permission from the cache so an offline reload stays editable", async () => {
+    vi.mocked(data.get).mockImplementation(async (id: string) =>
+      id === "SavedRepo-alice-notes"
+        ? ({ files: [], canPush: true } as never)
+        : (null as never)
+    )
+    vi.mocked(getRepoPermission).mockRejectedValue(new Error("offline"))
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+
+    const store = useUserRepoStore()
+    await store.setUserRepo("alice", "notes")
+    await flushAsync()
+
+    expect(store.canPush).toBe(true)
+  })
+
+  it("caches push permission once GitHub answers", async () => {
+    vi.mocked(getRepoPermission).mockResolvedValue(true)
+
+    const store = useUserRepoStore()
+    await store.setUserRepo("alice", "notes")
+    await flushAsync()
+
+    expect(vi.mocked(data.update)).toHaveBeenCalledWith(
+      expect.objectContaining({ _id: "SavedRepo-alice-notes", canPush: true })
+    )
+  })
+
   it("migrates the legacy chosenTitleFont localStorage key to chosenHeadingFont", async () => {
     localStorage.setItem(
       "remanso:layout:alice:notes",
