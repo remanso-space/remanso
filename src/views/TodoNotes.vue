@@ -9,6 +9,7 @@ import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 import { errorMessage } from "@/utils/notif"
 import {
+  applyFilterDefaults,
   applyRecurrence,
   contextsOf,
   FileLine,
@@ -255,15 +256,38 @@ const deleteTask = (index: number) => {
 
 const newTaskInput = ref("")
 
+// A new task inherits the filters currently narrowing the list, so it stays
+// visible after being added. A priority is only inherited when exactly one
+// is selected — with several active there is no single right answer.
+const inheritedProjects = computed(() => Array.from(activeProjects.value))
+const inheritedContexts = computed(() => Array.from(activeContexts.value))
+const inheritedPriority = computed<string | undefined>(() => {
+  if (activePriorities.value.size !== 1) return undefined
+  const [only] = activePriorities.value
+  return only === "none" ? undefined : only
+})
+
+const inheritedTokens = computed(() => [
+  ...(inheritedPriority.value ? [`(${inheritedPriority.value})`] : []),
+  ...inheritedProjects.value.map((p) => `+${p}`),
+  ...inheritedContexts.value.map((c) => `@${c}`)
+])
+
 const addTask = () => {
   const text = newTaskInput.value.trim()
   if (!text) return
-  const task = parseLine(text)
+  const task = applyFilterDefaults(parseLine(text), {
+    projects: inheritedProjects.value,
+    contexts: inheritedContexts.value,
+    priority: inheritedPriority.value
+  })
   newTaskInput.value = ""
   mutate((current) => {
     const next: FileLine[] = [...current, task]
     return next
   })
+  // A new task is open, so a "done only" view would swallow it.
+  if (statusFilter.value === "done") statusFilter.value = "all"
 }
 
 const { createFile } = useGitHubContent({ user: props.user, repo: props.repo })
@@ -354,6 +378,10 @@ const createTodoFile = async () => {
             Add
           </button>
         </form>
+
+        <p v-if="canPush && inheritedTokens.length" class="todo-inherited-hint">
+          New tasks get {{ inheritedTokens.join(" ") }}
+        </p>
 
         <div
           v-if="
@@ -538,6 +566,13 @@ const createTodoFile = async () => {
 
   .todo-move {
     transition: transform 220ms ease;
+  }
+
+  .todo-inherited-hint {
+    // Pull up against the form's mb-4 so the hint reads as part of the input.
+    margin: -0.85rem 0 0.75rem;
+    font-size: 0.75rem;
+    opacity: 0.6;
   }
 
   .todo-filters {

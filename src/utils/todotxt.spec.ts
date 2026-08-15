@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  applyFilterDefaults,
   applyRecurrence,
   contextsOf,
   isBlank,
@@ -214,6 +215,40 @@ Task two
   it("handles file with no trailing newline", () => {
     const parsed = parseFile("only line")
     expect(serializeFile(parsed, { trailingNewline: false })).toBe("only line")
+  })
+})
+
+describe("todotxt applyFilterDefaults", () => {
+  it("appends the active projects and contexts", () => {
+    const task = applyFilterDefaults(parseLine("Call the plumber"), {
+      projects: ["home"],
+      contexts: ["phone"]
+    })
+    expect(task.body).toBe("Call the plumber +home @phone")
+    expect(serializeTask(task)).toBe("Call the plumber +home @phone")
+  })
+
+  it("does not duplicate tokens already typed", () => {
+    const task = applyFilterDefaults(parseLine("Call the plumber +home"), {
+      projects: ["home", "work"],
+      contexts: []
+    })
+    expect(task.body).toBe("Call the plumber +home +work")
+  })
+
+  it("applies the priority only when the task has none", () => {
+    expect(
+      applyFilterDefaults(parseLine("Write spec"), { priority: "B" }).priority
+    ).toBe("B")
+    expect(
+      applyFilterDefaults(parseLine("(A) Write spec"), { priority: "B" })
+        .priority
+    ).toBe("A")
+  })
+
+  it("leaves the task untouched with no active filters", () => {
+    const parsed = parseLine("(C) Write spec +remanso @laptop")
+    expect(applyFilterDefaults(parsed, {})).toEqual(parsed)
   })
 })
 

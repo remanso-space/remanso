@@ -209,6 +209,30 @@ export const removeTagFromBody = (
     .trim()
 }
 
+export interface FilterDefaults {
+  projects?: string[]
+  contexts?: string[]
+  priority?: string
+}
+
+// Stamp a task with the tokens the current filter view implies, so a task
+// added while a filter is on actually matches it instead of vanishing the
+// moment it is created. Tokens already typed by hand win: an explicit
+// priority is never overwritten and a project/context is never duplicated.
+export const applyFilterDefaults = (
+  task: Task,
+  { projects = [], contexts = [], priority }: FilterDefaults
+): Task => {
+  const existingProjects = projectsOf(task)
+  const existingContexts = contextsOf(task)
+  const tokens = [
+    ...projects.filter((p) => !existingProjects.includes(p)).map((p) => `+${p}`),
+    ...contexts.filter((c) => !existingContexts.includes(c)).map((c) => `@${c}`)
+  ]
+  const body = [task.body.trim(), ...tokens].filter(Boolean).join(" ")
+  return { ...task, body, priority: task.priority ?? priority }
+}
+
 const todayIso = (now: Date): string => {
   const y = now.getFullYear()
   const m = String(now.getMonth() + 1).padStart(2, "0")
