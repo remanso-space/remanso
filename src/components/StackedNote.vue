@@ -16,7 +16,7 @@ import { useFile } from "@/hooks/useFile.hook"
 import { useGitHubContent } from "@/hooks/useGitHubContent.hook"
 import { useImageUpload } from "@/hooks/useImageUpload.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
-import { renderCodeFile } from "@/hooks/useMarkdown.hook"
+import { renderCodeFile, renderTikzFile } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteFreshness } from "@/hooks/useNoteFreshness.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
@@ -25,7 +25,11 @@ import { useTitleNotes } from "@/hooks/useTitleNotes.hook"
 import { RECORDING_COLLECTION } from "@/modules/atproto/recording.types"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { encodeUTF8ToBase64 } from "@/utils/decodeBase64ToUTF8"
-import { getFileLanguage, isMarkdownPath } from "@/utils/fileLanguage"
+import {
+  getFileLanguage,
+  isMarkdownPath,
+  isTikzPath
+} from "@/utils/fileLanguage"
 import { insertBlockAt } from "@/utils/insertBlockAt"
 import {
   findCheckboxIndex,
@@ -116,6 +120,10 @@ watch(
     }
     if (isMd) {
       displayedContent.value = content.value
+      return
+    }
+    if (p && isTikzPath(p)) {
+      displayedContent.value = renderTikzFile(raw)
       return
     }
     const lang = p ? getFileLanguage(p) : null
@@ -366,11 +374,14 @@ useMarkdownPostRender(content, () => `.note-${sha.value}`, {
   onReady: () => listenToClick(),
   noteRecording: () => attachedRecording.value,
   tikz: true,
+  tikzEmbeds: () => (rawContent.value.includes(".tikz") ? props.sha : null),
   macroplan: true,
   mermaid: () => rawContent.value.includes("```mermaid"),
   shikiji: () => isMarkdown.value && rawContent.value.includes("```"),
   images: () => (/\!\[.*?\]\(.*?\)/.test(rawContent.value) ? props.sha : null),
-  triggers: [mode]
+  // displayedContent lands after `content` for non-markdown files (code files
+  // await Shikiji), so the diagram/highlight pass needs it as a trigger too.
+  triggers: [mode, displayedContent]
 })
 
 const performSave = async (overrideSha?: string) => {

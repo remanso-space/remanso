@@ -1,5 +1,6 @@
 import { nextTick, type Ref, toValue, watch } from "vue"
 
+import { runTikzEmbeds } from "@/hooks/runTikzEmbeds"
 import { useImages } from "@/hooks/useImages.hook"
 import { runMermaid, runTikz, useShikiji } from "@/hooks/useMarkdown.hook"
 import { mountNoteRecording } from "@/modules/atproto/mountNoteRecording"
@@ -11,6 +12,12 @@ import { attachSvgDownloads } from "@/utils/svgDownload"
 interface MarkdownPostRenderOptions {
   onReady?: () => void
   tikz?: boolean
+  /**
+   * The sha of the note being rendered, for views whose repo files are
+   * reachable — lets `![](diagram.tikz)` embeds pull their source. Returns
+   * null when the note has no such embed to resolve.
+   */
+  tikzEmbeds?: () => string | null
   macroplan?: boolean
   mermaid?: () => boolean
   shikiji?: () => boolean
@@ -46,6 +53,15 @@ export const useMarkdownPostRender = (
       const renderJobs: Promise<unknown>[] = []
       if (wantsTikz) {
         renderJobs.push(runTikz(`${scope} .tikz`))
+
+        // `.tikz` file embeds need their source fetched first; render them in
+        // a second pass rather than holding the inline blocks back.
+        const embedSha = options.tikzEmbeds?.()
+        if (embedSha) {
+          renderJobs.push(
+            runTikzEmbeds(scope, embedSha).then(() => runTikz(`${scope} .tikz`))
+          )
+        }
       }
 
       if (wantsMermaid) {

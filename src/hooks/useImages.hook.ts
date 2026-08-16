@@ -24,7 +24,9 @@ export const useImages = (sha: string) => {
 
       images.forEach(async (image) => {
         const src = image.getAttribute("src")
-        if (!src || src.startsWith(SRC_PREFIX)) {
+        // `.tikz` embeds are diagrams, not images — runTikzEmbeds swaps them
+        // for a rendered block.
+        if (!src || src.startsWith(SRC_PREFIX) || src.endsWith(".tikz")) {
           return
         }
 

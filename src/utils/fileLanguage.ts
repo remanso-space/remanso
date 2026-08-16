@@ -26,6 +26,10 @@ export function isMarkdownPath(path: string): boolean {
   return MARKDOWN_EXTS.has(ext)
 }
 
+export function isTikzPath(path: string): boolean {
+  return path.toLowerCase().endsWith(".tikz")
+}
+
 export function getFileLanguage(path: string): string | null {
   const ext = path.split(".").pop()?.toLowerCase() ?? ""
   return EXT_TO_LANG[ext] ?? null

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { getFileLanguage, isMarkdownPath } from "./fileLanguage"
+import { getFileLanguage, isMarkdownPath, isTikzPath } from "./fileLanguage"
 
 describe("isMarkdownPath", () => {
   it.each(["note.md", "dir/note.md", "note.mdx", "DIR/NOTE.MD"])(
@@ -14,6 +14,22 @@ describe("isMarkdownPath", () => {
     "returns false for %s",
     (path) => {
       expect(isMarkdownPath(path)).toBe(false)
+    }
+  )
+})
+
+describe("isTikzPath", () => {
+  it.each(["graph.tikz", "diagrams/graph.tikz", "GRAPH.TIKZ"])(
+    "returns true for %s",
+    (path) => {
+      expect(isTikzPath(path)).toBe(true)
+    }
+  )
+
+  it.each(["note.md", "tikz", "graph.tikz.md", ""])(
+    "returns false for %s",
+    (path) => {
+      expect(isTikzPath(path)).toBe(false)
     }
   )
 })

@@ -68,6 +68,13 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
   }
 }
 
+/**
+ * Placeholder `runTikz` picks up, from raw TikZ source. Shared by the fenced
+ * `tikz` block and standalone `.tikz` files, so both render identically.
+ */
+export const tikzPlaceholder = (source: string): string =>
+  `<pre class="tikz" data-tikz-source="${encodeUTF8ToBase64(source)}"><span class="tikz-loading">Rendering TikZ…</span></pre>`
+
 const markdownItTikzExtractor = (md: MarkdownIt) => {
   const defaultFence =
     md.renderer.rules.fence ||
@@ -91,8 +98,7 @@ const markdownItTikzExtractor = (md: MarkdownIt) => {
     const token = tokens[index]
 
     if (token.info.trim() === "tikz") {
-      const encoded = encodeUTF8ToBase64(token.content)
-      return `<pre class="tikz" data-tikz-source="${encoded}"><span class="tikz-loading">Rendering TikZ…</span></pre>\n`
+      return `${tikzPlaceholder(token.content)}\n`
     }
 
     return defaultFence(tokens, index, options, env, self)
@@ -452,6 +458,14 @@ const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
     return renderFallback(content)
   }
 }
+
+/**
+ * A whole `.tikz` file rendered as the diagram it describes — the same output
+ * a fenced ```tikz block produces, so a diagram can live in its own file and
+ * still be embedded from a note.
+ */
+export const renderTikzFile = (rawContent: string): string =>
+  tikzPlaceholder(rawContent)
 
 export const renderCodeFile = async ({
   rawContent,

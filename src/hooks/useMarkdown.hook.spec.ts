@@ -5,7 +5,12 @@ vi.mock("@/data/data", () => ({
   generateId: (type: string, id: string) => `${type}-${id}`
 }))
 
-import { markdownBuilder, renderCodeFile } from "@/hooks/useMarkdown.hook"
+import {
+  markdownBuilder,
+  renderCodeFile,
+  renderTikzFile
+} from "@/hooks/useMarkdown.hook"
+import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 
 describe("renderCodeFile", () => {
   it("wraps highlighted files in a code-file container with a sized gutter", async () => {
@@ -38,6 +43,32 @@ describe("renderCodeFile", () => {
     })
 
     expect(html).toContain("--line-number-width:3ch")
+  })
+})
+
+describe("renderTikzFile", () => {
+  const source = "\\begin{document}\n\\draw (0,0) -- (1,1);\n\\end{document}"
+
+  it("renders a standalone .tikz file as a TikZ placeholder", () => {
+    const html = renderTikzFile(source)
+
+    expect(html).toContain('class="tikz"')
+    expect(html).toContain("tikz-loading")
+
+    const encoded = html.match(/data-tikz-source="([^"]+)"/)?.[1] ?? ""
+    expect(decodeBase64ToUTF8(encoded)).toBe(source)
+  })
+
+  it("carries the same source as a fenced tikz block", () => {
+    const { toHTML } = markdownBuilder()
+    const fenced = toHTML(`\`\`\`tikz\n${source}\n\`\`\``)
+
+    const fromFence = fenced.match(/data-tikz-source="([^"]+)"/)?.[1] ?? ""
+    const fromFile =
+      renderTikzFile(`${source}\n`).match(/data-tikz-source="([^"]+)"/)?.[1] ??
+      ""
+
+    expect(decodeBase64ToUTF8(fromFile)).toBe(decodeBase64ToUTF8(fromFence))
   })
 })
 
