@@ -1,25 +1,35 @@
-import { computed, watch } from "vue"
+import { nextTick, type Ref, watch } from "vue"
 
 import { useFile } from "@/hooks/useFile.hook"
 import { resolvePath } from "@/modules/repo/services/resolvePath"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { toImageDataUrl } from "@/utils/imageDataUrl"
 
-export const useImages = (sha: string) => {
+/**
+ * Rewrites the images of a rendered note to inline data URLs, so a repo-relative
+ * `src` resolves against the repo tree instead of the app's own origin.
+ *
+ * `notePath` is the path the sources are relative to, and re-runs on the file
+ * list because the tree can land after the note is on screen — the README of a
+ * repo renders from its own request, before `getFiles` resolves.
+ */
+export const useImages = (
+  scope: () => string,
+  notePath: () => string | null | undefined,
+  trigger: Ref<unknown>
+) => {
   const store = useUserRepoStore()
 
-  const currentFilePath = computed(
-    () => store.files.find((file) => file.sha === sha)?.path
-  )
-
   watch(
-    currentFilePath,
-    (filePath) => {
+    [notePath, () => store.files, trigger],
+    async ([filePath]) => {
       if (!filePath) {
         return
       }
 
-      const images = document.querySelectorAll(`.note-${sha} img`)
+      await nextTick()
+
+      const images = document.querySelectorAll(`${scope()} img`)
 
       images.forEach(async (image) => {
         const src = image.getAttribute("src")

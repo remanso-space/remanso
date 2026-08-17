@@ -378,7 +378,7 @@ useMarkdownPostRender(content, () => `.note-${sha.value}`, {
   macroplan: true,
   mermaid: () => rawContent.value.includes("```mermaid"),
   shikiji: () => isMarkdown.value && rawContent.value.includes("```"),
-  images: () => (/\!\[.*?\]\(.*?\)/.test(rawContent.value) ? props.sha : null),
+  images: () => path.value,
   // displayedContent lands after `content` for non-markdown files (code files
   // await Shikiji), so the diagram/highlight pass needs it as a trigger too.
   triggers: [mode, displayedContent]

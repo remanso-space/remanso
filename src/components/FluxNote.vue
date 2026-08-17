@@ -69,7 +69,11 @@ const hasContent = computed(() => !!renderedContent.value)
 useMarkdownPostRender(renderedContent, () => ".note-display", {
   onReady: () => listenToClick(),
   tikz: true,
-  macroplan: true
+  macroplan: true,
+  // The repo README sits at the root, so only its directory matters here — any
+  // root-level filename resolves its images the same way. A `content` prop is a
+  // list this component assembled, not a file: nothing to resolve against.
+  images: () => (props.content === null ? "README.md" : null)
 })
 
 watch(

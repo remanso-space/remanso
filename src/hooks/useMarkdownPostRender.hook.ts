@@ -21,6 +21,10 @@ interface MarkdownPostRenderOptions {
   macroplan?: boolean
   mermaid?: () => boolean
   shikiji?: () => boolean
+  /**
+   * The path the note's images are relative to, for views whose repo files are
+   * reachable. Returns null when they can't be resolved against a repo tree.
+   */
   images?: () => string | null | undefined
   /**
    * The at-uri of the recording attached to this note, for views whose title
@@ -38,6 +42,12 @@ export const useMarkdownPostRender = (
   options: MarkdownPostRenderOptions = {}
 ) => {
   const sources = [contentRef, ...(options.triggers ?? [])]
+
+  // Outside the render watcher: the repo tree images resolve against can land
+  // after the note does, and useImages watches for it on its own.
+  if (options.images) {
+    useImages(scopeSelector, options.images, contentRef)
+  }
 
   watch(
     sources,
@@ -94,11 +104,6 @@ export const useMarkdownPostRender = (
 
       if (options.shikiji?.()) {
         void useShikiji()
-      }
-
-      const imagesSha = options.images?.()
-      if (imagesSha) {
-        useImages(imagesSha)
       }
 
       if (wantsTikz || wantsMermaid) {
