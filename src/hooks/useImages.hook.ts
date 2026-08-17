@@ -3,8 +3,7 @@ import { computed, watch } from "vue"
 import { useFile } from "@/hooks/useFile.hook"
 import { resolvePath } from "@/modules/repo/services/resolvePath"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
-
-const SRC_PREFIX = "data:image/jpeg;charset=utf-8;base64,"
+import { toImageDataUrl } from "@/utils/imageDataUrl"
 
 export const useImages = (sha: string) => {
   const store = useUserRepoStore()
@@ -26,14 +25,11 @@ export const useImages = (sha: string) => {
         const src = image.getAttribute("src")
         // `.tikz` embeds are diagrams, not images — runTikzEmbeds swaps them
         // for a rendered block.
-        if (!src || src.startsWith(SRC_PREFIX) || src.endsWith(".tikz")) {
+        if (!src || src.startsWith("data:") || src.endsWith(".tikz")) {
           return
         }
 
-        const imageFilePath = resolvePath(
-          filePath,
-          image.getAttribute("src") ?? ""
-        )
+        const imageFilePath = resolvePath(filePath, src)
 
         const imageFile = store.files.find(
           (file) => file.path === imageFilePath
@@ -45,7 +41,12 @@ export const useImages = (sha: string) => {
         const { getCachedFileContent } = useFile(imageFile.sha, false)
 
         const fileContent = await getCachedFileContent()
-        image.setAttribute("src", `${SRC_PREFIX} ${fileContent}`)
+
+        if (!fileContent) {
+          return
+        }
+
+        image.setAttribute("src", toImageDataUrl(imageFilePath, fileContent))
       })
     },
     { immediate: true }
