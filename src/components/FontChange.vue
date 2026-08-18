@@ -48,14 +48,16 @@ const fontSize = computed({
 
 <template>
   <div class="font-change">
-    <div>
+    <div class="font-row">
       <label for="heading-font" class="font-label">h</label>
       <select id="heading-font" class="select" v-model="headingFont">
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
           {{ font }}
         </option>
       </select>
+    </div>
 
+    <div class="swap-row">
       <button
         type="button"
         class="btn btn-ghost btn-sm btn-circle"
@@ -73,11 +75,13 @@ const fontSize = computed({
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M7 10h14l-4 -4" />
-          <path d="M17 14h-14l4 4" />
+          <path d="M10 7v14l-4 -4" />
+          <path d="M14 17v-14l4 4" />
         </svg>
       </button>
+    </div>
 
+    <div class="font-row">
       <label for="body-font" class="font-label">p</label>
       <select id="body-font" class="select" v-model="bodyFont">
         <option v-for="font in sortedFontFamilies" :key="font" :value="font">
@@ -85,7 +89,8 @@ const fontSize = computed({
         </option>
       </select>
     </div>
-    <div>
+
+    <div class="font-row">
       <theme-swap />
 
       <label for="font-size" class="font-label">s</label>
@@ -105,12 +110,18 @@ const fontSize = computed({
     display: flex;
   }
 
-  div {
+  .font-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
     margin: 1rem;
+  }
+
+  .swap-row {
+    display: flex;
+    justify-content: center;
+    margin: 0 1rem;
   }
 }
 
