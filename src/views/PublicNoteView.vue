@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computedAsync } from "@vueuse/core"
 import { useTitle } from "@vueuse/core"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
@@ -11,47 +10,33 @@ import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import StackedPublicNote from "@/components/StackedPublicNote.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
-import { useNoteRecording } from "@/hooks/useNoteRecording.hook"
+import { usePublicNoteRecord } from "@/hooks/usePublicNoteRecord.hook"
 import { useResizeContainer } from "@/hooks/useResizeContainer.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
-import { getAuthor } from "@/modules/atproto/getAuthor"
-import { getUrl } from "@/modules/atproto/getUrl"
-import type { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
 import { fromShortDid } from "@/modules/atproto/shortDid"
-import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
 import { displayLanguage } from "@/utils/displayLanguage"
 import { downloadFont } from "@/utils/downloadFont"
-import { errorMessage } from "@/utils/notif"
 import { slugify } from "@/utils/slugify"
-import { stripLeadingTitle } from "@/utils/stripLeadingTitle"
 
 const props = defineProps<{ shortDid: string; rkey: string; slug?: string }>()
 const router = useRouter()
 const did = computed(() => fromShortDid(props.shortDid))
 const rkey = computed(() => props.rkey)
 
-const author = computedAsync(async () => getAuthor(did.value))
-const url = computedAsync(
-  async () => getUrl({ did: did.value, rkey: rkey.value }),
-  null
-)
-
-const noteNotFound = ref(false)
-const noteRecord = computedAsync(async () => {
-  if (!url.value) return null
-  const response = await fetch(url.value)
-  if (!response.ok) {
-    noteNotFound.value = true
-    return null
-  }
-  return response.json() as Promise<PublicNoteRecord>
-})
+const {
+  author,
+  noteRecord,
+  noteNotFound,
+  title,
+  content,
+  recording,
+  recordingAtUri,
+  showRecording
+} = usePublicNoteRecord(did, rkey, { stripTitle: true })
 
 watch(noteNotFound, (notFound) => {
   if (notFound) {
-    errorMessage("This note no longer exists.")
     router.replace({ name: "SpaceCowboy" })
   }
 })
@@ -78,39 +63,6 @@ watch(noteRecord, () => {
     )
   }
 })
-
-const { toHTML } = markdownBuilder()
-
-const title = computed(() => noteRecord.value?.value.title)
-const content = computed(() =>
-  noteRecord.value?.value.content && author.value
-    ? toHTML(
-        withATProtoImages(
-          stripLeadingTitle(noteRecord.value.value.content, title.value),
-          {
-            pds: author.value.pds,
-            did: did.value
-          }
-        )
-      )
-    : ""
-)
-
-const { atUri: recordingAtUri, recording } = useNoteRecording(did, rkey)
-
-/**
- * The recording takes its slot only once the note is here and only if the note
- * does not already place it itself: a note written under the old model carries
- * the at-uri inline in its markdown, where markdown-it-recording mounts a
- * player of its own. Waiting for the content also avoids showing the slot above
- * the skeleton and then moving it when the inline copy turns up.
- */
-const showRecording = computed(
-  () =>
-    !!recording.value &&
-    !!content.value &&
-    !noteRecord.value?.value.content.includes(recordingAtUri.value)
-)
 
 const breadcrumb = computed(() =>
   title.value

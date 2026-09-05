@@ -1,22 +1,15 @@
 <script lang="ts" setup>
-import { computedAsync } from "@vueuse/core"
-import { computed, ref, watch } from "vue"
+import { computed } from "vue"
 import { useRoute } from "vue-router"
 
 import RecordingPlayer from "@/components/RecordingPlayer.vue"
 import SkeletonLoader from "@/components/SkeletonLoader.vue"
 import { useATProtoLinks } from "@/hooks/useATProtoLinks.hook"
-import { markdownBuilder } from "@/hooks/useMarkdown.hook"
 import { useMarkdownPostRender } from "@/hooks/useMarkdownPostRender.hook"
 import { useNoteOverlay } from "@/hooks/useNoteOverlay.hook"
-import { useNoteRecording } from "@/hooks/useNoteRecording.hook"
+import { usePublicNoteRecord } from "@/hooks/usePublicNoteRecord.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
-import { getAuthor } from "@/modules/atproto/getAuthor"
-import { getUrl } from "@/modules/atproto/getUrl"
-import { PublicNoteRecord } from "@/modules/atproto/publicNote.types"
 import { fromShortDid } from "@/modules/atproto/shortDid"
-import { withATProtoImages } from "@/modules/atproto/withATProtoImages"
-import { errorMessage } from "@/utils/notif"
 
 const props = defineProps<{
   didrkey: string
@@ -30,10 +23,8 @@ const classNameId = computed(() => didrkey.value.replaceAll(":", "-"))
 
 const index = computed(() => props.index)
 
-const author = computedAsync(async () => getAuthor(did.value))
-const url = computedAsync(async () =>
-  getUrl({ did: did.value, rkey: rkey.value })
-)
+const { author, title, content, recording, showRecording } =
+  usePublicNoteRecord(did, rkey)
 
 const className = computed(() => `stacked-note-${props.index}`)
 const titleClassName = computed(() => `title-${className.value}`)
@@ -49,47 +40,6 @@ const { listenToClick } = useATProtoLinks(className.value, {
   mainNoteId
 })
 const { displayNoteOverlay } = useNoteOverlay(className.value, index)
-
-const noteNotFound = ref(false)
-const noteRecord = computedAsync(async () => {
-  if (!url.value) return null
-  const response = await fetch(url.value)
-  if (!response.ok) {
-    noteNotFound.value = true
-    return null
-  }
-  return response.json() as Promise<PublicNoteRecord>
-})
-
-watch(noteNotFound, (notFound) => {
-  if (notFound) {
-    errorMessage("This note no longer exists.")
-  }
-})
-const { toHTML } = markdownBuilder()
-const title = computed(() => noteRecord.value?.value.title)
-const content = computed(() =>
-  noteRecord.value?.value.content && author.value
-    ? toHTML(
-        withATProtoImages(noteRecord.value.value.content, {
-          pds: author.value.pds,
-          did: did.value
-        })
-      )
-    : ""
-)
-
-const { atUri: recordingAtUri, recording } = useNoteRecording(did, rkey)
-
-// Same slot as the main note view, same guard: a note written under the old
-// model carries the at-uri in its markdown and markdown-it-recording already
-// mounts a player there, so the fixed slot would play the same audio twice.
-const showRecording = computed(
-  () =>
-    !!recording.value &&
-    !!content.value &&
-    !noteRecord.value?.value.content.includes(recordingAtUri.value)
-)
 
 useMarkdownPostRender(content, () => `.note-${classNameId.value}`, {
   onReady: () => listenToClick(),
