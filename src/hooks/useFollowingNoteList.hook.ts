@@ -1,7 +1,6 @@
-import { computedAsync } from "@vueuse/core"
 import { computed, Ref, ref, watch } from "vue"
 
-import { Author, getAuthors } from "@/modules/atproto/getAuthor"
+import { useNoteAuthors } from "@/hooks/useNoteAuthors.hook"
 import { PublicNoteListItem } from "@/modules/note/models/Note"
 
 export function useFollowingNoteList(
@@ -57,13 +56,7 @@ export function useFollowingNoteList(
     }
   })
 
-  const authors = computedAsync<Map<string, Author>>(async () => {
-    if (notes.value.length === 0) return new Map()
-    return getAuthors(new Set(notes.value.map((n) => n.did)))
-  }, new Map())
-
-  const getAuthor = (did: string) =>
-    authors.value.has(did) ? authors.value.get(did)!.handle : ""
+  const { getAuthor } = useNoteAuthors(notes)
 
   return { notes, isLoading, canLoadMore, onLoadMore, getAuthor }
 }
