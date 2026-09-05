@@ -2,9 +2,8 @@ import type { MarkdownItTabData, MarkdownItTabInfo } from "@mdit/plugin-tab"
 import { tab } from "@mdit/plugin-tab"
 import markdownItKatex from "@vscode/markdown-it-katex"
 import GithubSlugger from "github-slugger"
-import MarkdownIt, { Options } from "markdown-it"
-import Renderer, { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
-import type Token from "markdown-it/lib/token.mjs"
+import MarkdownIt from "markdown-it"
+import { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
 import markdownItAnchor from "markdown-it-anchor"
 import blockEmbedPlugin from "markdown-it-block-embed"
 import markdownItCheckbox from "markdown-it-checkbox"
@@ -23,6 +22,7 @@ import {
   decodeBase64ToUTF8,
   encodeUTF8ToBase64
 } from "@/utils/decodeBase64ToUTF8"
+import { fenceRenderer } from "@/utils/markdown/fenceRenderer"
 import { html5Media } from "@/utils/markdown/markdown-html5-media"
 import { markdownItComments } from "@/utils/markdown/markdown-it-comments"
 import { markdownItHtml } from "@/utils/markdown/markdown-it-html"
@@ -37,36 +37,11 @@ const TIKZ_STYLES_URL =
   "https://cdn.jsdelivr.net/gh/artisticat1/obsidian-tikzjax@0.5.2/styles.css"
 const TIKZ_RENDER_TIMEOUT_MS = 30000
 
-const markdownItMermaidExtractor = (md: MarkdownIt) => {
-  const defaultFence =
-    md.renderer.rules.fence ||
-    function (
-      tokens: Array<Token>,
-      index: number,
-      options: Options,
-      _: unknown,
-      self: Renderer
-    ) {
-      return self.renderToken(tokens, index, options)
-    }
-
-  md.renderer.rules.fence = function (
-    tokens: Array<Token>,
-    index: number,
-    options: Options,
-    env: unknown,
-    self: Renderer
-  ) {
-    const token = tokens[index]
-
-    if (token.info.trim() === "mermaid") {
-      const content = token.content.trim()
-      return `<pre class="mermaid">\n${md.utils.escapeHtml(content)}\n</pre>\n`
-    }
-
-    return defaultFence(tokens, index, options, env, self)
-  }
-}
+const markdownItMermaidExtractor = fenceRenderer(
+  "mermaid",
+  (content, md) =>
+    `<pre class="mermaid">\n${md.utils.escapeHtml(content.trim())}\n</pre>\n`
+)
 
 /**
  * Placeholder `runTikz` picks up, from raw TikZ source. Shared by the fenced
@@ -75,66 +50,16 @@ const markdownItMermaidExtractor = (md: MarkdownIt) => {
 export const tikzPlaceholder = (source: string): string =>
   `<pre class="tikz" data-tikz-source="${encodeUTF8ToBase64(source)}"><span class="tikz-loading">Rendering TikZ…</span></pre>`
 
-const markdownItTikzExtractor = (md: MarkdownIt) => {
-  const defaultFence =
-    md.renderer.rules.fence ||
-    function (
-      tokens: Array<Token>,
-      index: number,
-      options: Options,
-      _: unknown,
-      self: Renderer
-    ) {
-      return self.renderToken(tokens, index, options)
-    }
+const markdownItTikzExtractor = fenceRenderer(
+  "tikz",
+  (content) => `${tikzPlaceholder(content)}\n`
+)
 
-  md.renderer.rules.fence = function (
-    tokens: Array<Token>,
-    index: number,
-    options: Options,
-    env: unknown,
-    self: Renderer
-  ) {
-    const token = tokens[index]
-
-    if (token.info.trim() === "tikz") {
-      return `${tikzPlaceholder(token.content)}\n`
-    }
-
-    return defaultFence(tokens, index, options, env, self)
-  }
-}
-
-const markdownItMacroplanExtractor = (md: MarkdownIt) => {
-  const defaultFence =
-    md.renderer.rules.fence ||
-    function (
-      tokens: Array<Token>,
-      index: number,
-      options: Options,
-      _: unknown,
-      self: Renderer
-    ) {
-      return self.renderToken(tokens, index, options)
-    }
-
-  md.renderer.rules.fence = function (
-    tokens: Array<Token>,
-    index: number,
-    options: Options,
-    env: unknown,
-    self: Renderer
-  ) {
-    const token = tokens[index]
-
-    if (token.info.trim() === "macroplan") {
-      const encoded = encodeUTF8ToBase64(token.content)
-      return `<div class="macroplan-block" data-macroplan-source="${encoded}"><span class="macroplan-loading">Rendering macroplan…</span></div>\n`
-    }
-
-    return defaultFence(tokens, index, options, env, self)
-  }
-}
+const markdownItMacroplanExtractor = fenceRenderer(
+  "macroplan",
+  (content) =>
+    `<div class="macroplan-block" data-macroplan-source="${encodeUTF8ToBase64(content)}"><span class="macroplan-loading">Rendering macroplan…</span></div>\n`
+)
 
 const slugger = new GithubSlugger()
 
