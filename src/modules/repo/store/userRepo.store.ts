@@ -29,6 +29,17 @@ interface State {
   _requestId: number
 }
 
+/** Write the repo's file list back to the local cache under its saved-repo id. */
+const persistSavedRepo = (user: string, repo: string, files: RepoFile[]) => {
+  data.update<DataType.SavedRepo, SavedRepo>({
+    _id: generateId(DataType.SavedRepo, `${user}-${repo}`),
+    $type: DataType.SavedRepo,
+    repo,
+    user,
+    files
+  })
+}
+
 const classifyLoadError = (error: unknown): "auth" | "network" => {
   if (error && typeof error === "object") {
     const e = error as { name?: string; status?: number }
@@ -156,13 +167,7 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
       getFiles(user, repo)
         .then(async (files) => {
           if (requestId !== this._requestId) return
-          data.update<DataType.SavedRepo, SavedRepo>({
-            _id: savedRepoId,
-            $type: DataType.SavedRepo,
-            repo,
-            user,
-            files
-          })
+          persistSavedRepo(user, repo, files)
           this.files = files
           return getUserSettingsContent(user, repo, files)
         })
@@ -246,23 +251,13 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         return
       }
 
-      const savedRepoId = generateId(
-        DataType.SavedRepo,
-        `${this.user}-${this.repo}`
-      )
       const newFiles = [
         ...toRaw(this.files).filter(
           (f) => f.sha !== file.sha && f.path !== file.path
         ),
         toRaw(file)
       ]
-      data.update<DataType.SavedRepo, SavedRepo>({
-        _id: savedRepoId,
-        $type: DataType.SavedRepo,
-        repo: this.repo,
-        user: this.user,
-        files: newFiles
-      })
+      persistSavedRepo(this.user, this.repo, newFiles)
       this.files = newFiles
     },
     registerUploadedFile(file: RepoFile) {
@@ -270,21 +265,11 @@ export const useUserRepoStore = defineStore("USER_REPO_STATE", {
         return
       }
 
-      const savedRepoId = generateId(
-        DataType.SavedRepo,
-        `${this.user}-${this.repo}`
-      )
       const newFiles = [
         ...toRaw(this.files).filter((f) => f.path !== file.path),
         toRaw(file)
       ]
-      data.update<DataType.SavedRepo, SavedRepo>({
-        _id: savedRepoId,
-        $type: DataType.SavedRepo,
-        repo: this.repo,
-        user: this.user,
-        files: newFiles
-      })
+      persistSavedRepo(this.user, this.repo, newFiles)
       this.files = newFiles
     },
     resetUserRepo() {
