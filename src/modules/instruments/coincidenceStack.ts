@@ -1,3 +1,4 @@
+import { clamp } from "./parseArgs"
 import type { InstrumentTable } from "./sibling"
 
 /**
@@ -12,9 +13,6 @@ export interface Institution {
   /** Probability the outcome is innocent coincidence, 0..1. */
   doubt: number
 }
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(max, Math.max(min, value))
 
 /**
  * Default doubt when a row leaves the column empty or unreadable: one coin-flip

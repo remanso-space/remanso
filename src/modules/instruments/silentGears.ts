@@ -1,3 +1,4 @@
+import { clamp } from "./parseArgs"
 import type { InstrumentTable } from "./sibling"
 
 export interface Toll {
@@ -33,9 +34,6 @@ export interface GearsParams {
   /** How many days of world time pass per real second. */
   daysPerSecond: number
 }
-
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(max, Math.max(min, value))
 
 /** Parse `:::silent-gears speed=30:::` — 30 days of world time per second. */
 export const parseGearsArgs = (args: string): GearsParams => {

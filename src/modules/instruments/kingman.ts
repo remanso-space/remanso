@@ -1,3 +1,5 @@
+import { clamp, parseArgPairs, parseFraction } from "./parseArgs"
+
 export interface KingmanParams {
   /** ρ — server utilization, a fraction in [0, 1). */
   utilization: number
@@ -16,9 +18,6 @@ const DEFAULTS: KingmanParams = {
   serviceTime: 10
 }
 
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(max, Math.max(min, value))
-
 /** Bare non-negative number, or null for garbage. */
 const parseNumber = (raw: string): number | null => {
   const trimmed = raw.trim()
@@ -29,31 +28,13 @@ const parseNumber = (raw: string): number | null => {
 }
 
 /**
- * Parse a utilization into a fraction: "85%" → 0.85, "0.85" → 0.85, and bare
- * numbers ≥ 1 are treated as percentages ("85" → 0.85). Returns null for
- * garbage.
- */
-const parseUtilization = (raw: string): number | null => {
-  const trimmed = raw.trim()
-  if (!trimmed) return null
-  const isPercent = trimmed.endsWith("%")
-  const numeric = Number(isPercent ? trimmed.slice(0, -1) : trimmed)
-  if (!Number.isFinite(numeric) || numeric < 0) return null
-  if (isPercent) return numeric / 100
-  return numeric < 1 ? numeric : numeric / 100
-}
-
-/**
  * Parse `:::kingman u=85% ca=1 cs=1 t=10:::` args. Missing or invalid keys
  * fall back to ρ=0.85, Ca=Cs=1 (an M/M/1 queue), τ=10.
  */
 export const parseKingmanArgs = (args: string): KingmanParams => {
-  const raw: Record<string, string> = {}
-  for (const match of args.matchAll(/(\w+)\s*=\s*(\S+)/g)) {
-    raw[match[1].toLowerCase()] = match[2]
-  }
+  const raw = parseArgPairs(args)
 
-  const utilization = parseUtilization(raw.u ?? raw.utilization ?? "")
+  const utilization = parseFraction(raw.u ?? raw.utilization ?? "")
   const ca = parseNumber(raw.ca ?? "")
   const cs = parseNumber(raw.cs ?? "")
   const serviceTime = parseNumber(raw.t ?? raw.tau ?? "")

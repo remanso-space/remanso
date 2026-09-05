@@ -1,3 +1,5 @@
+import { clamp, parseArgPairs } from "./parseArgs"
+
 export interface RatchetParams {
   /** Pounds of cotton expected on day one. */
   target: number
@@ -29,9 +31,6 @@ export interface RatchetState {
 
 const DEFAULTS: RatchetParams = { target: 150, days: 7 }
 
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(max, Math.max(min, value))
-
 const parsePositive = (raw: string): number | null => {
   const numeric = Number(raw.trim())
   if (!Number.isFinite(numeric) || numeric <= 0) return null
@@ -40,10 +39,7 @@ const parsePositive = (raw: string): number | null => {
 
 /** Parse `:::quota-ratchet target=150 days=7:::`. Invalid keys fall back. */
 export const parseRatchetArgs = (args: string): RatchetParams => {
-  const raw: Record<string, string> = {}
-  for (const match of args.matchAll(/(\w+)\s*=\s*(\S+)/g)) {
-    raw[match[1].toLowerCase()] = match[2]
-  }
+  const raw = parseArgPairs(args)
 
   const target = parsePositive(raw.target ?? raw.t ?? "")
   const days = parsePositive(raw.days ?? raw.d ?? "")
