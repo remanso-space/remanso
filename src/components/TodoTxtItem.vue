@@ -2,6 +2,7 @@
 import { onClickOutside } from "@vueuse/core"
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue"
 
+import TodoTxtChip from "@/components/TodoTxtChip.vue"
 import {
   removeTagFromBody,
   removeTokenFromBody,
@@ -267,39 +268,17 @@ watch(
       >
         <template v-for="(seg, i) in segments" :key="i">
           <span v-if="seg.kind === 'text'">{{ seg.value }}</span>
-          <span
+          <TodoTxtChip
             v-else-if="seg.kind === 'project'"
-            class="todo-chip badge badge-soft badge-primary mx-0.5"
-            @click.stop
+            class="badge badge-soft badge-primary mx-0.5"
+            :removable="canEdit"
+            :remove-label="`Remove project ${seg.value}`"
+            @remove="removeToken('project', seg.value)"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon icon-tabler icon-tabler-plus"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 5l0 14" />
-              <path d="M5 12l14 0" />
-            </svg>
-            {{ seg.value }}
-            <button
-              v-if="canEdit"
-              class="todo-chip-close"
-              type="button"
-              :aria-label="`Remove project ${seg.value}`"
-              @click.stop="removeToken('project', seg.value)"
-            >
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-x"
+                class="icon icon-tabler icon-tabler-plus"
                 width="14"
                 height="14"
                 viewBox="0 0 24 24"
@@ -311,152 +290,91 @@ watch(
                 aria-hidden="true"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
+                <path d="M12 5l0 14" />
+                <path d="M5 12l14 0" />
               </svg>
-            </button>
-          </span>
-          <span
+            </template>
+            {{ seg.value }}
+          </TodoTxtChip>
+          <TodoTxtChip
             v-else-if="seg.kind === 'context'"
-            class="todo-chip badge badge-soft badge-secondary mx-0.5"
-            @click.stop
+            class="badge badge-soft badge-secondary mx-0.5"
+            :removable="canEdit"
+            :remove-label="`Remove context ${seg.value}`"
+            @remove="removeToken('context', seg.value)"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon icon-tabler icon-tabler-at"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              stroke-width="1.75"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-              <path d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28" />
-            </svg>
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon icon-tabler icon-tabler-at"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                stroke-width="1.75"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                <path
+                  d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28"
+                />
+              </svg>
+            </template>
             {{ seg.value }}
-            <button
-              v-if="canEdit"
-              class="todo-chip-close"
-              type="button"
-              :aria-label="`Remove context ${seg.value}`"
-              @click.stop="removeToken('context', seg.value)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-x"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
-          </span>
-          <span
+          </TodoTxtChip>
+          <TodoTxtChip
             v-else-if="seg.kind === 'due'"
-            :class="dueClass(seg.value) + ' mx-0.5 todo-chip'"
+            :class="dueClass(seg.value) + ' mx-0.5'"
             :title="dueTitle(seg.value)"
-            @click.stop
+            :removable="canEdit"
+            :remove-label="`Remove due date ${seg.value}`"
+            @remove="removeTag('due', seg.value)"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon icon-tabler icon-tabler-calendar"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              stroke-width="1.75"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path
-                d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"
-              />
-              <path d="M16 3v4" />
-              <path d="M8 3v4" />
-              <path d="M4 11h16" />
-            </svg>
+            <template #icon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon icon-tabler icon-tabler-calendar"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                stroke-width="1.75"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"
+                />
+                <path d="M16 3v4" />
+                <path d="M8 3v4" />
+                <path d="M4 11h16" />
+              </svg>
+            </template>
             {{ formatDueDate(seg.value) }}
-            <button
-              v-if="canEdit"
-              class="todo-chip-close"
-              type="button"
-              :aria-label="`Remove due date ${seg.value}`"
-              @click.stop="removeTag('due', seg.value)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-x"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
-          </span>
-          <span
+          </TodoTxtChip>
+          <TodoTxtChip
             v-else
-            class="todo-chip badge badge-soft badge-info mx-0.5"
+            class="badge badge-soft badge-info mx-0.5"
             :title="recTitle(seg.value)"
-            @click.stop
+            :removable="canEdit"
+            :remove-label="`Remove recurrence ${seg.value}`"
+            @remove="removeTag('rec', seg.value)"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon icon-tabler icon-tabler-repeat"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              stroke-width="1.75"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3" />
-              <path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3" />
-            </svg>
-            {{ formatRecurrence(seg.value) }}
-            <button
-              v-if="canEdit"
-              class="todo-chip-close"
-              type="button"
-              :aria-label="`Remove recurrence ${seg.value}`"
-              @click.stop="removeTag('rec', seg.value)"
-            >
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-x"
-                width="14"
-                height="14"
+                class="icon icon-tabler icon-tabler-repeat"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
-                stroke-width="2"
+                stroke-width="1.75"
                 stroke="currentColor"
                 fill="none"
                 stroke-linecap="round"
@@ -464,11 +382,12 @@ watch(
                 aria-hidden="true"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
+                <path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3" />
+                <path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3" />
               </svg>
-            </button>
-          </span>
+            </template>
+            {{ formatRecurrence(seg.value) }}
+          </TodoTxtChip>
         </template>
         <span v-if="task.body.length === 0" class="opacity-50 italic">
           (empty task)
@@ -554,29 +473,6 @@ watch(
   &:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 1px;
-  }
-}
-
-.todo-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  vertical-align: baseline;
-}
-
-.todo-chip-close {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  margin-left: 0.1rem;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  color: inherit;
-  opacity: 0.7;
-
-  &:hover {
-    opacity: 1;
   }
 }
 </style>
