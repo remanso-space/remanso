@@ -4,9 +4,9 @@ import fontColorContrast from "font-color-contrast"
 import { getHex } from "pastel-color"
 import { computed, ref } from "vue"
 
+import HwTopNav from "@/components/HwTopNav.vue"
 import ProfileModal from "@/components/ProfileModal.vue"
 import SignInGithub from "@/components/SignInGithub.vue"
-import UserPill from "@/components/UserPill.vue"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { useRepos } from "@/hooks/useRepos.hook"
 import { useRepoList } from "@/modules/repo/hooks/useRepoList.hook"
@@ -22,10 +22,6 @@ const {
   canLoadMore,
   loadMore
 } = useRepoList()
-
-const openProfile = () => {
-  ;(document.getElementById("profile_modal") as HTMLDialogElement)?.showModal()
-}
 
 const filterQuery = ref("")
 const normalizedQuery = computed(() => filterQuery.value.trim().toLowerCase())
@@ -66,39 +62,13 @@ const isStarred = (repo: RepoBase) => favoriteCheckboxes.value.includes(repo.id)
 
 <template>
   <div
-    class="repo-list-page"
+    class="repo-list-page hw-page"
     v-infinite-scroll="[loadMore, { canLoadMore: () => canLoadMore }]"
   >
     <!-- ── Top Nav ─────────────────────────────────────────── -->
-    <nav class="topnav">
-      <div class="topnav-left">
-        <router-link :to="{ name: 'Home' }" class="brand">
-          <img
-            src="/favicon.png"
-            alt="Remanso"
-            class="brand-mark"
-            width="28"
-            height="28"
-          />
-          <span class="brand-word">Remanso</span>
-        </router-link>
-      </div>
-      <div class="topnav-right">
-        <router-link :to="{ name: 'Home' }" class="navlink">Home</router-link>
-        <router-link :to="{ name: 'PublicNoteListView' }" class="navlink"
-          >Public&nbsp;notes</router-link
-        >
-        <router-link
-          :to="{
-            name: 'FluxNoteView',
-            params: { user: 'remanso-space', repo: 'getting-started' }
-          }"
-          class="navlink"
-          >Getting&nbsp;started</router-link
-        >
-        <UserPill @click="openProfile" />
-      </div>
-    </nav>
+    <HwTopNav>
+      <router-link :to="{ name: 'Home' }" class="navlink">Home</router-link>
+    </HwTopNav>
 
     <!-- ── Main ────────────────────────────────────────────── -->
     <main>
@@ -323,155 +293,8 @@ const isStarred = (repo: RepoBase) => favoriteCheckboxes.value.includes(repo.id)
 <style lang="scss" scoped>
 /* ── Tokens ────────────────────────────────────────────────── */
 .repo-list-page {
-  --hw-surface: var(--color-base-100);
-  --hw-paper: var(--color-base-200);
-  --hw-paper-warm: var(--color-base-300);
-  --hw-ink: var(--color-base-content);
-  --hw-ink-soft: color-mix(
-    in oklch,
-    var(--color-base-content) 65%,
-    var(--color-base-200)
-  );
-  --hw-ink-faint: color-mix(
-    in oklch,
-    var(--color-base-content) 38%,
-    var(--color-base-200)
-  );
-  --hw-rule: color-mix(
-    in oklch,
-    var(--color-base-content) 12%,
-    var(--color-base-200)
-  );
-
-  --hw-pink: #e36598;
-  --hw-pink-deep: color-mix(in oklch, #e36598 75%, var(--color-base-content));
-  --hw-pink-wash: color-mix(in oklch, #e36598 12%, var(--color-base-200));
-  --hw-pink-wash-2: color-mix(in oklch, #e36598 22%, var(--color-base-200));
-  --hw-serif: "Libertinus Serif", "Iowan Old Style", "Palatino", serif;
-  --hw-mono: "Courier Prime", "IBM Plex Mono", ui-monospace, monospace;
-
-  font-family: var(--hw-serif);
-  background: var(--hw-paper);
-  color: var(--hw-ink);
-  font-size: 18px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  min-height: 100dvh;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
   overflow-y: auto;
-}
-
-.repo-list-page::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(
-      circle at 20% 10%,
-      rgba(227, 101, 152, 0.04),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 90% 80%,
-      rgba(107, 142, 78, 0.035),
-      transparent 45%
-    );
-}
-
-main {
-  position: relative;
-  flex: 1;
-}
-
-/* ── Shared buttons ────────────────────────────────────────── */
-.hw-btn {
-  font-family: var(--hw-serif);
-  font-size: 16px;
-  padding: 0.55rem 1rem;
-  border-radius: 2px;
-  border: 1px solid var(--hw-ink);
-  background: transparent;
-  color: var(--hw-ink);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s,
-    transform 0.1s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &:hover {
-    background: var(--hw-ink);
-    color: var(--hw-paper);
-  }
-
-  &:active {
-    transform: translateY(1px);
-  }
-}
-
-.mono {
-  font-family: var(--hw-mono);
-}
-
-/* ── Top nav ───────────────────────────────────────────────── */
-.topnav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 2rem;
-  border-bottom: 1px solid var(--hw-rule);
-  background: var(--hw-paper);
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  backdrop-filter: saturate(1.1) blur(6px);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  text-decoration: none;
-  color: var(--hw-ink);
-}
-
-.brand-mark {
-  display: block;
-  object-fit: contain;
-  view-transition-name: remanso-logo;
-  border: 0;
-  box-shadow: none;
-}
-
-.brand-word {
-  font-size: 1.25rem;
-  letter-spacing: 0.02em;
-  font-weight: 600;
-}
-
-.topnav-right {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.navlink {
-  text-decoration: none;
-  color: var(--hw-ink-soft);
-  font-size: 0.95rem;
-  transition: color 0.15s;
-
-  &:hover {
-    color: var(--hw-pink-deep);
-  }
 }
 
 /* ── Hero ──────────────────────────────────────────────────── */
@@ -498,30 +321,6 @@ main {
   font-weight: 600;
   margin: 0.25rem 0 0.75rem;
   letter-spacing: -0.005em;
-}
-
-.li-sub {
-  margin: 0;
-  color: var(--hw-ink-soft);
-  font-size: 0.95rem;
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.li-dot {
-  color: var(--hw-ink-faint);
-}
-
-.li-sub-link {
-  color: var(--hw-ink-soft);
-  text-decoration: underline;
-  text-decoration-color: var(--hw-rule);
-
-  &:hover {
-    color: var(--hw-pink-deep);
-  }
 }
 
 /* ── Filter ────────────────────────────────────────────────── */
@@ -729,19 +528,6 @@ main {
   justify-content: flex-start;
 }
 
-.skel {
-  display: block;
-  border-radius: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--hw-pink-wash) 0%,
-    var(--hw-pink-wash-2) 50%,
-    var(--hw-pink-wash) 100%
-  );
-  background-size: 200% 100%;
-  animation: skel-shimmer 1.4s ease-in-out infinite;
-}
-
 .skel-handle {
   height: 0.6rem;
   width: 45%;
@@ -750,15 +536,6 @@ main {
 .skel-title {
   height: 1.1rem;
   width: 75%;
-}
-
-@keyframes skel-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 /* ── Credential-error card ─────────────────────────────────── */
@@ -912,14 +689,6 @@ main {
 }
 
 @media (max-width: 640px) {
-  .topnav {
-    padding: 1rem 1.25rem;
-  }
-
-  .navlink {
-    display: none;
-  }
-
   .rl-hero,
   .rl-filter-wrap,
   .rl-section {

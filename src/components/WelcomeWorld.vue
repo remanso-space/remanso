@@ -5,10 +5,10 @@ import { computed, onMounted, ref } from "vue"
 import { useAtprotoLogin } from "vue-atproto-login"
 import { useRouter } from "vue-router"
 
+import GhRepoForm from "@/components/GhRepoForm.vue"
+import HwTopNav from "@/components/HwTopNav.vue"
 import ProfileModal from "@/components/ProfileModal.vue"
 import ThemeSwap from "@/components/ThemeSwap.vue"
-import UserPill from "@/components/UserPill.vue"
-import { useForm } from "@/hooks/useForm.hook"
 import { useGitHubLogin } from "@/hooks/useGitHubLogin.hook"
 import { usePublicNoteList } from "@/hooks/usePublicNoteList.hook"
 import { toShortDid } from "@/modules/atproto/shortDid"
@@ -19,7 +19,6 @@ import { slugify } from "@/utils/slugify"
 
 const { username, accessToken } = useGitHubLogin()
 const { isLoggedIn: isATProtoLoggedIn, handle } = useAtprotoLogin()
-const { userInput, repoInput, submit } = useForm()
 const { savedFavoriteRepos } = useFavoriteRepos()
 const { lastVisitedRepos } = useLastVisitedRepos()
 const { cardsToReview } = useNeedReviewCards()
@@ -40,10 +39,6 @@ const studioUrl = computed(() =>
     ? `https://remanso.at/?handle=${encodeURIComponent(handle.value)}`
     : "https://remanso.at"
 )
-
-const openProfile = () => {
-  ;(document.getElementById("profile_modal") as HTMLDialogElement)?.showModal()
-}
 
 const tileStyle = (seed: string) => {
   const bg = getHex(seed)
@@ -137,58 +132,32 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="welcome-world">
+  <div class="welcome-world hw-page">
     <!-- ── Top Nav ─────────────────────────────────────────── -->
-    <nav class="topnav">
-      <div class="topnav-left">
-        <router-link :to="{ name: 'Home' }" class="brand">
-          <img
-            src="/favicon.png"
-            alt="Remanso"
-            class="brand-mark"
-            width="28"
-            height="28"
+    <HwTopNav>
+      <a href="#about" class="navlink">About</a>
+      <a :href="studioUrl" class="navlink"
+        >Studio<svg
+          class="navlink-ext"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"
           />
-          <span class="brand-word">Remanso</span>
-        </router-link>
-      </div>
-      <div class="topnav-right">
-        <a href="#about" class="navlink">About</a>
-        <a :href="studioUrl" class="navlink"
-          >Studio<svg
-            class="navlink-ext"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"
-            />
-            <path d="M11 13l9 -9" />
-            <path d="M15 4h5v5" />
-          </svg></a
-        >
-        <router-link :to="{ name: 'PublicNoteListView' }" class="navlink"
-          >Public&nbsp;notes</router-link
-        >
-        <router-link
-          :to="{
-            name: 'FluxNoteView',
-            params: { user: 'remanso-space', repo: 'getting-started' }
-          }"
-          class="navlink"
-          >Getting&nbsp;started</router-link
-        >
-        <UserPill @click="openProfile" />
-      </div>
-    </nav>
+          <path d="M11 13l9 -9" />
+          <path d="M15 4h5v5" />
+        </svg></a
+      >
+    </HwTopNav>
 
     <!-- ── Main content ───────────────────────────────────── -->
     <main>
@@ -211,29 +180,7 @@ onMounted(() => {
             </div>
             <div class="li-quick">
               <div class="li-quick-label mono">jump to a repo</div>
-              <form class="gh-form compact" @submit.prevent="submit">
-                <label class="input gh-input-group">
-                  <span class="gh-prefix mono">github/</span>
-                  <input
-                    v-model="userInput"
-                    placeholder="user"
-                    class="gh-input"
-                    spellcheck="false"
-                    autocapitalize="off"
-                  />
-                  <span class="gh-slash">/</span>
-                  <input
-                    v-model="repoInput"
-                    placeholder="repo"
-                    class="gh-input"
-                    spellcheck="false"
-                    autocapitalize="off"
-                  />
-                </label>
-                <button type="submit" class="hw-btn hw-btn-pink gh-go">
-                  →
-                </button>
-              </form>
+              <GhRepoForm compact />
             </div>
           </div>
         </section>
@@ -285,29 +232,7 @@ onMounted(() => {
                 <div class="section-label mono" style="margin-top: 1.5rem">
                   or open one directly
                 </div>
-                <form class="gh-form" @submit.prevent="submit">
-                  <label class="input gh-input-group">
-                    <span class="gh-prefix mono">github/</span>
-                    <input
-                      v-model="userInput"
-                      placeholder="user"
-                      class="gh-input"
-                      spellcheck="false"
-                      autocapitalize="off"
-                    />
-                    <span class="gh-slash">/</span>
-                    <input
-                      v-model="repoInput"
-                      placeholder="repo"
-                      class="gh-input"
-                      spellcheck="false"
-                      autocapitalize="off"
-                    />
-                  </label>
-                  <button type="submit" class="hw-btn hw-btn-pink gh-go">
-                    Open →
-                  </button>
-                </form>
+                <GhRepoForm submit-label="Open →" />
               </div>
             </div>
 
@@ -431,29 +356,7 @@ onMounted(() => {
                     </div>
                   </div>
                 </div>
-                <form class="gh-form" @submit.prevent="submit">
-                  <label class="input gh-input-group">
-                    <span class="gh-prefix mono">github/</span>
-                    <input
-                      v-model="userInput"
-                      placeholder="user"
-                      class="gh-input"
-                      spellcheck="false"
-                      autocapitalize="off"
-                    />
-                    <span class="gh-slash">/</span>
-                    <input
-                      v-model="repoInput"
-                      placeholder="repo"
-                      class="gh-input"
-                      spellcheck="false"
-                      autocapitalize="off"
-                    />
-                  </label>
-                  <button type="submit" class="hw-btn hw-btn-pink gh-go">
-                    →
-                  </button>
-                </form>
+                <GhRepoForm />
               </div>
               <!-- CTA 02: Public notes (live preview) -->
               <div class="hero-ed-path hero-ed-path-network">
@@ -858,131 +761,7 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-/* ── CSS variables ─────────────────────────────────────────── */
-.welcome-world {
-  /* Derived from DaisyUI base tokens — adapts to any theme automatically.
-     base-100 is the lightest surface; base-200/300 are progressively deeper.
-     Paper uses base-200 so cards (base-100) appear slightly elevated above it. */
-  --hw-surface: var(--color-base-100);
-  --hw-paper: var(--color-base-200);
-  --hw-paper-warm: var(--color-base-300);
-  --hw-ink: var(--color-base-content);
-  --hw-ink-soft: color-mix(
-    in oklch,
-    var(--color-base-content) 65%,
-    var(--color-base-200)
-  );
-  --hw-ink-faint: color-mix(
-    in oklch,
-    var(--color-base-content) 38%,
-    var(--color-base-200)
-  );
-  --hw-rule: color-mix(
-    in oklch,
-    var(--color-base-content) 12%,
-    var(--color-base-200)
-  );
-
-  /* Brand accent — intentionally fixed, not derived from the active theme */
-  --hw-pink: #e36598;
-  --hw-pink-deep: color-mix(in oklch, #e36598 75%, var(--color-base-content));
-  --hw-pink-wash: color-mix(in oklch, #e36598 12%, var(--color-base-200));
-  --hw-pink-wash-2: color-mix(in oklch, #e36598 22%, var(--color-base-200));
-  --hw-leaf: #6b8e4e;
-  --hw-serif: "Libertinus Serif", "Iowan Old Style", "Palatino", serif;
-  --hw-mono: "Courier Prime", "IBM Plex Mono", ui-monospace, monospace;
-
-  font-family: var(--hw-serif);
-  background: var(--hw-paper);
-  color: var(--hw-ink);
-  font-size: 18px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.welcome-world::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(
-      circle at 20% 10%,
-      rgba(227, 101, 152, 0.04),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 90% 80%,
-      rgba(107, 142, 78, 0.035),
-      transparent 45%
-    );
-}
-
-main {
-  position: relative;
-  flex: 1;
-}
-
-/* ── Shared button system ───────────────────────────────────── */
-.hw-btn {
-  font-family: var(--hw-serif);
-  font-size: 16px;
-  padding: 0.55rem 1rem;
-  border-radius: 2px;
-  border: 1px solid var(--hw-ink);
-  background: transparent;
-  color: var(--hw-ink);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s,
-    transform 0.1s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &:hover {
-    background: var(--hw-ink);
-    color: var(--hw-paper);
-  }
-
-  &:active {
-    transform: translateY(1px);
-  }
-}
-
-.hw-btn-primary {
-  background: var(--hw-ink);
-  color: var(--hw-paper);
-
-  &:hover {
-    background: var(--hw-pink-deep);
-    border-color: var(--hw-pink-deep);
-  }
-}
-
-.hw-btn-pink {
-  background: var(--hw-pink);
-  border-color: var(--hw-pink);
-  color: #fff;
-
-  &:hover {
-    background: var(--hw-pink-deep);
-    border-color: var(--hw-pink-deep);
-  }
-}
-
 /* ── Utility classes ────────────────────────────────────────── */
-.mono {
-  font-family: var(--hw-mono);
-}
-
 .italic {
   font-style: italic;
 }
@@ -998,149 +777,7 @@ main {
 }
 
 /* ── Top nav ────────────────────────────────────────────────── */
-.topnav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 2rem;
-  border-bottom: 1px solid var(--hw-rule);
-  background: var(--hw-paper);
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  backdrop-filter: saturate(1.1) blur(6px);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  text-decoration: none;
-  color: var(--hw-ink);
-}
-
-.brand-mark {
-  display: block;
-  object-fit: contain;
-  view-transition-name: remanso-logo;
-}
-
-.brand-word {
-  font-size: 1.25rem;
-  letter-spacing: 0.02em;
-  font-weight: 600;
-}
-
-.topnav-right {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.navlink {
-  text-decoration: none;
-  color: var(--hw-ink-soft);
-  font-size: 0.95rem;
-  transition: color 0.15s;
-
-  &:hover {
-    color: var(--hw-pink-deep);
-  }
-}
-
-.navlink-ext {
-  display: inline-block;
-  width: 0.85em;
-  height: 0.85em;
-  margin-left: 0.2em;
-  vertical-align: -0.05em;
-}
-
 /* ── GitHub form ────────────────────────────────────────────── */
-.gh-form {
-  display: flex;
-  align-items: stretch;
-
-  &.compact {
-    .gh-input-group {
-      padding: 0.15rem 0.35rem 0.15rem 0.75rem;
-    }
-
-    .gh-go {
-      padding: 0.3rem 0.7rem;
-      font-size: 0.85rem;
-    }
-  }
-}
-
-.gh-input-group {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.35rem 0.45rem 0.35rem 0.9rem;
-  background: var(--hw-surface);
-  border: 1px solid var(--hw-rule);
-  border-right: none;
-  border-radius: 999px 0 0 999px;
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.02),
-    0 6px 18px -10px rgba(201, 74, 125, 0.15);
-  cursor: text;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-  height: auto;
-  outline: none;
-
-  &:focus-within {
-    border-color: var(--hw-pink);
-    box-shadow:
-      0 1px 0 rgba(0, 0, 0, 0.02),
-      0 10px 28px -10px rgba(201, 74, 125, 0.25);
-    outline: none;
-  }
-}
-
-.gh-prefix {
-  color: var(--hw-ink-faint);
-  font-size: 0.85rem;
-  user-select: none;
-}
-
-.gh-slash {
-  color: var(--hw-ink-faint);
-  font-family: var(--hw-mono);
-}
-
-.gh-input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-family: var(--hw-mono);
-  font-size: 0.95rem;
-  color: var(--hw-ink);
-  padding: 0;
-
-  &::placeholder {
-    color: var(--hw-ink-faint);
-    font-style: italic;
-  }
-}
-
-.gh-go {
-  flex-shrink: 0;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.9rem;
-  border-radius: 0 999px 999px 0;
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-}
-
 /* ── Hero (logged out) ──────────────────────────────────────── */
 .hero-ed {
   padding: 4.5rem 2rem 3rem;
@@ -1310,19 +947,6 @@ main {
   pointer-events: none;
 }
 
-.skel {
-  display: block;
-  border-radius: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--hw-pink-wash) 0%,
-    var(--hw-pink-wash-2) 50%,
-    var(--hw-pink-wash) 100%
-  );
-  background-size: 200% 100%;
-  animation: skel-shimmer 1.4s ease-in-out infinite;
-}
-
 .skel-handle {
   height: 0.6rem;
   width: 60%;
@@ -1338,15 +962,6 @@ main {
   height: 0.55rem;
   width: 30%;
   margin-top: auto;
-}
-
-@keyframes skel-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 .network-empty {
@@ -1824,30 +1439,6 @@ img {
   letter-spacing: -0.005em;
 }
 
-.li-sub {
-  margin: 0;
-  color: var(--hw-ink-soft);
-  font-size: 0.95rem;
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.li-dot {
-  color: var(--hw-ink-faint);
-}
-
-.li-sub-link {
-  color: var(--hw-ink-soft);
-  text-decoration: underline;
-  text-decoration-color: var(--hw-rule);
-
-  &:hover {
-    color: var(--hw-pink-deep);
-  }
-}
-
 .li-quick {
   display: flex;
   flex-direction: column;
@@ -2044,7 +1635,7 @@ img {
   color: var(--hw-ink-soft);
 }
 
-.due-btn {
+.hw-btn.due-btn {
   font-size: 0.85rem;
   padding: 0.35rem 0.8rem;
 }
@@ -2253,14 +1844,6 @@ img {
 }
 
 @media (max-width: 640px) {
-  .topnav {
-    padding: 1rem 1.25rem;
-  }
-
-  .navlink {
-    display: none;
-  }
-
   .hero-ed {
     padding: 3rem 1.25rem 2rem;
   }

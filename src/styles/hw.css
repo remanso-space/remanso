@@ -1,0 +1,252 @@
+/*
+ * The "hw" design system: the paper-and-ink surface shared by the marketing
+ * home and the repo list. Everything here is scoped under `.hw-page`, the
+ * class those two roots carry, so it never reaches the note views.
+ *
+ * Only what is genuinely common lives here. The two pages deliberately differ
+ * on spacing and tile sizes; those rules stay in each page's own scoped block.
+ */
+
+.hw-page {
+  /* Derived from DaisyUI base tokens — adapts to any theme automatically.
+     base-100 is the lightest surface; base-200/300 are progressively deeper.
+     Paper uses base-200 so cards (base-100) appear slightly elevated above it. */
+  --hw-surface: var(--color-base-100);
+  --hw-paper: var(--color-base-200);
+  --hw-paper-warm: var(--color-base-300);
+  --hw-ink: var(--color-base-content);
+  --hw-ink-soft: color-mix(
+    in oklch,
+    var(--color-base-content) 65%,
+    var(--color-base-200)
+  );
+  --hw-ink-faint: color-mix(
+    in oklch,
+    var(--color-base-content) 38%,
+    var(--color-base-200)
+  );
+  --hw-rule: color-mix(
+    in oklch,
+    var(--color-base-content) 12%,
+    var(--color-base-200)
+  );
+
+  /* Brand accent — intentionally fixed, not derived from the active theme */
+  --hw-pink: #e36598;
+  --hw-pink-deep: color-mix(in oklch, #e36598 75%, var(--color-base-content));
+  --hw-pink-wash: color-mix(in oklch, #e36598 12%, var(--color-base-200));
+  --hw-pink-wash-2: color-mix(in oklch, #e36598 22%, var(--color-base-200));
+  --hw-leaf: #6b8e4e;
+  --hw-serif: "Libertinus Serif", "Iowan Old Style", "Palatino", serif;
+  --hw-mono: "Courier Prime", "IBM Plex Mono", ui-monospace, monospace;
+
+  font-family: var(--hw-serif);
+  background: var(--hw-paper);
+  color: var(--hw-ink);
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.hw-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(
+      circle at 20% 10%,
+      rgba(227, 101, 152, 0.04),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(107, 142, 78, 0.035),
+      transparent 45%
+    );
+}
+
+.hw-page main {
+  position: relative;
+  flex: 1;
+}
+
+/* ── Shared button system ───────────────────────────────────── */
+.hw-page .hw-btn {
+  font-family: var(--hw-serif);
+  font-size: 16px;
+  padding: 0.55rem 1rem;
+  border-radius: 2px;
+  border: 1px solid var(--hw-ink);
+  background: transparent;
+  color: var(--hw-ink);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.1s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hw-page .hw-btn:hover {
+  background: var(--hw-ink);
+  color: var(--hw-paper);
+}
+
+.hw-page .hw-btn:active {
+  transform: translateY(1px);
+}
+
+/* Variants outrank the base by carrying both classes, so their order in the
+   bundle relative to a page's own styles never matters. */
+.hw-page .hw-btn.hw-btn-primary {
+  background: var(--hw-ink);
+  color: var(--hw-paper);
+}
+
+.hw-page .hw-btn.hw-btn-primary:hover {
+  background: var(--hw-pink-deep);
+  border-color: var(--hw-pink-deep);
+}
+
+.hw-page .hw-btn.hw-btn-pink {
+  background: var(--hw-pink);
+  border-color: var(--hw-pink);
+  color: #fff;
+}
+
+.hw-page .hw-btn.hw-btn-pink:hover {
+  background: var(--hw-pink-deep);
+  border-color: var(--hw-pink-deep);
+}
+
+/* ── Top navigation ─────────────────────────────────────────── */
+.hw-page .topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--hw-rule);
+  background: var(--hw-paper);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: saturate(1.1) blur(6px);
+}
+
+.hw-page .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: var(--hw-ink);
+}
+
+.hw-page .brand-mark {
+  display: block;
+  object-fit: contain;
+  view-transition-name: remanso-logo;
+  border: 0;
+  box-shadow: none;
+}
+
+.hw-page .brand-word {
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.hw-page .topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.hw-page .navlink {
+  text-decoration: none;
+  color: var(--hw-ink-soft);
+  font-size: 0.95rem;
+  transition: color 0.15s;
+}
+
+.hw-page .navlink:hover {
+  color: var(--hw-pink-deep);
+}
+
+.hw-page .navlink-ext {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.2em;
+  vertical-align: -0.05em;
+}
+
+/* ── Shared type ────────────────────────────────────────────── */
+.hw-page .mono {
+  font-family: var(--hw-mono);
+}
+
+.hw-page .li-dot {
+  color: var(--hw-ink-faint);
+}
+
+.hw-page .li-sub {
+  margin: 0;
+  color: var(--hw-ink-soft);
+  font-size: 0.95rem;
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hw-page .li-sub-link {
+  color: var(--hw-ink-soft);
+  text-decoration: underline;
+  text-decoration-color: var(--hw-rule);
+}
+
+.hw-page .li-sub-link:hover {
+  color: var(--hw-pink-deep);
+}
+
+/* ── Loading skeletons ──────────────────────────────────────── */
+.hw-page .skel {
+  display: block;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--hw-pink-wash) 0%,
+    var(--hw-pink-wash-2) 50%,
+    var(--hw-pink-wash) 100%
+  );
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skel-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .hw-page .topnav {
+    padding: 1rem 1.25rem;
+  }
+
+  .hw-page .navlink {
+    display: none;
+  }
+}
