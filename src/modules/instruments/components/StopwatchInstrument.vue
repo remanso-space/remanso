@@ -3,6 +3,10 @@ import { onUnmounted, ref } from "vue"
 
 import { formatMs } from "../duration"
 import type { InstrumentProps } from "../sibling"
+import InstrumentButton from "./controls/InstrumentButton.vue"
+import PauseIcon from "./controls/PauseIcon.vue"
+import PlayIcon from "./controls/PlayIcon.vue"
+import ResetIcon from "./controls/ResetIcon.vue"
 
 defineProps<InstrumentProps>()
 
@@ -69,50 +73,15 @@ onUnmounted(stopTicking)
         {{ formatMs(elapsed) }}
       </span>
       <div class="flex gap-1">
-        <button
-          class="btn btn-ghost btn-sm text-(--link-accent)"
-          :title="running ? 'Pause' : 'Start'"
-          :aria-label="running ? 'Pause' : 'Start'"
+        <InstrumentButton
+          :label="running ? 'Pause' : 'Start'"
           @click="running ? pause() : start()"
         >
-          <svg
-            v-if="!running"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M7 4v16l13 -8z" />
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"
-            />
-            <path
-              d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"
-            />
-          </svg>
-        </button>
-        <button
-          class="btn btn-ghost btn-sm text-(--link-accent)"
-          title="Lap"
-          aria-label="Lap"
+          <PlayIcon v-if="!running" />
+          <PauseIcon v-else />
+        </InstrumentButton>
+        <InstrumentButton
+          label="Lap"
           :disabled="!running && elapsed === 0"
           @click="lap"
         >
@@ -132,33 +101,16 @@ onUnmounted(stopTicking)
             />
             <path d="M5 21v-7" />
           </svg>
-        </button>
-        <button
-          class="btn btn-ghost btn-sm text-(--link-accent)"
-          title="Restart"
-          aria-label="Restart"
+        </InstrumentButton>
+        <InstrumentButton
+          label="Restart"
           :disabled="!running && elapsed === 0"
           @click="restart"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-            <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-          </svg>
-        </button>
-        <button
-          class="btn btn-ghost btn-sm text-(--link-accent)"
-          title="Stop"
-          aria-label="Stop"
+          <ResetIcon />
+        </InstrumentButton>
+        <InstrumentButton
+          label="Stop"
           :disabled="!running && elapsed === 0"
           @click="stop"
         >
@@ -177,7 +129,7 @@ onUnmounted(stopTicking)
               d="M5 5m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"
             />
           </svg>
-        </button>
+        </InstrumentButton>
       </div>
     </div>
     <ol v-if="laps.length" class="mt-2 text-sm font-mono tabular-nums">

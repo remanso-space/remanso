@@ -4,6 +4,10 @@ import { computed, onUnmounted, ref, watch } from "vue"
 import { beep, primeAudio } from "../audio"
 import { formatSeconds, parseDuration } from "../duration"
 import type { InstrumentProps } from "../sibling"
+import InstrumentButton from "./controls/InstrumentButton.vue"
+import PauseIcon from "./controls/PauseIcon.vue"
+import PlayIcon from "./controls/PlayIcon.vue"
+import ResetIcon from "./controls/ResetIcon.vue"
 
 const props = defineProps<InstrumentProps>()
 
@@ -84,67 +88,19 @@ onUnmounted(stopTicking)
       min
     </label>
     <div class="flex gap-1">
-      <button
-        class="btn btn-ghost btn-sm text-(--link-accent)"
-        :title="running ? 'Pause' : 'Start'"
-        :aria-label="running ? 'Pause' : 'Start'"
+      <InstrumentButton
+        :label="running ? 'Pause' : 'Start'"
         @click="running ? pause() : start()"
       >
-        <svg
-          v-if="!running"
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M7 4v16l13 -8z" />
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="M6 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"
-          />
-          <path
-            d="M14 5m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z"
-          />
-        </svg>
-      </button>
-      <button
-        class="btn btn-ghost btn-sm text-(--link-accent)"
-        title="Reset"
-        aria-label="Reset"
+        <PlayIcon v-if="!running" />
+        <PauseIcon v-else />
+      </InstrumentButton>
+      <InstrumentButton
+        label="Reset"
         @click="reset"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-        </svg>
-      </button>
+        <ResetIcon />
+      </InstrumentButton>
     </div>
   </div>
 </template>

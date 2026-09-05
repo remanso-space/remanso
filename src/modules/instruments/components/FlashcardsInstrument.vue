@@ -3,6 +3,8 @@ import { computed, ref } from "vue"
 
 import { shuffle } from "../shuffle"
 import { consumeRows, type InstrumentProps } from "../sibling"
+import InstrumentButton from "./controls/InstrumentButton.vue"
+import ResetIcon from "./controls/ResetIcon.vue"
 
 interface Card {
   question: string
@@ -80,27 +82,12 @@ const restart = () => {
           <span class="flashcard-progress text-xs tabular-nums opacity-60">
             {{ progress }}
           </span>
-          <button
-            class="btn btn-ghost btn-sm text-(--link-accent)"
-            title="Restart"
-            aria-label="Restart"
+          <InstrumentButton
+            label="Restart"
             @click="restart"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-              <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-            </svg>
-          </button>
+            <ResetIcon />
+          </InstrumentButton>
         </div>
       </div>
       <div v-if="!isDone" class="my-4 text-center">
