@@ -1,6 +1,7 @@
-import { ComputedRef, onUnmounted, Ref, toValue } from "vue"
+import { ComputedRef, Ref, toValue } from "vue"
 
 import { noteEventBus } from "@/bus/noteEventBus"
+import { useLinkClickListeners } from "@/hooks/useLinkClickListeners.hook"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
 import { isExternalLink } from "@/utils/link"
 
@@ -52,42 +53,5 @@ export const useLinks = (
     })
   }
 
-  const LINK_SELECTOR = `.${toValue(className)} a`
-
-  const removeListeners = () => {
-    const elements = document.querySelectorAll(LINK_SELECTOR)
-
-    elements.forEach((element) => {
-      element.removeEventListener("click", linkNote)
-    })
-  }
-
-  const listenToClick = () => {
-    removeListeners()
-    const elements = document.querySelectorAll(LINK_SELECTOR)
-
-    elements.forEach((element) => {
-      const href = element.getAttribute("href")
-
-      if (!href) {
-        return
-      }
-
-      if (isExternalLink(href)) {
-        element.classList.add("external-link")
-      }
-    })
-
-    elements.forEach((element) => {
-      element.addEventListener("click", linkNote)
-    })
-  }
-
-  onUnmounted(() => {
-    removeListeners()
-  })
-
-  return {
-    listenToClick
-  }
+  return useLinkClickListeners(className, linkNote)
 }

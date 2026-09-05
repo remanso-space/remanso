@@ -1,5 +1,6 @@
-import { ComputedRef, onUnmounted, Ref, toValue } from "vue"
+import { ComputedRef, Ref, toValue } from "vue"
 
+import { useLinkClickListeners } from "@/hooks/useLinkClickListeners.hook"
 import { useRouteQueryStackedNotes } from "@/hooks/useRouteQueryStackedNotes.hook"
 import { parseAtUri } from "@/modules/atproto/parseAtUri"
 import { toShortDid } from "@/modules/atproto/shortDid"
@@ -75,42 +76,5 @@ export const useATProtoLinks = (
     }
   }
 
-  const LINK_SELECTOR = `.${toValue(className)} a`
-
-  const removeListeners = () => {
-    const elements = document.querySelectorAll(LINK_SELECTOR)
-
-    elements.forEach((element) => {
-      element.removeEventListener("click", linkNote)
-    })
-  }
-
-  const listenToClick = () => {
-    removeListeners()
-    const elements = document.querySelectorAll(LINK_SELECTOR)
-
-    elements.forEach((element) => {
-      const href = element.getAttribute("href")
-
-      if (!href) {
-        return
-      }
-
-      if (isExternalLink(href)) {
-        element.classList.add("external-link")
-      }
-    })
-
-    elements.forEach((element) => {
-      element.addEventListener("click", linkNote)
-    })
-  }
-
-  onUnmounted(() => {
-    removeListeners()
-  })
-
-  return {
-    listenToClick
-  }
+  return useLinkClickListeners(className, linkNote)
 }
