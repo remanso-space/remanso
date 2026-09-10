@@ -1,6 +1,6 @@
 # Remanso — Design (QFD)
 
-Goal-driven design for what Remanso is _for_: a **beautiful, primarily read-only** viewer for notes authored in the IDE (git push) and read as a Matuschak-style stacked-notes web — built to make notes feel **good-looking**, to evoke **pride and peace** (including reading _gracefully on a flaky mobile/metro connection_), and to **lower every wall** to making your voice public. Relies on [CONTEXT.md](CONTEXT.md) for vocabulary (Note, Path, SHA, Backlink, Igarapé, Stacked Notes, Live/Snapshot reference, Published Note, Publish), [ADR-0001](docs/adr/0001-note-identity-is-path.md) (Note identity = Path) and [ADR-0002](docs/adr/0002-two-reference-modes.md) (Live vs Snapshot reference). The earlier "Path↔SHA resolution layer" is not a goal in itself — it folds in under Peace (live references that never break) and integrity (immutable Snapshot references).
+Need-driven design for what Remanso is _for_: a **beautiful, primarily read-only** viewer for notes authored in the IDE (git push) and read as a Matuschak-style stacked-notes web — built to make notes feel **good-looking**, to evoke **pride and peace** (including reading _gracefully on a flaky mobile/metro connection_), and to **lower every wall** to making your voice public. Relies on [CONTEXT.md](CONTEXT.md) for vocabulary (Note, Path, SHA, Backlink, Igarapé, Stacked Notes, Live/Snapshot reference, Published Note, Publish), [ADR-0001](docs/adr/0001-note-identity-is-path.md) (Note identity = Path) and [ADR-0002](docs/adr/0002-two-reference-modes.md) (Live vs Snapshot reference). The earlier "Path↔SHA resolution layer" is not a need in itself — it folds in under Peace (live references that never break) and integrity (immutable Snapshot references).
 
 Strength weights used in matrices: **9** strong, **3** medium, **1** weak, blank none.
 
@@ -211,14 +211,14 @@ Strength weights used in matrices: **9** strong, **3** medium, **1** weak, blank
 \def\qfdWhatW{4.5}
 \def\qfdHdrH{3.6}
 \def\qfdImpTitle{Wt}
-\def\qfdWhatsTitle{Goals}
+\def\qfdWhatsTitle{Needs}
 \def\qfdProjectTitle{Remanso}
 \def\qfdConcept{A \textbf{beautiful}, read-only notes web for \textbf{pride} and \textbf{peace}, with one-gesture \textbf{public} publishing.}
 \qfdshowcompetitivefalse
 
 \begin{qfdhouse}
   \pgfmathsetmacro{\qfdWhatTextW}{\qfdWhatW - 0.2}
-  \foreach \r/\t in {1/{G1 Beauty}, 2/{G2 Pride \& Peace (graceful on mobile)}, 3/{G3 Effortless public voice}}
+  \foreach \r/\t in {1/{N1 Beauty}, 2/{N2 Pride \& Peace (graceful on mobile)}, 3/{N3 Effortless public voice}}
     \node[anchor=west, font=\scriptsize, text width=\qfdWhatTextW cm, align=left] at ({\qfdLeftEdge + 0.1}, {-\r + 0.5}) {\t};
   \foreach \r/\imp in {1/9, 2/10, 3/8}
     \node[font=\scriptsize] at ({-\qfdImpW/2}, {-\r + 0.5}) {\imp};
@@ -226,17 +226,17 @@ Strength weights used in matrices: **9** strong, **3** medium, **1** weak, blank
   \foreach \c/\t in {1/{F1 Render fidelity}, 2/{F2 Typography}, 3/{F3 No broken refs}, 4/{F4 Snapshot integrity}, 5/{F5 Offline-resilient}, 6/{F6 Calm surface}, 7/{F7 Reveal web}, 8/{F8 1-gesture publish}}
     \node[rotate=90, anchor=west, font=\scriptsize] at ({\c - 0.5}, 0.15) {\t};
 
-  % Relations — G1 (row 1)
+  % Relations — N1 (row 1)
   \node[qfdrel/S] at ({1-0.5},{-1+0.5}){}; \node[qfdrel/S] at ({2-0.5},{-1+0.5}){};
   \node[qfdrel/M] at ({3-0.5},{-1+0.5}){}; \node[qfdrel/W] at ({4-0.5},{-1+0.5}){};
   \node[qfdrel/W] at ({5-0.5},{-1+0.5}){}; \node[qfdrel/M] at ({6-0.5},{-1+0.5}){};
   \node[qfdrel/W] at ({7-0.5},{-1+0.5}){}; \node[qfdrel/W] at ({8-0.5},{-1+0.5}){};
-  % G2 (row 2)
+  % N2 (row 2)
   \node[qfdrel/M] at ({1-0.5},{-2+0.5}){}; \node[qfdrel/M] at ({2-0.5},{-2+0.5}){};
   \node[qfdrel/S] at ({3-0.5},{-2+0.5}){}; \node[qfdrel/S] at ({4-0.5},{-2+0.5}){};
   \node[qfdrel/S] at ({5-0.5},{-2+0.5}){}; \node[qfdrel/S] at ({6-0.5},{-2+0.5}){};
   \node[qfdrel/S] at ({7-0.5},{-2+0.5}){}; \node[qfdrel/M] at ({8-0.5},{-2+0.5}){};
-  % G3 (row 3)
+  % N3 (row 3)
   \node[qfdrel/M] at ({1-0.5},{-3+0.5}){}; \node[qfdrel/M] at ({2-0.5},{-3+0.5}){};
   \node[qfdrel/W] at ({3-0.5},{-3+0.5}){}; \node[qfdrel/W] at ({4-0.5},{-3+0.5}){};
   \node[qfdrel/W] at ({5-0.5},{-3+0.5}){}; \node[qfdrel/W] at ({6-0.5},{-3+0.5}){};
@@ -266,13 +266,13 @@ Basement rows per function: **target / difficulty (1–5) / absolute weight / re
 
 ---
 
-## 1. Goals — the WHATs
+## 1. Needs — the WHATs
 
-| ID  | Goal                                                                                                                                                          | Weight | Source                       |
+| ID  | Need                                                                                                                                                          | Weight | Source                       |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: | ---------------------------- |
-| G1  | **Beauty** — notes render gorgeously; the page is something you want to look at                                                                               |   9    | Author intent (this session) |
-| G2  | **Pride & Peace** — calm, trustworthy, quietly proud: nothing breaks, nothing misleads, nothing clutters; reads gracefully on a flaky mobile/metro connection |   10   | Author intent (this session) |
-| G3  | **Effortless public voice** — lower _every_ wall to making your voice public: one gesture (`.pub.md`), open decentralized rails, no forms                     |   8    | Author intent (this session) |
+| N1  | **Beauty** — notes render gorgeously; the page is something you want to look at                                                                               |   9    | Author intent (this session) |
+| N2  | **Pride & Peace** — calm, trustworthy, quietly proud: nothing breaks, nothing misleads, nothing clutters; reads gracefully on a flaky mobile/metro connection |   10   | Author intent (this session) |
+| N3  | **Effortless public voice** — lower _every_ wall to making your voice public: one gesture (`.pub.md`), open decentralized rails, no forms                     |   8    | Author intent (this session) |
 
 ## 2. Functions — the HOWs
 
@@ -287,16 +287,16 @@ Basement rows per function: **target / difficulty (1–5) / absolute weight / re
 | F7  | **Reveal the web of connections** (backlinks + stacked notes) — _calm by default, on demand_                                                |  ↑  | every Note shows inbound links; stacking fluid; nothing flooded                             | —                                                          |
 | F8  | **Publish in one gesture to open rails** (`.pub.md` → ATProto Published Note; no in-app form; decentralized, author-owned)                  |  ↓  | publish = rename + push (1 gesture), 0 in-app steps                                         | —                                                          |
 
-## 3. Cascade — Goals → Functions → How → Components
+## 3. Cascade — Needs → Functions → How → Components
 
-- **G1 Beauty** _W:9_
+- **N1 Beauty** _W:9_
   - **F1** Render rich content faithfully _Dir↑_
     - **How**: markdown-it pipeline with plugins; each renderer wrapped so a parse failure yields a styled fallback, not a stack trace
       - **Component**: C1 `useMarkdown` + plugins (KaTeX, Shikiji, Mermaid, TikZ, GitHub alerts, checkboxes)
   - **F2** Beautiful typography & layout _Dir↑_
     - **How**: DaisyUI theme + `@tailwindcss/typography` prose + per-repo `UserSettings`; Published Notes apply their stored theme/fonts
       - **Component**: C2 Theme & typography system (themes, fonts/width, image lightbox)
-- **G2 Pride & Peace** _W:10_
+- **N2 Pride & Peace** _W:10_
   - **F3** Never show a broken live reference _Dir↓ Target 0 broken_
     - **How**: a single bidirectional Path↔SHA index; resolve Live references by Path; fix the in-stack edit bug; graceful placeholder when a target is genuinely missing
       - **Component**: C3 Reference resolver (Path↔SHA index over `store.files`)
@@ -312,23 +312,23 @@ Basement rows per function: **target / difficulty (1–5) / absolute weight / re
   - **F7** Reveal the web of connections — calm by default _Dir↑_
     - **How**: backlinks present but quiet; a Note opens into the stack only when its Backlink is summoned (progressive disclosure)
       - **Component**: C7 Backlinks + Stacked Notes (reveal-on-demand)
-- **G3 Effortless public voice** _W:8_
+- **N3 Effortless public voice** _W:8_
   - **F8** Publish in one gesture to open rails _Dir↓ friction_
     - **How**: `.pub.md` suffix → external/CI publish to ATProto as a Published Note; in-app surfaces read those records, styled like private notes
       - **Component**: C8 Publish pipeline + ATProto read plumbing (`getUrl`, `withATProtoImages`, `Public*`→`Published*` views)
 
-## 4. House — Goals × Functions
+## 4. House — Needs × Functions
 
 Cells: link strength (9/3/1/blank). Importance row = Σ(weight × strength).
 
 |                       | F1  | F2  | F3  | F4  | F5  | F6  | F7  | F8  |
 | --------------------- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
-| G1 Beauty (9)         |  9  |  9  |  3  |  1  |  1  |  3  |  1  |  1  |
-| G2 Pride & Peace (10) |  3  |  3  |  9  |  9  |  9  |  9  |  9  |  3  |
-| G3 Public voice (8)   |  3  |  3  |  1  |  1  |  1  |  1  |  3  |  9  |
+| N1 Beauty (9)         |  9  |  9  |  3  |  1  |  1  |  3  |  1  |  1  |
+| N2 Pride & Peace (10) |  3  |  3  |  9  |  9  |  9  |  9  |  9  |  3  |
+| N3 Public voice (8)   |  3  |  3  |  1  |  1  |  1  |  1  |  3  |  9  |
 | **Σ**                 | 135 | 135 | 125 | 107 | 107 | 125 | 123 | 111 |
 
-**Top engineering priorities:** F1/F2 (rendering beauty) lead on raw Σ because all three goals touch them; F3 and F6 follow on the strength of Pride & Peace. **Caveat the matrix hides:** the _primary read context is mobile on a flaky metro connection_, which makes F3 (graceful) + F5 (offline-resilient) the **reliability spine to watch hardest** — a broken note in the metro is far more peace-destroying than its mid-pack Σ suggests. Treat F3+F5 as critical despite F5's rank (see §7).
+**Top engineering priorities:** F1/F2 (rendering beauty) lead on raw Σ because all three needs touch them; F3 and F6 follow on the strength of Pride & Peace. **Caveat the matrix hides:** the _primary read context is mobile on a flaky metro connection_, which makes F3 (graceful) + F5 (offline-resilient) the **reliability spine to watch hardest** — a broken note in the metro is far more peace-destroying than its mid-pack Σ suggests. Treat F3+F5 as critical despite F5's rank (see §7).
 
 ## 5. Roof — Function × Function tradeoffs
 
