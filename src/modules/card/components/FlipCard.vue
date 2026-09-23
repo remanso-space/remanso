@@ -22,17 +22,21 @@ const needsReview = () => emit("needsReview")
       <div class="flip-card-front flip-card-content" v-html="card.front"></div>
       <div class="flip-card-back flip-card-content">
         <div class="back" v-html="card.back"></div>
+        <template v-if="card.references">
+          <hr />
+          <div class="references" v-html="card.references"></div>
+        </template>
         <hr />
-        <div class="references" v-html="card.references"></div>
-        <hr />
-        <div class="actions">
+        <div class="actions not-prose">
           <p>Did you remember this?</p>
-          <div class="buttons is-centered">
-            <button class="button is-warning" @click.stop="fail">failed</button>
-            <button class="button is-success" @click.stop="success">
+          <div class="buttons">
+            <button class="btn btn-sm btn-warning" @click.stop="fail">
+              failed
+            </button>
+            <button class="btn btn-sm btn-success" @click.stop="success">
               got it
             </button>
-            <button class="button is-danger" @click.stop="needsReview">
+            <button class="btn btn-sm btn-ghost" @click.stop="needsReview">
               <em>needs review</em>
             </button>
           </div>
@@ -43,27 +47,27 @@ const needsReview = () => emit("needsReview")
 </template>
 
 <style lang="scss">
-$border-radius: 0.5rem;
-
 .flip-card {
   display: flex;
   background-color: transparent;
-  padding: 0 1rem;
   margin: auto;
+  width: 100%;
   user-select: none;
-  transition: 0.3s;
   perspective: 1500px;
 
   &:hover {
     cursor: pointer;
   }
 
+  /**
+   * Both faces share one grid cell: the card keeps the height of the taller
+   * face instead of collapsing, which is what absolute positioning did.
+   */
   .flip-card-inner {
     flex: 1;
-    position: relative;
-    transition: cubic-bezier(0.39, 0.575, 0.565, 1) 0.3s;
+    display: grid;
+    transition: transform cubic-bezier(0.39, 0.575, 0.565, 1) 0.4s;
     transform-style: preserve-3d;
-    border-radius: $border-radius;
   }
 
   &.flipped .flip-card-inner {
@@ -72,20 +76,25 @@ $border-radius: 0.5rem;
 
   .flip-card-front,
   .flip-card-back {
-    position: absolute;
+    grid-area: 1 / 1;
     backface-visibility: hidden;
   }
 
   .flip-card-content {
-    width: 100%;
-    background-color: #ede4e0;
+    background-color: var(--color-base-200);
     color: var(--color-base-content);
+    border: 1px solid var(--color-base-300);
     padding: 1rem;
-    border-radius: $border-radius;
+    border-radius: 0.5rem;
+    overflow-y: auto;
   }
 
   .flip-card-back {
     transform: rotateY(180deg);
+  }
+
+  h1 {
+    font-size: 1.25rem;
   }
 }
 
@@ -95,9 +104,12 @@ $border-radius: 0.5rem;
   p {
     margin-bottom: 0.5rem;
   }
-}
 
-h1 {
-  font-size: 16pt;
+  .buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 </style>

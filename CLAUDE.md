@@ -101,6 +101,15 @@ src/
 - `src/hooks/useMarkdown.hook.ts` - Markdown rendering with all plugins
 - `src/data/data.ts` - PouchDB database wrapper
 
+### Spaced repetition cards
+
+Cards are markdown files under `_cards/` in the notes repo, each written as
+`front ___ back ___ references`. Review state (level, next date, needs-review)
+lives in PouchDB for speed and is mirrored to `.remanso.cards.json` at the repo
+root, committed through the GitHub contents API, so a session started on one
+device continues on another. Conflicts resolve per card on `updatedAt`, last
+answer wins. Without push rights the state stays local.
+
 ### Patterns
 
 - All components use Composition API (`<script setup lang="ts">`)

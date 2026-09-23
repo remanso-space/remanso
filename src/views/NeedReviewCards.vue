@@ -2,8 +2,8 @@
 import { computed } from "vue"
 
 import FluxNote from "@/components/FluxNote.vue"
-import { DataType } from "@/data/DataType.enum"
 import { useNeedReviewCards } from "@/modules/card/hooks/useNeedReviewCards"
+import { cardPathFromId } from "@/modules/card/services/repetitionSync"
 
 defineProps<{
   user: string
@@ -14,7 +14,7 @@ const { cardsToReview } = useNeedReviewCards()
 const cardNames = computed(() =>
   cardsToReview.value.map((card) => ({
     id: card._id,
-    name: card._id?.split(DataType.RepetitionCard).pop()
+    name: cardPathFromId(card._id ?? "")
   }))
 )
 </script>

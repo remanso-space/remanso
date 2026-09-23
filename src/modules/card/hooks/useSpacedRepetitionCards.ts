@@ -2,19 +2,24 @@
 
 import { useAsyncState } from "@vueuse/core"
 import { addDays, isAfter } from "date-fns"
-import { computed, nextTick, watch } from "vue"
+import { computed, nextTick, ref, watch } from "vue"
 
-import { data, generateId } from "@/data/data"
+import { data } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import { useFile } from "@/hooks/useFile.hook"
 import { useLinks } from "@/hooks/useLinks.hook"
 import { markdownBuilder } from "@/hooks/useMarkdown.hook"
+import { useRepetitionSync } from "@/modules/card/hooks/useRepetitionSync"
 import { Card } from "@/modules/card/models/Card"
 import { RepetitionCard } from "@/modules/card/models/RepetitionCard"
+import { parseCardContent } from "@/modules/card/services/parseCardContent"
+import { cardIdFromPath } from "@/modules/card/services/repetitionSync"
 import { useUserRepoStore } from "@/modules/repo/store/userRepo.store"
-import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
 
 const MAX_LEVEL = 8
+
+/** Cards are markdown files under `_cards/`. */
+const CARDS_DIR = "_cards/"
 
 export interface Repetition {
   repetition: RepetitionCard
@@ -25,37 +30,45 @@ export const useSpacedRepetitionCards = () => {
   const { toHTML } = markdownBuilder()
   const store = useUserRepoStore()
   const { listenToClick } = useLinks("flip-card")
+  const { sync, pushSoon } = useRepetitionSync()
 
   const cardFiles = computed(() =>
     store.files.filter(
       (file) =>
         file.path !== undefined &&
-        file.path.startsWith("_cards") &&
+        file.path.startsWith(CARDS_DIR) &&
         file.path.endsWith(".md")
     )
   )
 
+  const hasLoadedOnce = ref(false)
+
   const {
     state: cards,
-    isReady,
+    isLoading: isFetching,
     execute
   } = useAsyncState(
     async () => {
+      // Pull the repo's review state first: a card answered on another device
+      // must not come back up here.
+      await sync()
+
       const cards: Repetition[] = []
 
       for (const cardFile of cardFiles.value) {
-        if (!cardFile.sha) {
+        if (!cardFile.sha || !cardFile.path) {
           continue
         }
 
         const repetition = await data.getOrCreate<
           DataType.RepetitionCard,
           RepetitionCard
-        >(generateId(DataType.RepetitionCard, cardFile.path), {
+        >(cardIdFromPath(cardFile.path), {
           $type: DataType.RepetitionCard,
           level: 1,
-          repeatDate: new Date(),
-          needsReview: false
+          repeatDate: new Date(0).toISOString(),
+          needsReview: false,
+          updatedAt: new Date(0).toISOString()
         })
 
         if (
@@ -66,11 +79,10 @@ export const useSpacedRepetitionCards = () => {
           continue
         }
 
-        const { getContent } = useFile(cardFile.sha, false)
-        const content = (await getContent()) ?? ""
+        const { getRawContent } = useFile(cardFile.sha, false)
+        const raw = (await getRawContent()) ?? ""
 
-        const [front, back, references] =
-          decodeBase64ToUTF8(content).split("___") ?? []
+        const { front, back, references } = parseCardContent(raw)
 
         cards.push({
           repetition,
@@ -82,13 +94,20 @@ export const useSpacedRepetitionCards = () => {
         })
       }
 
+      hasLoadedOnce.value = true
+
       return cards
     },
     [],
-    { immediate: false }
+    { immediate: false, onError: () => (hasLoadedOnce.value = true) }
   )
 
-  const successRepetition = async (cardId: string) => {
+  const isLoading = computed(() => isFetching.value || !hasLoadedOnce.value)
+
+  const answer = async (
+    cardId: string,
+    change: (repetition: RepetitionCard) => Partial<RepetitionCard>
+  ) => {
     const repetition = await data.get<DataType.RepetitionCard, RepetitionCard>(
       cardId
     )
@@ -98,43 +117,29 @@ export const useSpacedRepetitionCards = () => {
 
     await data.update<DataType.RepetitionCard, RepetitionCard>({
       ...repetition,
+      ...change(repetition),
+      updatedAt: new Date().toISOString()
+    })
+
+    pushSoon()
+  }
+
+  const successRepetition = (cardId: string) =>
+    answer(cardId, (repetition) => ({
       needsReview: false,
       level: Math.min(repetition.level + 1, MAX_LEVEL),
-      repeatDate: addDays(new Date(), 2 ** repetition.level)
-    })
-  }
+      repeatDate: addDays(new Date(), 2 ** repetition.level).toISOString()
+    }))
 
-  const failRepetition = async (cardId: string) => {
-    const repetition = await data.get<DataType.RepetitionCard, RepetitionCard>(
-      cardId
-    )
-    if (!repetition) {
-      return
-    }
-
-    const level = 1
-
-    await data.update<DataType.RepetitionCard, RepetitionCard>({
-      ...repetition,
-      level,
+  const failRepetition = (cardId: string) =>
+    answer(cardId, () => ({
+      level: 1,
       needsReview: false,
-      repeatDate: addDays(new Date(), level)
-    })
-  }
+      repeatDate: addDays(new Date(), 1).toISOString()
+    }))
 
-  const needsReview = async (cardId: string) => {
-    const repetition = await data.get<DataType.RepetitionCard, RepetitionCard>(
-      cardId
-    )
-    if (!repetition) {
-      return
-    }
-
-    await data.update<DataType.RepetitionCard, RepetitionCard>({
-      ...repetition,
-      needsReview: true
-    })
-  }
+  const needsReview = (cardId: string) =>
+    answer(cardId, () => ({ needsReview: true }))
 
   watch(
     cards,
@@ -145,13 +150,14 @@ export const useSpacedRepetitionCards = () => {
     { immediate: true }
   )
 
-  watch(cardFiles, () => execute())
+  watch(cardFiles, () => execute(), { immediate: true })
 
   return {
     cards,
+    cardFileCount: computed(() => cardFiles.value.length),
     successRepetition,
     failRepetition,
     needsReview,
-    isLoading: !isReady
+    isLoading
   }
 }
