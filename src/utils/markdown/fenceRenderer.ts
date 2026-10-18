@@ -1,6 +1,4 @@
-import MarkdownIt, { Options } from "markdown-it"
-import Renderer from "markdown-it/lib/renderer.mjs"
-import type Token from "markdown-it/lib/token.mjs"
+import type { MarkdownIt, RendererRule } from "markdown-it"
 
 /**
  * Build a markdown-it plugin that renders the fences of one language itself and
@@ -10,25 +8,12 @@ import type Token from "markdown-it/lib/token.mjs"
 export const fenceRenderer =
   (language: string, render: (content: string, md: MarkdownIt) => string) =>
   (md: MarkdownIt) => {
-    const defaultFence =
+    const defaultFence: RendererRule =
       md.renderer.rules.fence ||
-      function (
-        tokens: Array<Token>,
-        index: number,
-        options: Options,
-        _: unknown,
-        self: Renderer
-      ) {
-        return self.renderToken(tokens, index, options)
-      }
+      ((tokens, index, options, _env, self) =>
+        self.renderToken(tokens, index, options))
 
-    md.renderer.rules.fence = function (
-      tokens: Array<Token>,
-      index: number,
-      options: Options,
-      env: unknown,
-      self: Renderer
-    ) {
+    md.renderer.rules.fence = (tokens, index, options, env, self) => {
       const token = tokens[index]
 
       if (token.info.trim() === language) {

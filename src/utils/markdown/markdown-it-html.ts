@@ -1,6 +1,4 @@
-import type MarkdownIt from "markdown-it"
-import { HTML_TAG_RE } from "markdown-it/lib/common/html_re.mjs"
-import type StateInline from "markdown-it/lib/rules_inline/state_inline.mjs"
+import type { MarkdownIt, StateInline } from "markdown-it"
 
 // READMEs written for GitHub reach for raw HTML when markdown can't carry what
 // they want — an `<img>` with a width, a `<p align="center">` wrapping a logo.
@@ -15,6 +13,15 @@ const ATTR =
 const SCHEME = /^[a-z][a-z0-9+.-]*:/i
 const SAFE_SCHEME = /^(?:https?:|data:image\/)/i
 const DIMENSION = /^\d+(?:px|%)?$/
+
+// markdown-it's own inline HTML recognition (`src/common/html_re.ts`), which
+// it stopped exporting in v15: open tag, close tag, comment, processing
+// instruction, declaration, CDATA.
+const ATTR_VALUE = `(?:[^"'=<>\`\\x00-\\x20]+|'[^']*'|"[^"]*")`
+const OPEN_TAG = `<[A-Za-z][A-Za-z0-9\\-]*(?:\\s+[a-zA-Z_:][a-zA-Z0-9:._-]*(?:\\s*=\\s*${ATTR_VALUE})?)*\\s*\\/?>`
+const HTML_TAG_RE = new RegExp(
+  `^(?:${OPEN_TAG}|<\\/[A-Za-z][A-Za-z0-9\\-]*\\s*>|<!---?>|<!--(?:[^-]|-[^-]|--[^>])*-->|<[?][\\s\\S]*?[?]>|<![A-Za-z][^>]*>|<!\\[CDATA\\[[\\s\\S]*?\\]\\]>)`
+)
 
 const unquote = (value: string): string =>
   (value.startsWith('"') && value.endsWith('"')) ||

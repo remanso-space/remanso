@@ -1,4 +1,4 @@
-import type MarkdownIt from "markdown-it"
+import type { MarkdownIt } from "markdown-it"
 
 import { RECORDING_COLLECTION } from "@/modules/atproto/recording.types"
 
@@ -24,7 +24,7 @@ export const markdownItRecording = (md: MarkdownIt): void => {
 
   md.renderer.rules.image = (tokens, index, options, env, self) => {
     const token = tokens[index]
-    const src = token.attrGet("src") ?? ""
+    const src = String(token.attrGet("src") ?? "")
 
     if (!RECORDING_URI.test(src)) {
       return fallback(tokens, index, options, env, self)

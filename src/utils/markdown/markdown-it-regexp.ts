@@ -1,11 +1,11 @@
-import MarkdownIt, { PluginSimple } from "markdown-it"
+import type { MarkdownIt, RendererRule } from "markdown-it"
 
 let counter = 0
 
 export const markdownItPlugin = (
   regex: RegExp,
   replacer: (matches: RegExpExecArray[]) => string
-): PluginSimple => {
+): ((md: MarkdownIt) => void) => {
   const id = "regexp-" + counter
   counter++
   const flags =
@@ -37,12 +37,8 @@ export const markdownItPlugin = (
     return true
   }
 
-  const render = (
-    tokens: { meta: { match: RegExpExecArray[] } }[],
-    id: number
-  ) => {
-    return replacer(tokens[id].meta.match)
-  }
+  const render: RendererRule = (tokens, id) =>
+    replacer(tokens[id].meta?.match as RegExpExecArray[])
 
   return (md: MarkdownIt) => {
     md.inline.ruler.push(id, parse)

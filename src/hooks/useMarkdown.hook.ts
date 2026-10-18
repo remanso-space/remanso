@@ -3,9 +3,7 @@ import { tab } from "@mdit/plugin-tab"
 import { fromHighlighter } from "@shikijs/markdown-it/core"
 import markdownItKatex from "@vscode/markdown-it-katex"
 import GithubSlugger from "github-slugger"
-import type { PluginSimple } from "markdown-it"
-import MarkdownIt from "markdown-it"
-import { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
+import MarkdownIt, { type RendererRule } from "markdown-it"
 import markdownItAnchor from "markdown-it-anchor"
 import blockEmbedPlugin from "markdown-it-block-embed"
 import markdownItCheckbox from "markdown-it-checkbox"
@@ -98,20 +96,20 @@ const md = new MarkdownIt({
   .use(markdownItTablerIcons)
   .use(tab, {
     name: "tabs",
-    openRender: (info: MarkdownItTabInfo) => {
+    openRenderer: (info: MarkdownItTabInfo) => {
       currentTabGroup = ++tabGroupCounter
       currentTabActiveSet = info.active >= 0
       return '<div class="tabs tabs-box">\n'
     },
-    closeRender: () => "</div>\n",
-    tabOpenRender: (data: MarkdownItTabData) => {
+    closeRenderer: () => "</div>\n",
+    tabOpenRenderer: (data: MarkdownItTabData) => {
       const isChecked =
         data.isActive || (!currentTabActiveSet && data.index === 0)
       const checked = isChecked ? " checked" : ""
       const title = data.title.replace(/"/g, "&quot;")
       return `<input type="radio" name="md-tabs-${currentTabGroup}" class="tab" aria-label="${title}"${checked}>\n<div class="tab-content bg-base-100 border-base-300 rounded-box p-2">\n`
     },
-    tabCloseRender: () => "</div>\n"
+    tabCloseRenderer: () => "</div>\n"
   })
   .use(markdownItAnchor, {
     slugify: (s: string) => slugger.slug(s)
@@ -152,11 +150,8 @@ export const useShiki = (): Promise<void> => {
       ],
       engine: createOnigurumaEngine(import("shiki/wasm"))
     }).then((highlighter) => {
-      // Two casts the shapes alone force, neither of them a runtime concern:
       // `fromHighlighter` is typed for the bundled highlighter rather than a
-      // core one, and it types its plugin against markdown-it 15 while this
-      // app is on 14. The plugin only assigns `options.highlight`, which every
-      // one of those versions carries.
+      // core one; both expose the same `codeToHtml` it calls.
       const plugin = fromHighlighter(
         highlighter as Parameters<typeof fromHighlighter>[0],
         {
@@ -166,7 +161,7 @@ export const useShiki = (): Promise<void> => {
           }
         }
       )
-      md.use(plugin as unknown as PluginSimple)
+      md.use(plugin)
       shikiReady.value = true
     })
   }
@@ -387,7 +382,7 @@ export const runTikz = async (querySelector: string): Promise<void> => {
   )
 }
 
-const rules: RenderRuleRecord = {
+const rules: Record<string, RendererRule> = {
   table_open: () =>
     '<div class="overflow-x-auto"><table class="table table-zebra">',
   table_close: () => "</table></div>"

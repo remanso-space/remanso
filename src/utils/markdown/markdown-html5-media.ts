@@ -2,7 +2,7 @@
 // We can only detect video/audio files from the extension in the URL.
 // We ignore MP1 and MP2 (not in active use) and default to video for ambiguous
 
-import MarkdownIt from "markdown-it"
+import type { MarkdownIt } from "markdown-it"
 
 // extensions (MPG, MP4)
 const validAudioExtensions = ["aac", "m4a", "mp3", "oga", "ogg", "wav"]
