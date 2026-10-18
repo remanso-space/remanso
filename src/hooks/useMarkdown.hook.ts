@@ -1,7 +1,9 @@
 import type { MarkdownItTabData, MarkdownItTabInfo } from "@mdit/plugin-tab"
 import { tab } from "@mdit/plugin-tab"
+import { fromHighlighter } from "@shikijs/markdown-it/core"
 import markdownItKatex from "@vscode/markdown-it-katex"
 import GithubSlugger from "github-slugger"
+import type { PluginSimple } from "markdown-it"
 import MarkdownIt from "markdown-it"
 import { type RenderRuleRecord } from "markdown-it/lib/renderer.mjs"
 import markdownItAnchor from "markdown-it-anchor"
@@ -9,8 +11,9 @@ import blockEmbedPlugin from "markdown-it-block-embed"
 import markdownItCheckbox from "markdown-it-checkbox"
 import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
 import markdownItIframe from "markdown-it-iframe"
-import Shikiji from "markdown-it-shikiji"
-import type { LanguageRegistration } from "shikiji-core"
+import { createHighlighterCore } from "shiki/core"
+import { createOnigurumaEngine } from "shiki/engine/oniguruma"
+import type { LanguageRegistration } from "shiki/types"
 import { Ref, ref, toValue } from "vue"
 
 import { data } from "@/data/data"
@@ -114,39 +117,60 @@ const md = new MarkdownIt({
     slugify: (s: string) => slugger.slug(s)
   })
 
-let shikijiPromise: Promise<void> | null = null
-const shikijiReady = ref(false)
+let shikiPromise: Promise<void> | null = null
+const shikiReady = ref(false)
 
-export const useShikiji = (): Promise<void> => {
-  if (!shikijiPromise) {
-    shikijiPromise = Shikiji({
-      themes: {
-        light: "vitesse-light",
-        dark: "vitesse-black"
-      },
+/**
+ * Shiki's fine-grained bundle: every grammar and theme is named here instead
+ * of reached through the full bundle's catalogue. The catalogue references all
+ * ~200 languages, and the build turns each one into a chunk the service worker
+ * then precaches — 3MB of grammars no note ever asks for.
+ */
+export const useShiki = (): Promise<void> => {
+  if (!shikiPromise) {
+    shikiPromise = createHighlighterCore({
+      themes: [
+        import("@shikijs/themes/vitesse-light"),
+        import("@shikijs/themes/vitesse-black")
+      ],
       langs: [
-        "bash",
-        "javascript",
-        "typescript",
-        "tsx",
-        "markdown",
-        "mermaid",
-        "html",
-        "css",
-        "json",
-        "rust",
+        import("@shikijs/langs/bash"),
+        import("@shikijs/langs/javascript"),
+        import("@shikijs/langs/typescript"),
+        import("@shikijs/langs/tsx"),
+        import("@shikijs/langs/markdown"),
+        import("@shikijs/langs/mermaid"),
+        import("@shikijs/langs/html"),
+        import("@shikijs/langs/css"),
+        import("@shikijs/langs/json"),
+        import("@shikijs/langs/rust"),
         {
           ...alloyGrammar,
           name: "alloy",
           aliases: ["als"]
         } as unknown as LanguageRegistration
-      ]
-    }).then((plugin) => {
-      md.use(plugin)
-      shikijiReady.value = true
+      ],
+      engine: createOnigurumaEngine(import("shiki/wasm"))
+    }).then((highlighter) => {
+      // Two casts the shapes alone force, neither of them a runtime concern:
+      // `fromHighlighter` is typed for the bundled highlighter rather than a
+      // core one, and it types its plugin against markdown-it 15 while this
+      // app is on 14. The plugin only assigns `options.highlight`, which every
+      // one of those versions carries.
+      const plugin = fromHighlighter(
+        highlighter as Parameters<typeof fromHighlighter>[0],
+        {
+          themes: {
+            light: "vitesse-light",
+            dark: "vitesse-black"
+          }
+        }
+      )
+      md.use(plugin as unknown as PluginSimple)
+      shikiReady.value = true
     })
   }
-  return shikijiPromise
+  return shikiPromise
 }
 
 /**
@@ -377,11 +401,11 @@ const stripFrontmatter = (content: string): string => {
 }
 
 const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
-  // Track Shikiji readiness so reactive consumers (e.g. the `content`
-  // computed in useFile) re-render once `useShikiji()` mutates the
+  // Track Shiki readiness so reactive consumers (e.g. the `content`
+  // computed in useFile) re-render once `useShiki()` mutates the
   // singleton `md` — otherwise the first render on page load stays
   // unhighlighted because nothing else invalidates the computed.
-  if (content.includes("```")) void shikijiReady.value
+  if (content.includes("```")) void shikiReady.value
   slugger.reset()
   try {
     return env ? md.render(content, env) : md.render(content)
@@ -410,7 +434,7 @@ export const renderCodeFile = async ({
   lang: string | null
   filename?: string
 }): Promise<string> => {
-  await useShikiji()
+  await useShiki()
   const heading = filename ? `# ${filename}\n\n` : ""
   // Drop the trailing newline so the final empty line isn't numbered.
   const lines = rawContent.replace(/\n$/, "").split("\n")
@@ -420,10 +444,10 @@ export const renderCodeFile = async ({
     const rendered = renderMarkdown(
       `${heading}\`\`\`\`${lang}\n${lines.join("\n")}\n\`\`\`\``
     )
-    // Shikiji always appends an empty line span; drop it so it isn't numbered.
+    // Shiki always appends an empty line span; drop it so it isn't numbered.
     return `${wrapper}${rendered.replace('\n<span class="line"></span></code>', "</code>")}</div>`
   }
-  // Mirror Shikiji's per-line spans so the line-number CSS applies uniformly.
+  // Mirror Shiki's per-line spans so the line-number CSS applies uniformly.
   const code = lines
     .map((line) => `<span class="line">${md.utils.escapeHtml(line)}</span>`)
     .join("\n")

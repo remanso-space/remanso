@@ -25,6 +25,21 @@ describe("renderCodeFile", () => {
     expect(html.match(/class="line"/g)).toHaveLength(2)
   })
 
+  // app.css paints the dark themes from these custom properties, because the
+  // highlighter inlines the light colours and leaves the dark ones in vars.
+  it("carries the dual-theme custom properties the dark styling reads", async () => {
+    const html = await renderCodeFile({
+      rawContent: "const a = 1\n",
+      lang: "typescript"
+    })
+
+    expect(html).toContain(
+      'class="shiki shiki-themes vitesse-light vitesse-black"'
+    )
+    expect(html).toContain("--shiki-dark-bg:")
+    expect(html).toContain("--shiki-dark:")
+  })
+
   it("wraps each line of unknown-language files in line spans", async () => {
     const html = await renderCodeFile({
       rawContent: "line one\nline <two>\n",

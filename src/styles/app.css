@@ -213,7 +213,7 @@ pre {
   user-select: none;
 }
 
-/* Shikiji renders dual-theme tokens but only inlines the light colors;
+/* Shiki renders dual-theme tokens but only inlines the light colors;
    the dark palette lives in --shiki-dark* vars that we must apply ourselves.
    Without this, dark theme keeps the white code background and the
    base-content line numbers become white-on-white. */

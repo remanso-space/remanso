@@ -2,7 +2,7 @@ import { nextTick, type Ref, toValue, watch } from "vue"
 
 import { runTikzEmbeds } from "@/hooks/runTikzEmbeds"
 import { useImages } from "@/hooks/useImages.hook"
-import { runMermaid, runTikz, useShikiji } from "@/hooks/useMarkdown.hook"
+import { runMermaid, runTikz, useShiki } from "@/hooks/useMarkdown.hook"
 import { mountNoteRecording } from "@/modules/atproto/mountNoteRecording"
 import { runRecordings } from "@/modules/atproto/runRecordings"
 import { runInstruments } from "@/modules/instruments/runInstruments"
@@ -20,7 +20,7 @@ interface MarkdownPostRenderOptions {
   tikzEmbeds?: () => string | null
   macroplan?: boolean
   mermaid?: () => boolean
-  shikiji?: () => boolean
+  shiki?: () => boolean
   /**
    * The path the note's images are relative to, for views whose repo files are
    * reachable. Returns null when they can't be resolved against a repo tree.
@@ -102,8 +102,8 @@ export const useMarkdownPostRender = (
         )
       }
 
-      if (options.shikiji?.()) {
-        void useShikiji()
+      if (options.shiki?.()) {
+        void useShiki()
       }
 
       if (wantsTikz || wantsMermaid) {

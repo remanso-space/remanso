@@ -377,10 +377,10 @@ useMarkdownPostRender(content, () => `.note-${sha.value}`, {
   tikzEmbeds: () => (rawContent.value.includes(".tikz") ? props.sha : null),
   macroplan: true,
   mermaid: () => rawContent.value.includes("```mermaid"),
-  shikiji: () => isMarkdown.value && rawContent.value.includes("```"),
+  shiki: () => isMarkdown.value && rawContent.value.includes("```"),
   images: () => path.value,
   // displayedContent lands after `content` for non-markdown files (code files
-  // await Shikiji), so the diagram/highlight pass needs it as a trigger too.
+  // await Shiki), so the diagram/highlight pass needs it as a trigger too.
   triggers: [mode, displayedContent]
 })
 
