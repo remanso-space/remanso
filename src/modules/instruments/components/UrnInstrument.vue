@@ -76,10 +76,7 @@ const reset = () => {
       </div>
       <div class="mt-2 flex items-center gap-2">
         <button class="btn btn-primary btn-sm" @click="draw">Draw</button>
-        <InstrumentButton
-          label="Reset"
-          @click="reset"
-        >
+        <InstrumentButton label="Reset" @click="reset">
           <ResetIcon />
         </InstrumentButton>
         <span v-if="lastResult" class="text-sm">

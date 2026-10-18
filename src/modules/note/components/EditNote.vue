@@ -67,8 +67,7 @@ const handleBlur = () => emits("caret", caretOffset())
       contenteditable
       @input="(e) => handleInput((e.target as any)?.innerText ?? '')"
       @blur="handleBlur"
-      >{{ modelValue }}</pre
-    >
+      >{{ modelValue }}</pre>
   </div>
 </template>
 

@@ -138,11 +138,7 @@ onUnmounted(stopTicking)
           <PlayIcon v-if="!running" />
           <PauseIcon v-else />
         </InstrumentButton>
-        <InstrumentButton
-          label="Skip"
-          :disabled="done"
-          @click="skip"
-        >
+        <InstrumentButton label="Skip" :disabled="done" @click="skip">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -158,10 +154,7 @@ onUnmounted(stopTicking)
             <path d="M14 5v14l8 -7z" />
           </svg>
         </InstrumentButton>
-        <InstrumentButton
-          label="Reset"
-          @click="reset"
-        >
+        <InstrumentButton label="Reset" @click="reset">
           <ResetIcon />
         </InstrumentButton>
       </div>

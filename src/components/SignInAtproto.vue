@@ -105,7 +105,8 @@ withDefaults(
   border: 1px solid var(--color-base-300);
   border-radius: var(--radius-box, 0.5rem);
   background: var(--color-base-100);
-  box-shadow: 0 8px 24px color-mix(in oklch, var(--color-base-content) 18%, transparent);
+  box-shadow: 0 8px 24px
+    color-mix(in oklch, var(--color-base-content) 18%, transparent);
 }
 
 .sign-in-atproto-suggestions li {

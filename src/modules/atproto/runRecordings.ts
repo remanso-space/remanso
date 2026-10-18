@@ -15,9 +15,8 @@ export const runRecordings = async (querySelector: string): Promise<void> => {
   ).filter((el) => !el.dataset.recordingRendered)
   if (elements.length === 0) return
 
-  const { default: RecordingPlayer } = await import(
-    "@/components/RecordingPlayer.vue"
-  )
+  const { default: RecordingPlayer } =
+    await import("@/components/RecordingPlayer.vue")
 
   await Promise.all(
     elements.map(async (el) => {

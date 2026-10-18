@@ -45,7 +45,7 @@ The `while(` keyword is missing. The orphaned `)` is a syntax error.
 ```js
 var dn = `$ark`,
   fn = 2
-for (; dn in globalThis; ) dn = `$ark${fn++}`
+for (; dn in globalThis;) dn = `$ark${fn++}`
 var pn = dn
 ```
 

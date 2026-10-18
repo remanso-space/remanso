@@ -226,7 +226,9 @@ export const applyFilterDefaults = (
   const existingProjects = projectsOf(task)
   const existingContexts = contextsOf(task)
   const tokens = [
-    ...projects.filter((p) => !existingProjects.includes(p)).map((p) => `+${p}`),
+    ...projects
+      .filter((p) => !existingProjects.includes(p))
+      .map((p) => `+${p}`),
     ...contexts.filter((c) => !existingContexts.includes(c)).map((c) => `@${c}`)
   ]
   const body = [task.body.trim(), ...tokens].filter(Boolean).join(" ")

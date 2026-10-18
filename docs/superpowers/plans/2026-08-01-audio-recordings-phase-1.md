@@ -27,32 +27,32 @@
 
 **`remanso-jetstream`**
 
-| File | Responsibility |
-| --- | --- |
+| File                                    | Responsibility                                                  |
+| --------------------------------------- | --------------------------------------------------------------- |
 | `lexicons/space/remanso/recording.json` | Record schema. Published to the network with `goat lex publish` |
 
 **`remanso` — new**
 
-| File | Responsibility |
-| --- | --- |
-| `src/modules/atproto/recording.types.ts` | Types + the two shared constants |
-| `src/modules/atproto/resolveRecording.ts` | at-uri → `{ blobUrl, title, durationSec }` |
-| `src/modules/atproto/uploadRecording.ts` | `uploadBlob` + `createRecord`, returns the at-uri |
-| `src/modules/atproto/runRecordings.ts` | Mounts players onto `.recording-block` placeholders |
-| `src/components/RecordingPlayer.vue` | The player |
-| `src/utils/markdown/markdown-it-recording.ts` | Renderer override emitting the placeholder |
-| `src/utils/noteTitleForAlt.ts` | Alt-text derivation from note content + path |
-| `src/hooks/useAudioUpload.hook.ts` | Validation + orchestration for the UI |
+| File                                          | Responsibility                                      |
+| --------------------------------------------- | --------------------------------------------------- |
+| `src/modules/atproto/recording.types.ts`      | Types + the two shared constants                    |
+| `src/modules/atproto/resolveRecording.ts`     | at-uri → `{ blobUrl, title, durationSec }`          |
+| `src/modules/atproto/uploadRecording.ts`      | `uploadBlob` + `createRecord`, returns the at-uri   |
+| `src/modules/atproto/runRecordings.ts`        | Mounts players onto `.recording-block` placeholders |
+| `src/components/RecordingPlayer.vue`          | The player                                          |
+| `src/utils/markdown/markdown-it-recording.ts` | Renderer override emitting the placeholder          |
+| `src/utils/noteTitleForAlt.ts`                | Alt-text derivation from note content + path        |
+| `src/hooks/useAudioUpload.hook.ts`            | Validation + orchestration for the UI               |
 
 **`remanso` — modified**
 
-| File | Change |
-| --- | --- |
-| `src/modules/atproto/parseAtUri.ts` | Also return `collection` |
+| File                                          | Change                      |
+| --------------------------------------------- | --------------------------- |
+| `src/modules/atproto/parseAtUri.ts`           | Also return `collection`    |
 | `src/modules/atproto/service/atprotoOAuth.ts` | Add `getActiveSession(did)` |
-| `src/hooks/useMarkdown.hook.ts` | Register the plugin |
-| `src/hooks/useMarkdownPostRender.hook.ts` | Call `runRecordings` |
-| `src/components/StackedNote.vue` | Toolbar button + file input |
+| `src/hooks/useMarkdown.hook.ts`               | Register the plugin         |
+| `src/hooks/useMarkdownPostRender.hook.ts`     | Call `runRecordings`        |
+| `src/components/StackedNote.vue`              | Toolbar button + file input |
 
 **Note — a spec correction.** The spec says `useATProtoLogin.hook.ts` must expose the live `OAuthSession`. It does not. `BrowserOAuthClient.restore(sub)` re-derives the session from the DID the hook already exposes (verified at `node_modules/@atproto/oauth-client-browser/dist/browser-oauth-client.d.ts:41`). Task 6 adds `getActiveSession(did)` to the OAuth service instead, and `useATProtoLogin.hook.ts` is left untouched.
 
@@ -61,9 +61,11 @@
 ### Task 1: Lexicon schema
 
 **Files:**
+
 - Create: `/home/jean/projects/remanso-jetstream/lexicons/space/remanso/recording.json`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: the on-network shape that `uploadRecording` (Task 6) writes and `resolveRecording` (Task 3) reads — `audio` (blob), `title` (string), `durationSec` (integer), `recordedAt` (datetime), `createdAt` (datetime).
 
@@ -137,10 +139,12 @@ git commit -m "feat(lexicon): add space.remanso.recording schema"
 ### Task 2: `parseAtUri` returns the collection
 
 **Files:**
+
 - Modify: `src/modules/atproto/parseAtUri.ts`
 - Test: `src/modules/atproto/parseAtUri.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: `parseAtUri(atUri: string): { did: string; collection: string; rkey: string }`. The existing `did` and `rkey` fields keep their meaning, so current callers (`useATProtoLinks.hook.ts`) are unaffected.
 
@@ -149,13 +153,13 @@ git commit -m "feat(lexicon): add space.remanso.recording schema"
 Append to `src/modules/atproto/parseAtUri.spec.ts`, inside the existing top-level `describe`:
 
 ```ts
-  it("returns the collection segment", () => {
-    expect(parseAtUri("at://did:plc:abc/space.remanso.recording/3xyz")).toEqual({
-      did: "did:plc:abc",
-      collection: "space.remanso.recording",
-      rkey: "3xyz"
-    })
+it("returns the collection segment", () => {
+  expect(parseAtUri("at://did:plc:abc/space.remanso.recording/3xyz")).toEqual({
+    did: "did:plc:abc",
+    collection: "space.remanso.recording",
+    rkey: "3xyz"
   })
+})
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -186,11 +190,11 @@ export const parseAtUri = (
 In `src/modules/atproto/parseAtUri.spec.ts`, add the matching `collection` key to every existing `toEqual({ did, rkey })` assertion. For example the `app.bsky.feed.post` case becomes:
 
 ```ts
-    expect(parseAtUri("at://did:plc:abc123/app.bsky.feed.post/rkey-xyz")).toEqual({
-      did: "did:plc:abc123",
-      collection: "app.bsky.feed.post",
-      rkey: "rkey-xyz"
-    })
+expect(parseAtUri("at://did:plc:abc123/app.bsky.feed.post/rkey-xyz")).toEqual({
+  did: "did:plc:abc123",
+  collection: "app.bsky.feed.post",
+  rkey: "rkey-xyz"
+})
 ```
 
 Do the same for the `did:web` case and the multi-segment rkey case. Leave the four throwing cases as they are.
@@ -217,11 +221,13 @@ git commit -m "refactor(atproto): return the collection from parseAtUri"
 ### Task 3: Types, constants, and `resolveRecording`
 
 **Files:**
+
 - Create: `src/modules/atproto/recording.types.ts`
 - Create: `src/modules/atproto/resolveRecording.ts`
 - Test: `src/modules/atproto/resolveRecording.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `parseAtUri` (Task 2), the existing `getAuthor` from `@/modules/atproto/getAuthor` (returns `{ handle, pds } | null`), and the existing `PublicNoteBlob` type from `@/modules/atproto/publicNote.types`.
 - Produces:
   - `RECORDING_COLLECTION = "space.remanso.recording"`
@@ -455,11 +461,13 @@ git commit -m "feat(atproto): resolve recording at-uris to blob URLs"
 ### Task 4: markdown-it recording plugin
 
 **Files:**
+
 - Create: `src/utils/markdown/markdown-it-recording.ts`
 - Test: `src/utils/markdown/markdown-it-recording.spec.ts`
 - Modify: `src/hooks/useMarkdown.hook.ts`
 
 **Interfaces:**
+
 - Consumes: `RECORDING_COLLECTION` (Task 3).
 - Produces: `markdownItRecording(md: MarkdownIt): void`, and the rendered contract `<div class="recording-block" data-at-uri="…" data-alt="…"></div>` that Task 5 hydrates.
 
@@ -610,12 +618,14 @@ git commit -m "feat(markdown): render recording at-uris as player placeholders"
 ### Task 5: Player component and hydration
 
 **Files:**
+
 - Create: `src/components/RecordingPlayer.vue`
 - Create: `src/modules/atproto/runRecordings.ts`
 - Test: `src/components/RecordingPlayer.spec.ts`
 - Modify: `src/hooks/useMarkdownPostRender.hook.ts`
 
 **Interfaces:**
+
 - Consumes: `resolveRecording` and `ResolvedRecording` (Task 3), the `.recording-block` contract (Task 4).
 - Produces: `runRecordings(querySelector: string): Promise<void>`, mirroring `runMacroplan`/`runInstruments`.
 
@@ -756,10 +766,10 @@ const duration = computed(() => {
         stroke-linejoin="round"
       >
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M15 12.9a5 5 0 1 0 -3.902 -3.9" />
         <path
-          d="M15 12.9a5 5 0 1 0 -3.902 -3.9"
+          d="M15 12.9l-3.902 -3.899l-7.513 8.584a2 2 0 1 0 2.83 2.83l8.585 -7.515z"
         />
-        <path d="M15 12.9l-3.902 -3.899l-7.513 8.584a2 2 0 1 0 2.83 2.83l8.585 -7.515z" />
       </svg>
       <span class="recording-title">{{ label }}</span>
       <span v-if="duration" class="recording-duration">{{ duration }}</span>
@@ -836,9 +846,8 @@ export const runRecordings = async (querySelector: string): Promise<void> => {
   ).filter((el) => !el.dataset.recordingRendered)
   if (elements.length === 0) return
 
-  const { default: RecordingPlayer } = await import(
-    "@/components/RecordingPlayer.vue"
-  )
+  const { default: RecordingPlayer } =
+    await import("@/components/RecordingPlayer.vue")
 
   await Promise.all(
     elements.map(async (el) => {
@@ -875,10 +884,10 @@ import { runRecordings } from "@/modules/atproto/runRecordings"
 Then add this immediately after the `runInstruments` push (currently line 52):
 
 ```ts
-      // Unconditional for the same reason as instruments: one querySelectorAll
-      // when no recording exists, and both the repo and public views get
-      // players without another option flag.
-      renderJobs.push(runRecordings(`${scope} .recording-block`))
+// Unconditional for the same reason as instruments: one querySelectorAll
+// when no recording exists, and both the repo and public views get
+// players without another option flag.
+renderJobs.push(runRecordings(`${scope} .recording-block`))
 ```
 
 - [ ] **Step 7: Verify the whole suite still passes**
@@ -898,11 +907,13 @@ git commit -m "feat(atproto): mount audio players on recording placeholders"
 ### Task 6: Upload service
 
 **Files:**
+
 - Modify: `src/modules/atproto/service/atprotoOAuth.ts`
 - Create: `src/modules/atproto/uploadRecording.ts`
 - Test: `src/modules/atproto/uploadRecording.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RECORDING_COLLECTION` (Task 3), `getOAuthClient` from the existing OAuth service.
 - Produces:
   - `getActiveSession(did: string): Promise<OAuthSession | null>` in `atprotoOAuth.ts`
@@ -1172,10 +1183,12 @@ git commit -m "feat(atproto): upload audio blobs and create recording records"
 ### Task 7: Alt-text derivation
 
 **Files:**
+
 - Create: `src/utils/noteTitleForAlt.ts`
 - Test: `src/utils/noteTitleForAlt.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: `noteTitleForAlt(content: string, path: string): string` — returns the note title with ` - audio` already appended.
 
@@ -1318,10 +1331,12 @@ git commit -m "feat(notes): derive recording alt text from the note title"
 ### Task 8: Upload hook
 
 **Files:**
+
 - Create: `src/hooks/useAudioUpload.hook.ts`
 - Test: `src/hooks/useAudioUpload.hook.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `uploadRecording` (Task 6), `noteTitleForAlt` (Task 7), `MAX_RECORDING_BYTES` (Task 3), the existing `errorMessage` from `@/utils/notif`.
 - Produces: `useAudioUpload({ did, notePath, noteContent })` where all three are `Ref<string | undefined> | string | undefined`, returning `{ attachAudio(file: File): Promise<{ markdown: string } | null> }`. `markdown` is the finished line, alt text included.
 
@@ -1552,22 +1567,22 @@ Expected: PASS, five cases.
 If the duration tests hang, jsdom's `HTMLMediaElement` never fires `loadedmetadata`. The `error` listener covers it, but if neither fires, add this to the spec's `beforeEach`:
 
 ```ts
-    vi.stubGlobal(
-      "Audio",
-      class {
-        preload = ""
-        duration = NaN
-        addEventListener(event: string, handler: () => void) {
-          if (event === "loadedmetadata") setTimeout(handler, 0)
-        }
-        set src(_value: string) {}
-      }
-    )
-    vi.stubGlobal("URL", {
-      ...URL,
-      createObjectURL: () => "blob:x",
-      revokeObjectURL: () => {}
-    })
+vi.stubGlobal(
+  "Audio",
+  class {
+    preload = ""
+    duration = NaN
+    addEventListener(event: string, handler: () => void) {
+      if (event === "loadedmetadata") setTimeout(handler, 0)
+    }
+    set src(_value: string) {}
+  }
+)
+vi.stubGlobal("URL", {
+  ...URL,
+  createObjectURL: () => "blob:x",
+  revokeObjectURL: () => {}
+})
 ```
 
 - [ ] **Step 5: Commit**
@@ -1583,9 +1598,11 @@ git commit -m "feat(notes): validate and upload audio attachments"
 ### Task 9: Toolbar button in `StackedNote.vue`
 
 **Files:**
+
 - Modify: `src/components/StackedNote.vue`
 
 **Interfaces:**
+
 - Consumes: `useAudioUpload` (Task 8), the existing `useATProtoLogin` hook (exposes `did` and `isLoggedIn`).
 - Produces: nothing downstream.
 
@@ -1650,13 +1667,13 @@ Confirm `computed` and `ref` are already in the `vue` import at the top of the f
 In `src/components/StackedNote.vue`, immediately after the hidden image `<input>` (currently ending at line 550), add:
 
 ```vue
-        <button
-          v-if="isMarkdown && mode === 'edit' && canPush && canAttachAudio"
-          class="action button is-text is-light"
-          :title="isUploading ? 'Uploading…' : 'Attach audio'"
-          :disabled="isUploading"
-          @click="audioInput?.click()"
-        >
+<button
+  v-if="isMarkdown && mode === 'edit' && canPush && canAttachAudio"
+  class="action button is-text is-light"
+  :title="isUploading ? 'Uploading…' : 'Attach audio'"
+  :disabled="isUploading"
+  @click="audioInput?.click()"
+>
           <span
             v-if="isUploading"
             class="loading loading-spinner loading-sm"
@@ -1681,13 +1698,13 @@ In `src/components/StackedNote.vue`, immediately after the hidden image `<input>
             <path d="M19 16v6" />
           </svg>
         </button>
-        <input
-          ref="audioInput"
-          type="file"
-          accept="audio/*"
-          class="hidden-input"
-          @change="onAudioPicked"
-        />
+<input
+  ref="audioInput"
+  type="file"
+  accept="audio/*"
+  class="hidden-input"
+  @change="onAudioPicked"
+/>
 ```
 
 - [ ] **Step 3: Verify the suite still passes**
@@ -1722,20 +1739,20 @@ git commit -m "feat(notes): attach audio to published notes from the toolbar"
 
 Spec coverage check against `docs/superpowers/specs/2026-08-01-atproto-audio-design.md`:
 
-| Spec section | Task |
-| --- | --- |
-| Lexicon | 1 |
-| Publishing the lexicon (goat, DNS) | Manual operator steps, called out in Task 1 |
-| The link / at-uri format | 4, 8 |
-| Alt-text derivation | 7 |
-| Data flow — write | 6, 8, 9 |
-| Data flow — read | 3, 5 |
-| Rendering / post-render hydration | 4, 5 |
-| Components table (`remanso`) | 2-9 |
-| Components table (`remanso-jetstream`) | 1 |
-| Components (`remanso-cli`) | None, by design |
-| Failure handling table | 3 (read failures), 6 (write failures), 8 (validation), 9 (gating) |
-| Testing | Every task |
+| Spec section                           | Task                                                              |
+| -------------------------------------- | ----------------------------------------------------------------- |
+| Lexicon                                | 1                                                                 |
+| Publishing the lexicon (goat, DNS)     | Manual operator steps, called out in Task 1                       |
+| The link / at-uri format               | 4, 8                                                              |
+| Alt-text derivation                    | 7                                                                 |
+| Data flow — write                      | 6, 8, 9                                                           |
+| Data flow — read                       | 3, 5                                                              |
+| Rendering / post-render hydration      | 4, 5                                                              |
+| Components table (`remanso`)           | 2-9                                                               |
+| Components table (`remanso-jetstream`) | 1                                                                 |
+| Components (`remanso-cli`)             | None, by design                                                   |
+| Failure handling table                 | 3 (read failures), 6 (write failures), 8 (validation), 9 (gating) |
+| Testing                                | Every task                                                        |
 
 One deviation from the spec, already flagged above: `useATProtoLogin.hook.ts` is not modified. `BrowserOAuthClient.restore(did)` re-derives the session, so Task 6 adds `getActiveSession(did)` to the OAuth service instead. Update the spec's component table when this lands.
 

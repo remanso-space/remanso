@@ -34,11 +34,13 @@ describe("parseAtUri", () => {
   })
 
   it("returns the collection segment", () => {
-    expect(parseAtUri("at://did:plc:abc/space.remanso.recording/3xyz")).toEqual({
-      did: "did:plc:abc",
-      collection: "space.remanso.recording",
-      rkey: "3xyz"
-    })
+    expect(parseAtUri("at://did:plc:abc/space.remanso.recording/3xyz")).toEqual(
+      {
+        did: "did:plc:abc",
+        collection: "space.remanso.recording",
+        rkey: "3xyz"
+      }
+    )
   })
 
   it("throws when the URI does not start with at://", () => {

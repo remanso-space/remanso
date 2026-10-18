@@ -25,7 +25,7 @@ Locked during brainstorming, 2026-08-01.
 - **`remanso-cli` needs no change for the link to survive**, but not for the
   reason first recorded here. `isLocalPath`
   (`packages/remanso-cli/src/lib/note.ts:37`) only excludes `http://`,
-  `https://`, `#` and `mailto:`, so an `at://` URI counts as *local* and
+  `https://`, `#` and `mailto:`, so an `at://` URI counts as _local_ and
   `processImages` does try to upload it. Every candidate path misses,
   `uploadBlob` returns undefined, and the loop warns
   `Could not upload image: at://…` and continues — leaving the markdown
@@ -125,12 +125,12 @@ goat account logout
 `publish` takes a path relative to the lexicons root. Its output symbols
 (`lex_publish.go`):
 
-| Symbol | Meaning |
-| --- | --- |
-| 🟢 | Published — no remote record existed |
-| 🟠 | Skipped — a remote record already exists; pass `--update` to overwrite |
-| 🟣 | Updated an existing record |
-| ⭕ | DNS check failed — the authority does not resolve to your DID |
+| Symbol | Meaning                                                                |
+| ------ | ---------------------------------------------------------------------- |
+| 🟢     | Published — no remote record existed                                   |
+| 🟠     | Skipped — a remote record already exists; pass `--update` to overwrite |
+| 🟣     | Updated an existing record                                             |
+| ⭕     | DNS check failed — the authority does not resolve to your DID          |
 
 Use an app password. `goat` stores credentials in cleartext under the home
 directory, and `goat account logout` removes them.
@@ -240,18 +240,18 @@ This follows the pattern mermaid, tikz and macroplan already use:
 
 ### `remanso`
 
-| File | Change |
-| --- | --- |
-| `src/modules/atproto/recording.types.ts` | New. `Recording`, `RecordingRecord`, reusing `PublicNoteBlob` |
-| `src/modules/atproto/uploadRecording.ts` | New. `uploadBlob` + `createRecord` via the OAuth session fetch handler |
-| `src/modules/atproto/resolveRecording.ts` | New. at-uri → `{ blobUrl, title, durationSec }`, using existing `parseAtUri` and `getAuthor` |
-| `src/modules/atproto/service/atprotoOAuth.ts` | New `getActiveSession(did)`, wrapping `BrowserOAuthClient.restore` |
-| `src/hooks/useAudioUpload.hook.ts` | New. Mirrors `useImageUpload.hook.ts`: validate, upload, return the at-uri |
-| `src/utils/markdown/markdown-it-recording.ts` | New plugin |
-| `src/hooks/useMarkdown.hook.ts` | Register the plugin |
-| `src/hooks/useMarkdownPostRender.hook.ts` | Hydrate `.recording-block` |
-| `src/components/RecordingPlayer.vue` | New. DaisyUI player, title and duration from the record |
-| `src/components/StackedNote.vue` | Second file input and toolbar button beside the image one (`:509-550`), gated on `.pub.md` and an ATProto session |
+| File                                          | Change                                                                                                            |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `src/modules/atproto/recording.types.ts`      | New. `Recording`, `RecordingRecord`, reusing `PublicNoteBlob`                                                     |
+| `src/modules/atproto/uploadRecording.ts`      | New. `uploadBlob` + `createRecord` via the OAuth session fetch handler                                            |
+| `src/modules/atproto/resolveRecording.ts`     | New. at-uri → `{ blobUrl, title, durationSec }`, using existing `parseAtUri` and `getAuthor`                      |
+| `src/modules/atproto/service/atprotoOAuth.ts` | New `getActiveSession(did)`, wrapping `BrowserOAuthClient.restore`                                                |
+| `src/hooks/useAudioUpload.hook.ts`            | New. Mirrors `useImageUpload.hook.ts`: validate, upload, return the at-uri                                        |
+| `src/utils/markdown/markdown-it-recording.ts` | New plugin                                                                                                        |
+| `src/hooks/useMarkdown.hook.ts`               | Register the plugin                                                                                               |
+| `src/hooks/useMarkdownPostRender.hook.ts`     | Hydrate `.recording-block`                                                                                        |
+| `src/components/RecordingPlayer.vue`          | New. DaisyUI player, title and duration from the record                                                           |
+| `src/components/StackedNote.vue`              | Second file input and toolbar button beside the image one (`:509-550`), gated on `.pub.md` and an ATProto session |
 
 No new dependency. `@atproto/api` is not installed and is not needed — the
 codebase already calls XRPC endpoints with plain `fetch`, and the OAuth
@@ -264,9 +264,9 @@ already exposes.
 
 ### `remanso-jetstream`
 
-| File | Change |
-| --- | --- |
-| `lexicons/space/remanso/recording.json` | New |
+| File                                    | Change |
+| --------------------------------------- | ------ |
+| `lexicons/space/remanso/recording.json` | New    |
 
 No `jetstream.ts` change. Indexing recordings is a discovery feature, separate
 from this.
@@ -277,18 +277,18 @@ None.
 
 ## Failure handling
 
-| Case | Behaviour |
-| --- | --- |
-| No ATProto session | Button hidden. The image button's `canPush` gate is the model |
-| Note is not `*.pub.md` | Button hidden |
-| File over 50MB | Reject before upload. Error names the size and suggests `ffmpeg -c:a aac -b:a 64k -ac 1` |
-| File is not audio | `accept="audio/*"` on the input, plus a MIME check on the handler |
-| `uploadBlob` fails | Toast via `errorMessage`, no record created, no markdown written. Nothing to clean up |
-| `createRecord` fails after a successful upload | Toast, no markdown written. The orphan blob is GC'd within the hour by design |
-| GitHub commit fails after the record is created | The record survives and the markdown does not. Orphan; accepted for phase 1 |
-| `getRecord` fails at read time | Player renders the alt text as a link to the at-uri |
-| `getBlob` fails at read time | Native `<audio>` error state under the title |
-| Line deleted from markdown | Record and blob persist. Known gap — see below |
+| Case                                            | Behaviour                                                                                |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| No ATProto session                              | Button hidden. The image button's `canPush` gate is the model                            |
+| Note is not `*.pub.md`                          | Button hidden                                                                            |
+| File over 50MB                                  | Reject before upload. Error names the size and suggests `ffmpeg -c:a aac -b:a 64k -ac 1` |
+| File is not audio                               | `accept="audio/*"` on the input, plus a MIME check on the handler                        |
+| `uploadBlob` fails                              | Toast via `errorMessage`, no record created, no markdown written. Nothing to clean up    |
+| `createRecord` fails after a successful upload  | Toast, no markdown written. The orphan blob is GC'd within the hour by design            |
+| GitHub commit fails after the record is created | The record survives and the markdown does not. Orphan; accepted for phase 1              |
+| `getRecord` fails at read time                  | Player renders the alt text as a link to the at-uri                                      |
+| `getBlob` fails at read time                    | Native `<audio>` error state under the title                                             |
+| Line deleted from markdown                      | Record and blob persist. Known gap — see below                                           |
 
 Format support is left to the browser. AAC in `.m4a` plays everywhere including
 old iOS; Opus in `.webm` is roughly twice as efficient at speech bitrates but

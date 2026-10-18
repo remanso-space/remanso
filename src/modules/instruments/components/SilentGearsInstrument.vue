@@ -91,10 +91,7 @@ const count = (perYear: number) =>
           <PlayIcon v-if="!running" />
           <PauseIcon v-else />
         </InstrumentButton>
-        <InstrumentButton
-          label="Reset"
-          @click="reset"
-        >
+        <InstrumentButton label="Reset" @click="reset">
           <ResetIcon />
         </InstrumentButton>
       </div>

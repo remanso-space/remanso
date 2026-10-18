@@ -136,7 +136,7 @@ before starting.
   attribute)
 - every instrument gets the element rendered right after its placeholder,
   whatever it is. Read it with `consumeRows(props.sibling)` (rows of data: takes
-  a table *or* a pipe-separated list, hides the source it read) or
+  a table _or_ a pipe-separated list, hides the source it read) or
   `readList(props.sibling)` (plain items, stays visible) from `../sibling`. Both
   return `undefined` when the sibling is some other shape — fall back to
   `DEFAULT_*` data, never throw.

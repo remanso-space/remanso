@@ -37,7 +37,13 @@ const mount = (html: string) => {
 const run = (notePath: string | null, content = "rendered") => {
   const trigger = ref(content)
   const scope = effectScope()
-  scope.run(() => useImages(() => ".note-display", () => notePath, trigger))
+  scope.run(() =>
+    useImages(
+      () => ".note-display",
+      () => notePath,
+      trigger
+    )
+  )
   return { trigger, scope }
 }
 

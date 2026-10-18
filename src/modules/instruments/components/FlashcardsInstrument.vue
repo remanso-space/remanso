@@ -82,10 +82,7 @@ const restart = () => {
           <span class="flashcard-progress text-xs tabular-nums opacity-60">
             {{ progress }}
           </span>
-          <InstrumentButton
-            label="Restart"
-            @click="restart"
-          >
+          <InstrumentButton label="Restart" @click="restart">
             <ResetIcon />
           </InstrumentButton>
         </div>
