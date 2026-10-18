@@ -9,6 +9,14 @@ import { defineConfig } from "vitest/config"
 // Where _scripts/install-browser-deps.sh vendors chromium's shared libraries
 // when the machine has none and no root to apt-install them. Absent on CI and
 // on a normal desktop, where the browser finds its libraries by itself.
+// playwright's default download directory is a root-owned mount in the dev
+// container, so _scripts/install-browser-deps.sh puts the browser here
+// instead. Absent everywhere the default directory is writable.
+const homeBrowsers = path.join(homedir(), ".local/share/ms-playwright")
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH && existsSync(homeBrowsers)) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = homeBrowsers
+}
+
 const vendoredLibs =
   process.env.CHROMIUM_DEPS_DIR ??
   path.join(homedir(), ".local/share/chromium-deps")

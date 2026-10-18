@@ -292,7 +292,7 @@ Basement rows per function: **target / difficulty (1–5) / absolute weight / re
 - **N1 Beauty** _W:9_
   - **F1** Render rich content faithfully _Dir↑_
     - **How**: markdown-it pipeline with plugins; each renderer wrapped so a parse failure yields a styled fallback, not a stack trace
-      - **Component**: C1 `useMarkdown` + plugins (KaTeX, Shikiji, Mermaid, TikZ, GitHub alerts, checkboxes)
+      - **Component**: C1 `useMarkdown` + plugins (KaTeX, Shikiji, pele for mermaid, TikZ, GitHub alerts, checkboxes)
   - **F2** Beautiful typography & layout _Dir↑_
     - **How**: DaisyUI theme + `@tailwindcss/typography` prose + per-repo `UserSettings`; Published Notes apply their stored theme/fonts
       - **Component**: C2 Theme & typography system (themes, fonts/width, image lightbox)

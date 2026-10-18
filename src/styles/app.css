@@ -235,11 +235,44 @@ pre {
   }
 }
 
+/* pele renders mermaid blocks and takes every color from these custom
+   properties, so the diagrams follow the DaisyUI theme (and its light/dark
+   scheme) instead of carrying a baked-in palette. */
 pre.mermaid {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--color-base-content);
+  background-color: transparent;
+
+  --pele-bg: var(--color-base-100);
+  --pele-fg: var(--color-base-content);
+  --pele-muted: color-mix(
+    in oklch,
+    var(--color-base-content) 60%,
+    var(--color-base-100)
+  );
+  --pele-surface: var(--color-base-200);
+  --pele-surface-alt: var(--color-base-300);
+  --pele-border: color-mix(
+    in oklch,
+    var(--color-base-content) 25%,
+    var(--color-base-100)
+  );
+  --pele-line: var(--pele-border);
+  --pele-accent: var(--link-accent);
+  --pele-critical: var(--color-error);
+  --pele-error: var(--color-error);
+  --pele-font: var(--font-family);
+  --pele-font-mono: ui-monospace, "Courier Prime", monospace;
+  --pele-radius: 0.5rem;
+  --pele-series-1: var(--link-accent);
+  --pele-series-2: var(--color-primary);
+  --pele-series-3: var(--color-secondary);
+  --pele-series-4: var(--color-info);
+  --pele-series-5: var(--color-success);
+  --pele-series-6: var(--color-warning);
+  --pele-series-7: var(--color-error);
+  --pele-series-8: var(--color-neutral);
 }
 
 pre.tikz {

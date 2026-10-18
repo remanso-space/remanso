@@ -10,7 +10,6 @@ import markdownItCheckbox from "markdown-it-checkbox"
 import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
 import markdownItIframe from "markdown-it-iframe"
 import Shikiji from "markdown-it-shikiji"
-import mermaid from "mermaid"
 import type { LanguageRegistration } from "shikiji-core"
 import { Ref, ref, toValue } from "vue"
 
@@ -40,7 +39,7 @@ const TIKZ_RENDER_TIMEOUT_MS = 30000
 const markdownItMermaidExtractor = fenceRenderer(
   "mermaid",
   (content, md) =>
-    `<pre class="mermaid">\n${md.utils.escapeHtml(content.trim())}\n</pre>\n`
+    `<pre class="mermaid" data-mermaid-source="${encodeUTF8ToBase64(content.trim())}">\n${md.utils.escapeHtml(content.trim())}\n</pre>\n`
 )
 
 /**
@@ -150,20 +149,30 @@ export const useShikiji = (): Promise<void> => {
   return shikijiPromise
 }
 
-let mermaidInitialized = false
+/**
+ * Render every mermaid block through pele, which parses mermaid syntax but
+ * lays out and paints the svg itself — themed from the `--pele-*` custom
+ * properties in `app.css` instead of a baked-in palette. Imported on demand so
+ * notes without a diagram never download the renderer.
+ */
+export const runMermaid = async (querySelector: string): Promise<void> => {
+  const blocks = Array.from(
+    document.querySelectorAll<HTMLElement>(querySelector)
+  )
+  if (blocks.length === 0) return
 
-export const runMermaid = (querySelector: string): Promise<void> => {
-  if (!mermaidInitialized) {
-    mermaidInitialized = true
-    mermaid.initialize({
-      theme: "dark",
-      startOnLoad: false,
-      flowchart: { curve: "natural" }
+  const { mount } = await import("pele")
+
+  blocks.forEach((block) => {
+    const encoded = block.dataset.mermaidSource
+    const source = encoded ? decodeBase64ToUTF8(encoded) : block.textContent
+    if (!source) return
+
+    mount(block, source, {
+      onError: (error) => {
+        block.textContent = String(error)
+      }
     })
-  }
-
-  return mermaid.run({
-    querySelector
   })
 }
 

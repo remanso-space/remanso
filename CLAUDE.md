@@ -24,7 +24,7 @@ Run a single test file: `pnpm test src/modules/repo/services/resolvePath.spec.ts
 
 `*.browser.spec.ts` files run in a real headless chromium (Vitest browser mode +
 Playwright, config in `vitest.browser.config.mts`), so they carry things jsdom
-cannot: computed CSS from Tailwind/DaisyUI variables, mermaid's measured layout,
+cannot: computed CSS from Tailwind/DaisyUI variables, pele's measured diagram layout,
 IndexedDB and Workers (PouchDB runs unmocked), real media elements, and
 screenshot comparisons through `toMatchScreenshot`.
 
@@ -49,7 +49,8 @@ screenshot comparisons through `toMatchScreenshot`.
 - **arktype** for runtime type validation (used by the ATProto module)
 - **PouchDB** (IndexedDB) for local persistence
 - **Octokit** for GitHub API integration
-- **markdown-it** with plugins (KaTeX, Shikiji, Mermaid, checkboxes, GitHub alerts)
+- **markdown-it** with plugins (KaTeX, Shikiji, checkboxes, GitHub alerts) and
+  **pele** for mermaid diagrams
 
 ### Styling
 

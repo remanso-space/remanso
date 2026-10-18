@@ -12,6 +12,14 @@ set -euo pipefail
 
 LIB_DIR="${CHROMIUM_DEPS_DIR:-$HOME/.local/share/chromium-deps}"
 
+# playwright's default download directory is a root-owned mount in the dev
+# container, so when it is not writable put the browser under $HOME instead;
+# vitest.browser.config.mts looks in the same place.
+if [ -z "${PLAYWRIGHT_BROWSERS_PATH:-}" ] && [ ! -w "$HOME/.cache/ms-playwright" ]; then
+  export PLAYWRIGHT_BROWSERS_PATH="$HOME/.local/share/ms-playwright"
+fi
+BROWSERS_DIR="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
+
 vendored_ld_path() {
   echo "$LIB_DIR/usr/lib/x86_64-linux-gnu:$LIB_DIR/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
 }
@@ -24,10 +32,10 @@ missing_libs() {
 # what a headless test run uses anyway.
 pnpm exec playwright install chromium --only-shell
 
-SHELL_BIN=$(ls -d "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell 2>/dev/null | tail -1 || true)
+SHELL_BIN=$(ls -d "$BROWSERS_DIR"/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell 2>/dev/null | tail -1 || true)
 
 if [ -z "$SHELL_BIN" ]; then
-  echo "No chrome-headless-shell found under ~/.cache/ms-playwright — nothing to check."
+  echo "No chrome-headless-shell found under $BROWSERS_DIR — nothing to check."
   exit 0
 fi
 
