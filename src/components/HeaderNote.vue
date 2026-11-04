@@ -172,10 +172,12 @@ defineProps<{ user: string; repo: string }>()
 
   // Touch screens keep :hover on the last tapped button, leaving a grey disc
   // behind; keep the background for keyboard focus only.
-  :deep(.btn-ghost:not(:focus-visible)) {
-    background-color: transparent;
-    border-color: transparent;
-    box-shadow: none;
+  @media (hover: none) {
+    :deep(.btn-ghost:not(:focus-visible)) {
+      background-color: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
   }
 }
 </style>
