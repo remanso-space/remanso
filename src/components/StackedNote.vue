@@ -859,10 +859,21 @@ $border-color: rgba(18, 19, 58, 0.2);
     top: 0;
   }
 
+  // Rotated, the title's height becomes its width: pin it to the bookmark
+  // spine (BOOKMARK_WIDTH_REM) and pull it onto the note's left edge so the
+  // next note's border never crops it.
   .title-stacked-note {
+    height: 2rem;
+    flex-shrink: 0;
+    margin-left: -1.5rem;
     padding: 0;
     transform-origin: 0 0;
-    transform: rotate(90deg);
+    transform: rotate(90deg) translateY(-100%);
+  }
+
+  .title-stacked-note-link {
+    margin-inline-start: 0;
+    padding-block: 0;
   }
 
   a {
