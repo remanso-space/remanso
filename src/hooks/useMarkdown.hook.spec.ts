@@ -59,6 +59,18 @@ describe("renderCodeFile", () => {
 
     expect(html).toContain("--line-number-width:3ch")
   })
+
+  // Only a handful of grammars ship; any other fence must still render as
+  // code instead of failing the whole note into its raw-text fallback.
+  it("renders a language without a loaded grammar as plain code", async () => {
+    const html = await renderCodeFile({
+      rawContent: "name: remanso\n",
+      lang: "yaml"
+    })
+
+    expect(html).toContain('class="shiki')
+    expect(html).toContain("name: remanso")
+  })
 })
 
 describe("renderTikzFile", () => {

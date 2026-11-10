@@ -11,7 +11,7 @@ import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
 import markdownItIframe from "markdown-it-iframe"
 import { createHighlighterCore } from "shiki/core"
 import { createOnigurumaEngine } from "shiki/engine/oniguruma"
-import type { LanguageRegistration } from "shiki/types"
+import type { BundledLanguage, LanguageRegistration } from "shiki/types"
 import { Ref, ref, toValue } from "vue"
 
 import { data } from "@/data/data"
@@ -158,7 +158,11 @@ export const useShiki = (): Promise<void> => {
           themes: {
             light: "vitesse-light",
             dark: "vitesse-black"
-          }
+          },
+          // Without it, a fence in any language not loaded above throws and
+          // the whole note degrades to raw text. Shiki renders "text" without
+          // a grammar, but the option's type leaves out its special languages.
+          fallbackLanguage: "text" as BundledLanguage
         }
       )
       md.use(plugin)
