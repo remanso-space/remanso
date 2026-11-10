@@ -130,8 +130,6 @@ a.title-stacked-note-link {
   margin-bottom: 0;
   padding-left: 0;
   text-decoration: none;
-  display: flex;
-  gap: 1rem;
 }
 
 .notyf__toast {

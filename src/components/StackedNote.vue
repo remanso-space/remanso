@@ -605,7 +605,7 @@ const onBadgeClick = async () => {
       [`note-${sha}`]: true
     }"
   >
-    <div class="title-stacked-note breadcrumbs text-sm" :class="titleClassName">
+    <div class="title-stacked-note text-sm" :class="titleClassName">
       <div class="action-bar">
         <note-freshness-badge
           :status="freshnessStatus"
@@ -665,7 +665,7 @@ const onBadgeClick = async () => {
         </button>
       </div>
       <a
-        class="title-stacked-note-link"
+        class="title-stacked-note-link breadcrumbs not-prose"
         @click.prevent="scrollToFocusedNote({ noteId: props.sha })"
       >
         <ul>
@@ -767,6 +767,10 @@ $border-color: rgba(18, 19, 58, 0.2);
     margin-bottom: 0;
     padding-left: 0;
     text-decoration: none;
+  }
+
+  li:last-child {
+    font-weight: 600;
   }
 }
 
