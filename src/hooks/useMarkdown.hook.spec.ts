@@ -8,9 +8,15 @@ vi.mock("@/data/data", () => ({
 import {
   markdownBuilder,
   renderCodeFile,
-  renderTikzFile
+  renderTikzFile,
+  useShiki
 } from "@/hooks/useMarkdown.hook"
 import { decodeBase64ToUTF8 } from "@/utils/decodeBase64ToUTF8"
+
+// Plain-text fallback paints at most one colour; a grammar
+// splits the code into differently coloured tokens.
+const tokenColours = (html: string) =>
+  new Set(html.match(/<span style="color:#[0-9A-Fa-f]+/g))
 
 describe("renderCodeFile", () => {
   it("wraps highlighted files in a code-file container with a sized gutter", async () => {
@@ -60,16 +66,39 @@ describe("renderCodeFile", () => {
     expect(html).toContain("--line-number-width:3ch")
   })
 
-  // Only a handful of grammars ship; any other fence must still render as
-  // code instead of failing the whole note into its raw-text fallback.
-  it("renders a language without a loaded grammar as plain code", async () => {
+  it("fetches a grammar that isn't preloaded before rendering the file", async () => {
+    const html = await renderCodeFile({
+      rawContent: "name: remanso\nversion: 2\n",
+      lang: "yaml"
+    })
+
+    expect(tokenColours(html).size).toBeGreaterThan(1)
+  })
+
+  // A fence must still render as code instead of failing the whole note into
+  // its raw-text fallback when shiki has no grammar for it.
+  it("renders a language shiki has no grammar for as plain code", async () => {
     const html = await renderCodeFile({
       rawContent: "name: remanso\n",
-      lang: "yaml"
+      lang: "notalanguage"
     })
 
     expect(html).toContain('class="shiki')
     expect(html).toContain("name: remanso")
+  })
+})
+
+describe("markdownBuilder fence languages", () => {
+  const { toHTML } = markdownBuilder()
+
+  it("re-renders a fence highlighted once its grammar has loaded", async () => {
+    await useShiki()
+    const note = "```python\ndef greet(name):\n    return name\n```"
+
+    expect(tokenColours(toHTML(note)).size).toBeLessThan(2)
+    await vi.waitFor(() =>
+      expect(tokenColours(toHTML(note)).size).toBeGreaterThan(1)
+    )
   })
 })
 

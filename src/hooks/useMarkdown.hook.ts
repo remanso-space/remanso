@@ -9,11 +9,15 @@ import blockEmbedPlugin from "markdown-it-block-embed"
 import markdownItCheckbox from "markdown-it-checkbox"
 import MarkdownItGitHubAlerts from "markdown-it-github-alerts"
 import markdownItIframe from "markdown-it-iframe"
-import { createHighlighterCore } from "shiki/core"
+import { createHighlighterCore, type HighlighterCore } from "shiki/core"
 import { createOnigurumaEngine } from "shiki/engine/oniguruma"
-import type { BundledLanguage, LanguageRegistration } from "shiki/types"
+import type {
+  DynamicImportLanguageRegistration,
+  LanguageRegistration
+} from "shiki/types"
 import { Ref, ref, toValue } from "vue"
 
+import { PRELOADED_SHIKI_LANGUAGES } from "@/constants/shiki-languages"
 import { data } from "@/data/data"
 import { DataType } from "@/data/DataType.enum"
 import type { TikzCache } from "@/data/models/TikzCache"
@@ -117,59 +121,102 @@ const md = new MarkdownIt({
 
 let shikiPromise: Promise<void> | null = null
 const shikiReady = ref(false)
+// Bumped whenever a grammar lands, so notes rendered with a plain-text
+// fallback re-render highlighted.
+const shikiLanguagesVersion = ref(0)
+let highlighter: HighlighterCore | null = null
+let bundledLanguages: Record<string, DynamicImportLanguageRegistration> = {}
+const languageLoads = new Map<string, Promise<void>>()
+
+const FENCE_LANGUAGE = /^ {0,3}(?:`{3,}|~{3,})[ \t]*([^\s`{]+)/gm
 
 /**
- * Shiki's fine-grained bundle: every grammar and theme is named here instead
- * of reached through the full bundle's catalogue. The catalogue references all
- * ~200 languages, and the build turns each one into a chunk the service worker
- * then precaches — 3MB of grammars no note ever asks for.
+ * The highlighter starts with the PRELOADED_SHIKI_LANGUAGES grammars; any
+ * other fence language is fetched the first time a note uses it, so the full
+ * catalogue is never downloaded nor precached up front.
  */
 export const useShiki = (): Promise<void> => {
   if (!shikiPromise) {
-    shikiPromise = createHighlighterCore({
-      themes: [
-        import("@shikijs/themes/vitesse-light"),
-        import("@shikijs/themes/vitesse-black")
-      ],
-      langs: [
-        import("@shikijs/langs/bash"),
-        import("@shikijs/langs/javascript"),
-        import("@shikijs/langs/typescript"),
-        import("@shikijs/langs/tsx"),
-        import("@shikijs/langs/markdown"),
-        import("@shikijs/langs/mermaid"),
-        import("@shikijs/langs/html"),
-        import("@shikijs/langs/css"),
-        import("@shikijs/langs/json"),
-        import("@shikijs/langs/rust"),
-        {
-          ...alloyGrammar,
-          name: "alloy",
-          aliases: ["als"]
-        } as unknown as LanguageRegistration
-      ],
-      engine: createOnigurumaEngine(import("shiki/wasm"))
-    }).then((highlighter) => {
-      // `fromHighlighter` is typed for the bundled highlighter rather than a
-      // core one; both expose the same `codeToHtml` it calls.
-      const plugin = fromHighlighter(
-        highlighter as Parameters<typeof fromHighlighter>[0],
-        {
-          themes: {
-            light: "vitesse-light",
-            dark: "vitesse-black"
-          },
-          // Without it, a fence in any language not loaded above throws and
-          // the whole note degrades to raw text. Shiki renders "text" without
-          // a grammar, but the option's type leaves out its special languages.
-          fallbackLanguage: "text" as BundledLanguage
+    shikiPromise = import("shiki/langs")
+      .then((langs) => {
+        bundledLanguages = langs.bundledLanguages
+        return createHighlighterCore({
+          themes: [
+            import("@shikijs/themes/vitesse-light"),
+            import("@shikijs/themes/vitesse-black")
+          ],
+          langs: [
+            ...PRELOADED_SHIKI_LANGUAGES.map((lang) => bundledLanguages[lang]()),
+            {
+              ...alloyGrammar,
+              name: "alloy",
+              aliases: ["als"]
+            } as unknown as LanguageRegistration
+          ],
+          engine: createOnigurumaEngine(import("shiki/wasm"))
+        })
+      })
+      .then((core) => {
+        highlighter = core
+        // `fromHighlighter` is typed for the bundled highlighter rather than a
+        // core one; both expose the same `codeToHtml` it calls.
+        md.use(
+          fromHighlighter(core as Parameters<typeof fromHighlighter>[0], {
+            themes: {
+              light: "vitesse-light",
+              dark: "vitesse-black"
+            }
+          })
+        )
+        // The plugin's own `fallbackLanguage` checks a snapshot of the loaded
+        // grammars taken at setup, so it would keep grammars loaded later on
+        // plain text. Fall back against the live list instead: a fence whose
+        // grammar is not loaded yet renders as plain code rather than throwing
+        // the whole note into its raw-text fallback.
+        const highlight = md.options.highlight!
+        md.options.highlight = (code, lang, attrs) => {
+          const id = lang.toLowerCase()
+          const loaded = core.getLoadedLanguages().includes(id)
+          return highlight(code, loaded ? id : "text", attrs)
         }
-      )
-      md.use(plugin)
-      shikiReady.value = true
-    })
+        shikiReady.value = true
+      })
   }
   return shikiPromise
+}
+
+const loadLanguage = (core: HighlighterCore, lang: string): Promise<void> => {
+  const pending = languageLoads.get(lang)
+  if (pending) return pending
+  const load = core
+    .loadLanguage(bundledLanguages[lang]())
+    .then(() => {
+      shikiLanguagesVersion.value++
+    })
+    .catch((error) => console.error(`shiki: ${lang} grammar failed`, error))
+  languageLoads.set(lang, load)
+  return load
+}
+
+/**
+ * Fetch the grammars of every fence language in `content` that the
+ * highlighter has not loaded yet. Languages shiki has no grammar for keep
+ * rendering as plain code.
+ */
+const loadFenceLanguages = async (content: string): Promise<void> => {
+  const core = highlighter
+  if (!core) return
+  const loaded = core.getLoadedLanguages()
+  const missing = [
+    ...new Set(
+      [...content.matchAll(FENCE_LANGUAGE)].map(([, lang]) =>
+        lang.toLowerCase()
+      )
+    )
+  ].filter(
+    (lang) => Object.hasOwn(bundledLanguages, lang) && !loaded.includes(lang)
+  )
+  await Promise.all(missing.map((lang) => loadLanguage(core, lang)))
 }
 
 /**
@@ -404,7 +451,11 @@ const renderMarkdown = (content: string, env?: Record<string, unknown>) => {
   // computed in useFile) re-render once `useShiki()` mutates the
   // singleton `md` — otherwise the first render on page load stays
   // unhighlighted because nothing else invalidates the computed.
-  if (content.includes("```")) void shikiReady.value
+  if (content.includes("```")) {
+    void shikiReady.value
+    void shikiLanguagesVersion.value
+    void loadFenceLanguages(content)
+  }
   slugger.reset()
   try {
     return env ? md.render(content, env) : md.render(content)
@@ -434,6 +485,7 @@ export const renderCodeFile = async ({
   filename?: string
 }): Promise<string> => {
   await useShiki()
+  if (lang !== null) await loadFenceLanguages(`\`\`\`${lang}`)
   const heading = filename ? `# ${filename}\n\n` : ""
   // Drop the trailing newline so the final empty line isn't numbered.
   const lines = rawContent.replace(/\n$/, "").split("\n")

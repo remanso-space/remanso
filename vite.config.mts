@@ -4,11 +4,34 @@ import path from "path"
 import { defineConfig, type UserConfigExport } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
 
+import { PRELOADED_SHIKI_LANGUAGES } from "./src/constants/shiki-languages"
+
+const SHIKI_GRAMMAR = /@shikijs\/langs\/dist\/([^/]+)\.mjs$/
+const SHIKI_LAZY_DIR = "shiki-langs"
+const PRELOADED = new Set<string>(PRELOADED_SHIKI_LANGUAGES)
+
 export default defineConfig(({ command }) => {
   const config: UserConfigExport = {
     build: {
       minify: "esbuild",
-      reportCompressedSize: false
+      reportCompressedSize: false,
+      rolldownOptions: {
+        output: {
+          // Grammars fetched on first use get their own folder, so the service
+          // worker can leave them out of the precache (see `workbox` below).
+          // Judged on every module, not the facade: a grammar other grammars
+          // embed (cpp, yaml…) becomes a shared chunk with no facade.
+          chunkFileNames: ({ moduleIds }) => {
+            const grammars = moduleIds.map((id) => id.match(SHIKI_GRAMMAR)?.[1])
+            const lazy =
+              grammars.length > 0 &&
+              grammars.every((name) => name && !PRELOADED.has(name))
+            return lazy
+              ? `assets/${SHIKI_LAZY_DIR}/[name]-[hash].js`
+              : "assets/[name]-[hash].js"
+          }
+        }
+      }
     },
     test: {
       environment: "jsdom",
@@ -31,6 +54,18 @@ export default defineConfig(({ command }) => {
       vue(),
       VitePWA({
         registerType: "prompt",
+        workbox: {
+          // ~200 grammars, 3MB no note may ever ask for: cache each one the
+          // first time it is fetched instead.
+          globIgnores: [`**/${SHIKI_LAZY_DIR}/**`],
+          runtimeCaching: [
+            {
+              urlPattern: new RegExp(`/assets/${SHIKI_LAZY_DIR}/`),
+              handler: "CacheFirst",
+              options: { cacheName: SHIKI_LAZY_DIR }
+            }
+          ]
+        },
         includeAssets: [
           "favicon.ico",
           "apple-touch-icon.png",
