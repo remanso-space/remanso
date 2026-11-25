@@ -44,8 +44,12 @@ useUserSettings()
 const { visitRepo } = useVisitRepo({ user: user, repo: repo })
 const { toHTML } = markdownBuilder(repo)
 const { listenToClick } = useLinks("note-display")
-const { stackedNotes, scrollToFocusedNote, scrollToLastStackedNote } =
-  useRouteQueryStackedNotes()
+const {
+  stackedNotes,
+  justAddedNote,
+  scrollToFocusedNote,
+  scrollToLastStackedNote
+} = useRouteQueryStackedNotes()
 
 // A living link arrives with paths in `?notes`; resolve them to the latest
 // shas, then focus the deepest note just like an ordinary shared link does.
@@ -146,6 +150,7 @@ onUnmounted(() => {
       v-for="(stackedNote, index) in stackedNotes"
       :key="stackedNote"
       class="note"
+      :class="{ 'note-enter': stackedNote === justAddedNote }"
       :index="index"
       :sha="stackedNote"
       :user="user"
@@ -157,6 +162,27 @@ onUnmounted(() => {
 
 <style lang="scss">
 $header-height: 40px;
+
+@keyframes note-enter {
+  from {
+    opacity: 0;
+    transform: translate(var(--note-enter-x, 8px), var(--note-enter-y, 0));
+  }
+}
+
+@media (max-width: 768px) {
+  .flux-note {
+    --note-enter-x: 0;
+    --note-enter-y: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flux-note {
+    --note-enter-x: 0;
+    --note-enter-y: 0;
+  }
+}
 
 .flux-note {
   display: flex;
@@ -245,6 +271,12 @@ $header-height: 40px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+
+    // A note opened from a link settles in beside its parent while the strip
+    // glides to it. Short: opening notes is the core, repeated gesture.
+    &.note-enter {
+      animation: note-enter var(--dur-fast) var(--ease-out) backwards;
+    }
 
     .title {
       text-align: left;

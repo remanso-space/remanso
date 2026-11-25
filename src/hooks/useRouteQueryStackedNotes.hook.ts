@@ -1,10 +1,14 @@
 import { useWindowSize } from "@vueuse/core"
 import { useRouteQuery } from "@vueuse/router"
-import { nextTick, readonly } from "vue"
+import { nextTick, readonly, ref } from "vue"
 
 import { getBookmarkWidthPx } from "@/constants/bookmark-width"
 import { getNoteWidth } from "@/constants/note-width"
 import { scrollBehavior, useOverlay } from "@/hooks/useOverlay.hook"
+
+// The note the user just opened from a link: the only one that plays the
+// entrance. Notes restored from the URL, or remounted on a new sha, appear as is.
+const justAddedNote = ref<string | null>(null)
 
 export const useRouteQueryStackedNotes = () => {
   const stackedNotes = useRouteQuery("stackedNotes", undefined, {
@@ -163,6 +167,7 @@ export const useRouteQueryStackedNotes = () => {
 
       stackedNotes.value = newStackedNotes
     }
+    justAddedNote.value = sha
 
     scrollToFocusedNote({ noteId: selector ?? sha, hash, anchorTop })
   }
@@ -184,6 +189,7 @@ export const useRouteQueryStackedNotes = () => {
 
   return {
     stackedNotes: readonly(stackedNotes),
+    justAddedNote: readonly(justAddedNote),
     addStackedNote,
     replaceStackedNote,
     scrollToFocusedNote,
