@@ -294,22 +294,12 @@ pre {
    the dark palette lives in --shiki-dark* vars that we must apply ourselves.
    Without this, dark theme keeps the white code background and the
    base-content line numbers become white-on-white. */
-[data-theme="dracula"] :is(.shiki, .shiki span) {
+[data-theme="remanso-nuit"] :is(.shiki, .shiki span) {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
   font-style: var(--shiki-dark-font-style) !important;
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.shiki, .shiki span) {
-    color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
-    font-style: var(--shiki-dark-font-style) !important;
-    font-weight: var(--shiki-dark-font-weight) !important;
-    text-decoration: var(--shiki-dark-text-decoration) !important;
-  }
 }
 
 /* pele renders mermaid blocks and takes every color from these custom
@@ -367,11 +357,11 @@ pre.tikz svg {
 
 /* TikZ SVGs are monochrome black; invert them on the dark theme so they
    remain readable on the transparent background. The theme is always set
-   explicitly (index.html defaults to cmyk; ThemeSwap toggles cmyk/black),
+   explicitly (index.html defaults to remanso; applyTheme picks the pair),
    so we key off the dark theme name rather than prefers-color-scheme —
    the latter wrongly inverts when the OS is dark but the light theme is
    active. */
-[data-theme="black"] pre.tikz svg {
+[data-theme="remanso-nuit"] pre.tikz svg {
   filter: invert(1) hue-rotate(180deg);
 }
 
