@@ -184,6 +184,25 @@ $header-height: 40px;
   }
 }
 
+// Loading the readme: a static placeholder with one slow breath instead of
+// DaisyUI's shimmer sweep.
+.flux-note .skeleton {
+  background-image: none;
+  animation: skeleton-breathe 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes skeleton-breathe {
+  to {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flux-note .skeleton {
+    animation: none;
+  }
+}
+
 .flux-note {
   display: flex;
   flex: 1;
