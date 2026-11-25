@@ -40,8 +40,8 @@
 
 @plugin 'daisyui' {
   themes:
-    emerald --default,
-    dark --prefersdark;
+    pastel --default,
+    forest --prefersdark;
 }
 
 @config '../../tailwind.config.js';

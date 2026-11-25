@@ -170,6 +170,13 @@ defineProps<{ user: string; repo: string }>()
     color: var(--link-accent);
   }
 
+  // RouterLink marks the current view with aria-current="page", which DaisyUI
+  // paints as .btn-active: the repo-root link sat filled on every note.
+  :deep(.btn-ghost[aria-current]:not(:hover, :focus-visible)) {
+    --btn-bg: transparent;
+    --btn-border: transparent;
+  }
+
   // Touch screens keep :hover on the last tapped button, leaving a grey disc
   // behind; keep the background for keyboard focus only.
   @media (hover: none) {
