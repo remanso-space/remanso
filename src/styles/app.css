@@ -22,8 +22,10 @@
   );
   --background-color: #ffffff;
   --note-width: 500px;
+  /* oklab, not oklch: Chromium can resolve the oklch mix of two near-neutrals
+     to hue `none`, which paints as hue 0 and tints the canvas pink. */
   --note-canvas-bg: color-mix(
-    in oklch,
+    in oklab,
     var(--color-base-100) 60%,
     var(--color-base-200)
   );
