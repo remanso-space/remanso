@@ -19,8 +19,11 @@ import {
   saveSession
 } from "@/modules/atproto/service/atprotoSession"
 import { router } from "@/router/router"
+import { applyTheme, isDarkPreferred } from "@/theme.config"
 
 import App from "./App.vue"
+
+applyTheme(isDarkPreferred())
 
 const i18n = createI18n({
   locale: "en",

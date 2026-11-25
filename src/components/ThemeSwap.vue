@@ -1,31 +1,17 @@
 <script setup lang="ts">
-import { themeConfig } from "../theme.config"
+import { applyTheme, isDarkPreferred, themeConfig } from "../theme.config"
 
-const htmlElement = document.querySelector("html")
-const lightMode = themeConfig.light
 const darkMode = themeConfig.dark
+const isInitiallyDark = isDarkPreferred()
 
-const isInitiallyDark = JSON.parse(localStorage.getItem("is-dark") ?? "false")
-
-if (htmlElement) {
-  htmlElement.dataset.theme = isInitiallyDark ? darkMode : lightMode
-}
-
-const toggle = (isChecked: boolean) => {
-  localStorage.setItem("is-dark", isChecked ? "true" : "false")
-
-  if (!htmlElement) {
-    return
-  }
-
-  htmlElement.dataset.theme = isChecked ? darkMode : lightMode
-}
+const toggle = (isChecked: boolean) => applyTheme(isChecked, true)
 </script>
 
 <template>
   <label class="toggle text-base-content">
     <input
       type="checkbox"
+      aria-label="Dark mode"
       :value="darkMode"
       :checked="isInitiallyDark"
       class="theme-controller"
