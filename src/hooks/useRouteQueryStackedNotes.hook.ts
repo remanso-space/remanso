@@ -4,7 +4,7 @@ import { nextTick, readonly } from "vue"
 
 import { getBookmarkWidthPx } from "@/constants/bookmark-width"
 import { getNoteWidth } from "@/constants/note-width"
-import { useOverlay } from "@/hooks/useOverlay.hook"
+import { scrollBehavior, useOverlay } from "@/hooks/useOverlay.hook"
 
 export const useRouteQueryStackedNotes = () => {
   const stackedNotes = useRouteQuery("stackedNotes", undefined, {
@@ -37,7 +37,7 @@ export const useRouteQueryStackedNotes = () => {
       heading.scrollIntoView({
         block: "start",
         inline: "nearest",
-        behavior: smooth ? "smooth" : "auto"
+        behavior: scrollBehavior(!smooth)
       })
       return
     }
@@ -51,6 +51,7 @@ export const useRouteQueryStackedNotes = () => {
     cleanNoteId: string,
     index: number,
     anchorTop?: number,
+    instant = false,
     attempts = 30
   ) => {
     const element = document.querySelector(
@@ -58,17 +59,17 @@ export const useRouteQueryStackedNotes = () => {
     ) as HTMLElement | null
 
     if (element) {
-      scrollToElement(element, anchorTop)
+      scrollToElement(element, anchorTop, { instant })
       return
     }
 
     if (attempts <= 0) {
-      scrollToNote((index + 1) * height.value)
+      scrollToNote((index + 1) * height.value, { instant })
       return
     }
 
     requestAnimationFrame(() => {
-      scrollToNoteElement(cleanNoteId, index, anchorTop, attempts - 1)
+      scrollToNoteElement(cleanNoteId, index, anchorTop, instant, attempts - 1)
     })
   }
 
@@ -78,6 +79,7 @@ export const useRouteQueryStackedNotes = () => {
     hash?: string
     smoothHash?: boolean
     anchorTop?: number
+    instant?: boolean
   }
 
   const scrollToFocusedNote = ({
@@ -85,23 +87,29 @@ export const useRouteQueryStackedNotes = () => {
     notes = stackedNotes.value,
     hash,
     smoothHash = false,
-    anchorTop
+    anchorTop,
+    instant = false
   }: ScrollToFocusedNoteOptions = {}) => {
     nextTick(() => {
       const index = noteId ? notes.findIndex((nid) => nid === noteId) : 0
 
       if (isMobile.value) {
         if (noteId) {
-          scrollToNoteElement(noteId.replaceAll(":", "-"), index, anchorTop)
+          scrollToNoteElement(
+            noteId.replaceAll(":", "-"),
+            index,
+            anchorTop,
+            instant
+          )
         } else {
-          scrollToNote(0)
+          scrollToNote(0, { instant })
         }
       } else {
         if (noteId) {
           const left = (index + 1) * (getNoteWidth() - getBookmarkWidthPx())
-          scrollToNote(left)
+          scrollToNote(left, { instant })
         } else {
-          scrollToNote(0)
+          scrollToNote(0, { instant })
         }
       }
 
@@ -117,7 +125,7 @@ export const useRouteQueryStackedNotes = () => {
   const scrollToLastStackedNote = () => {
     const lastNote = stackedNotes.value.at(-1)
     if (lastNote) {
-      scrollToFocusedNote({ noteId: lastNote })
+      scrollToFocusedNote({ noteId: lastNote, instant: true })
     }
   }
 

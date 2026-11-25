@@ -3,6 +3,13 @@ import { computed, ref } from "vue"
 
 import { MOBILE_BREAKPOINT } from "@/constants/mobile"
 
+// Glide only on a jump the user asked for; restoring a position, or a user
+// who asked for less motion, lands at once.
+export const scrollBehavior = (instant = false): ScrollBehavior =>
+  instant || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
+    : "smooth"
+
 export const useOverlay = (listen = true) => {
   const x = ref(0)
   const y = ref(0)
@@ -23,15 +30,16 @@ export const useOverlay = (listen = true) => {
     )
   }
 
-  const scrollToNote = (to: number) => {
+  const scrollToNote = (to: number, { instant = false } = {}) => {
     const go = () => {
       const mainApp = document.getElementById("main-app")
       if (!mainApp) return
 
+      const behavior = scrollBehavior(instant)
       if (isMobile.value) {
-        mainApp.scrollTo({ top: to, behavior: "smooth" })
+        mainApp.scrollTo({ top: to, behavior })
       } else {
-        mainApp.scrollTo({ left: to, behavior: "smooth" })
+        mainApp.scrollTo({ left: to, behavior })
       }
     }
 
@@ -40,14 +48,21 @@ export const useOverlay = (listen = true) => {
     }, 80)
   }
 
-  const scrollToElement = (element: HTMLElement, anchorTop?: number) => {
+  const scrollToElement = (
+    element: HTMLElement,
+    anchorTop?: number,
+    { instant = false } = {}
+  ) => {
     const mainApp = document.getElementById("main-app")
     if (mainApp && anchorTop !== undefined) {
       mainApp.scrollTop = anchorTop
     }
 
     requestAnimationFrame(() => {
-      element.scrollIntoView({ behavior: "smooth", block: "start" })
+      element.scrollIntoView({
+        behavior: scrollBehavior(instant),
+        block: "start"
+      })
     })
   }
 
