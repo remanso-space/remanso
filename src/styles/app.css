@@ -39,16 +39,88 @@
   --dur-slow: 300ms;
 }
 
-[data-theme="light"] {
-  --color-contrast-content: var(--color-success-content);
-}
-
 @plugin "@tailwindcss/typography";
 
 @plugin 'daisyui' {
-  themes:
-    pastel --default,
-    forest --prefersdark;
+  themes: false;
+}
+
+/* Remanso — a remanso is the still pool at a river's bend. Notes are cream
+   sheets resting on that water: base-100 is the paper, base-200 the celadon
+   pool the canvas mixes in, accent a river-teal ink for links. Brand pink
+   stays the signature, as primary at night and as a fill by day (too pale to
+   read as text on paper, hence the deeper rose primary). Every *-content
+   pair is measured at ≥ 4.5:1 — re-measure when touching a colour. */
+@plugin "daisyui/theme" {
+  name: "remanso";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+  --color-base-100: #fbf7ef;
+  --color-base-200: #e4ebe6;
+  --color-base-300: #d3ddd7;
+  --color-base-content: #262a2b;
+  --color-primary: #b23f66;
+  --color-primary-content: #fff8f3;
+  --color-secondary: #ffa4c0;
+  --color-secondary-content: #3a1020;
+  --color-accent: #1f7a78;
+  --color-accent-content: #fbf7ef;
+  --color-neutral: #33403f;
+  --color-neutral-content: #f3efe6;
+  --color-info: #2f6f95;
+  --color-info-content: #ffffff;
+  --color-success: #3a7a4b;
+  --color-success-content: #ffffff;
+  --color-warning: #e0a63f;
+  --color-warning-content: #2a1d05;
+  --color-error: #b3392e;
+  --color-error-content: #ffffff;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Remanso nuit — the same pool after dark: teal-black water, moonlit paper
+   text, brand pink back as primary. */
+@plugin "daisyui/theme" {
+  name: "remanso-nuit";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: #1a2224;
+  --color-base-200: #131a1c;
+  --color-base-300: #0e1416;
+  --color-base-content: #e4ddd0;
+  --color-primary: #ffa4c0;
+  --color-primary-content: #2a0d17;
+  --color-secondary: #c25c7f;
+  --color-secondary-content: #1a0a10;
+  --color-accent: #5fbdb5;
+  --color-accent-content: #0b1c1b;
+  --color-neutral: #2c3a3c;
+  --color-neutral-content: #e4ddd0;
+  --color-info: #7cb8d6;
+  --color-info-content: #0b1820;
+  --color-success: #84c79a;
+  --color-success-content: #0c1a10;
+  --color-warning: #e8bf6a;
+  --color-warning-content: #221703;
+  --color-error: #f08c7e;
+  --color-error-content: #240b07;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
 @config '../../tailwind.config.js';
